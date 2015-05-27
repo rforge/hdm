@@ -1,0 +1,10 @@
+Package: hdm
+Type: Package
+Title: High-Dimensional Metrics
+Version: 0.1
+Date: 2015-05-24
+Author: Victor Chernozhukov, Christian Hansen, Martin Spindler
+Maintainer: Martin Spindler <spindler@mea.mpisoc.mpg.de>
+Depends: R (>= 2.14.0), MASS, glmnet, ggplot2
+Description: This package provides the implementation of selected high-dimensional statistical and econometric methods.
+License: GPL-3

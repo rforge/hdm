@@ -1,0 +1,28 @@
+import("MASS", "glmnet", "ggplot2")
+exportPattern("^[^\\.]")
+export("DGP.IV", 
+       "DGP.HC",
+       "DGP.HCHIV",
+       "LassoShooting.fit",
+       "lasso",
+       "lasso.default",
+       "lasso.formula",
+       "print.lasso",
+       "summary.lasso",
+       "predict.lasso",
+       "logistic.lasso",
+       "predict.logistic.lasso",
+       "IV.lasso",
+       "HC.lasso",
+       "HC.lasso.wrap",
+       "HCHIV.lasso",
+       "ProgEval",
+       "late",
+       "latt",
+       "lasf",
+       "lasft",
+       "tsls")
+S3method(print, lasso)
+S3method(summary, lasso)
+S3method(predict, lasso)
+S3method(predict, logistic.lasso)
