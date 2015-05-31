@@ -184,7 +184,7 @@ alpha.hat <- (result[,1]-0.5)/result[,2]
 hist(alpha.hat, breaks=25, freq=F, main="")
 curve(dnorm(x), add=TRUE)
 @
-\includegraphics{hdm-HC}
+\includegraphics{HDM-HC}
 \end{center}
 \caption{Histogram of the centered and rescaled estimated values for the treatment effect $\alpha$; standard normal distribution is given by the solid line.}
 \end{figure}
@@ -237,7 +237,7 @@ alpha.hat <- (result[,1]-1)/sqrt(result[,2])
 hist(alpha.hat, breaks=25, freq=F, main="")
 curve(dnorm(x), add=TRUE)
 @
-\includegraphics{hdm-IV}
+\includegraphics{HDM-IV}
 \end{center}
 \caption{Histogram of the centered and rescaled estimated values for the treatment effect $\alpha$; standard normal distribution is given by the solid line.}
 \end{figure}
@@ -281,7 +281,7 @@ alpha.hat <- (result[,1]-1)/result[,2]
 hist(alpha.hat, breaks=25, freq=F, main="")
 curve(dnorm(x), add=TRUE)
 @
-\includegraphics{hdm-HCHIV}
+\includegraphics{HDM-HCHIV}
 \end{center}
 \caption{Histogram of the centered and rescaled estimated values for the treatment effect $\alpha$; standard normal distribution is given by the solid line.}
 \end{figure}
@@ -291,17 +291,28 @@ We also provide functions for estimation and inference on policy relevant treatm
 We demonstrate the usage of the functions by estimating the effect of 401(k) participation on accumulated assets. The data set is contained in the package and can be accessed in the following way:
 <<label=401k_data, eval=TRUE>>=
 data(pension)
+@
+
+<<label=401k_data, eval=FALSE>>=
 help(pension)
 @
 
 As 401(k) participation -- the treatment variable -- is presumably endogenous, we use 401(k) eligibility as an instrument. For illustration purpose we construct a matrix of control variables containing selected socio-economic variables where the variables age, income, family size and education are transformed by high-order orthogonal polynomial. The outcome variable (e.g. total wealth) is denoted by y, the treatment variable by d, the instrument by z. The analysis of treatment effects can be done as shown below. Moreover, the LQTE and LQTE-T can also be plotted.
 
-<<label=401k_analysis, eval=TRUE>>=
-effects <- ProgEval(pension_example, y, z, d, bootstrap="wild", nRep=200)
+<<label=401k_analysis, echo=FALSE, eval=TRUE>>=
+effects <- ProgEval(pension_example, y, z, d, bootstrap="wild", nRep=100)
+@
+<<label=401k_analysis_output, eval=TRUE>>=
 str(effects)
-LQplot(effects)
 @
 
+<<label=401k_analysis_plot, eval=FALSE>>=
+LQplot(effects)
+@
+\includegraphics{Program}
+\end{center}
+\caption{Local Qunatilie Treatment Effects (LQTE) and the corresponding effect of the Treated (LQTT) at selected quantiles.}
+\end{figure}
 \section{Related \R packages}
 \R already contains many very useful packages for high-dimensional problems. In this section we review some packages which are related to our package but without any claim to be complete as currently the field is evolving very fast. A good starting point for the interested reader is the CRAN Task View \texttt{Machine Learning & Statistical Learning} which points to many methods available as \R packages.
 
