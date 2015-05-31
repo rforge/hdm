@@ -2,6 +2,7 @@
 \alias{lasso}
 \alias{lasso.default}
 \alias{lasso.formula}
+\alias{glm.lasso}
 \title{lasso: Function for Lasso estimation under heterosceastic non-Gaussian disturbances}
 \description{
 The function estimates the coefficients of a Lasso regression with data-driven penalty under heteroskedasticity and non-Gaussian noise. The method of the data-driven penalty can be chosen. The object which is returned is of the S3 class \code{lasso}.
@@ -67,7 +68,7 @@ yhat.new <- predict(lasso.reg, newdata=Xnew)
 \references{
 A. Belloni, D. Chen, V. Chernozhukov and C. Hansen (2012). Sparse models and methods for optimal instruments with an application to eminent domain. \emph{Econometrica} 80 (6), 2369--2429.
 
-A. Belloni, V. Chernozhukov and C. Hansen (2013). Inference for high-dimensional sparse econometric models. In Advances in Economics and Econometrics: 10th World Congress, Vol. 3: Econometrics, ed. D. Acemoglu, M. Arellano, E. Dekel, 245–-295. Cambridge, UK: Cambridge Univ. Press
+A. Belloni, V. Chernozhukov and C. Hansen (2013). Inference for high-dimensional sparse econometric models. In Advances in Economics and Econometrics: 10th World Congress, Vol. 3: Econometrics, Cambirdge University Press: Cambridge, 245-295.
 }
 %\author{
 %Martin Spindler
