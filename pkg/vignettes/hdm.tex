@@ -379,7 +379,7 @@ with the empirical distribution of the centered and normalized estimates given i
 \end{figure}
 
 \section{Program Evaluation}
-We also provide functions for estimation and inference on policy relevant treatment effects in a high-dimensional setting. The ideas and theoretical results are given in \cite{BCFH:Policy}. The function \code{ProgEval} estimates the local average treatment effect (LATE) and the local average treatment effect of the treated (LATE-T). Moreover, local quantile treatment effects (LQTE) and the LQTE of the treated (LQTE-T) at user-specified quantiles are estimated. For calculation of the standard errors bootstrap methods can be employed, namely, the normal, wild and Bayes bootstrap. The output of a function call to \code{ProgEval} can be plotted with the function \code{LQplot}.
+We also provide functions for estimation and inference on policy relevant treatment effects in a high-dimensional setting. The ideas and theoretical results are given in \cite{BCFH:Policy}. The function \texttt{ProgEval} estimates the local average treatment effect (LATE) and the local average treatment effect of the treated (LATE-T). Moreover, local quantile treatment effects (LQTE) and the LQTE of the treated (LQTE-T) at user-specified quantiles are estimated. For calculation of the standard errors bootstrap methods can be employed, namely, the normal, wild and Bayes bootstrap. The output of a function call to \texttt{ProgEval} can be plotted with the function \texttt{LQplot}.
 We demonstrate the usage of the functions by estimating the effect of 401(k) participation on accumulated assets. The data set is contained in the package and can be accessed in the following way:
 \begin{Schunk}
 \begin{Sinput}
@@ -395,19 +395,9 @@ We demonstrate the usage of the functions by estimating the effect of 401(k) par
 
 As 401(k) participation -- the treatment variable -- is presumably endogenous, we use 401(k) eligibility as an instrument. For illustration purpose we construct a matrix of control variables containing selected socio-economic variables where the variables age, income, family size and education are transformed by high-order orthogonal polynomial. The outcome variable (e.g. total wealth) is denoted by y, the treatment variable by d, the instrument by z. The analysis of treatment effects can be done as shown below. Moreover, the LQTE and LQTE-T can also be plotted.
 
+
 \begin{Schunk}
 \begin{Soutput}
-[1] "No variables selected!"
-[1] "No variables selected!"
-[1] "No variables selected!"
-[1] "No variables selected!"
-[1] "No variables selected!"
-[1] "No variables selected!"
-[1] "No variables selected!"
-[1] "No variables selected!"
-[1] "No variables selected!"
-[1] "No variables selected!"
-[1] "No variables selected!"
 [1] "No variables selected!"
 [1] "No variables selected!"
 [1] "No variables selected!"
@@ -426,27 +416,27 @@ As 401(k) participation -- the treatment variable -- is presumably endogenous, w
 \begin{Soutput}
 List of 6
  $ LATE     :List of 4
-  ..$ se        : num [1, 1] 1645
-  ..$ late      : num 11584
-  ..$ individual: num [1:9915, 1] -7380 -99494 141649 24635 34524 ...
-  ..$ boot.se   : num 1702
+  ..$ se        : num [1, 1] 2689
+  ..$ late      : num 8120
+  ..$ individual: num [1:9915, 1] -30238 -68129 -150066 -22357 -543607 ...
+  ..$ boot.se   : num 2537
  $ LATT     :List of 4
-  ..$ se        : num [1, 1] 2193
-  ..$ latt      : num 16692
-  ..$ individual: num [1:9915, 1] -690 -103527 157645 25637 49202 ...
-  ..$ boot.se   : num 2294
+  ..$ se        : num [1, 1] 3539
+  ..$ latt      : num 11993
+  ..$ individual: num [1:9915, 1] -8370 -83635 -214033 12009 -907687 ...
+  ..$ boot.se   : num 3639
  $ LQTE     :List of 3
-  ..$ lqte: num [1:84] NA -667 188 883 961 ...
-  ..$ se  : num [1:84] NA NA NA NA 1074 ...
-  ..$ t   : Named num 3.34
+  ..$ lqte: num [1:89] NA -626.1 40.4 988.5 842.8 ...
+  ..$ se  : num [1:89] NA NA NA 724 529 ...
+  ..$ t   : Named num 3.69
   .. ..- attr(*, "names")= chr "95%"
  $ LQTT     :List of 3
-  ..$ lqtt: num [1:84] NA NA 4860 4118 3705 ...
-  ..$ se  : num [1:84] NA NA NA 994 801 ...
-  ..$ t   : Named num 3
+  ..$ lqtt: num [1:89] 2182 2043 1681 2396 3251 ...
+  ..$ se  : num [1:89] NA 635 498 419 441 ...
+  ..$ t   : Named num 3.31
   .. ..- attr(*, "names")= chr "95%"
  $ bootstrap: chr "wild"
- $ tau      : int [1:84] 1 2 3 4 5 6 7 8 9 10 ...
+ $ tau      : int [1:89] 1 2 3 4 5 6 7 10 11 12 ...
 \end{Soutput}
 \end{Schunk}
 
@@ -455,12 +445,15 @@ List of 6
 > LQplot(effects)
 \end{Sinput}
 \end{Schunk}
+\begin{figure}[h!]
+\begin{center}
+\label{Program}
 \includegraphics{Program}
 \end{center}
 \caption{Local Qunatilie Treatment Effects (LQTE) and the corresponding effect of the Treated (LQTT) at selected quantiles.}
 \end{figure}
 \section{Related \R packages}
-\R already contains many very useful packages for high-dimensional problems. In this section we review some packages which are related to our package but without any claim to be complete as currently the field is evolving very fast. A good starting point for the interested reader is the CRAN Task View \texttt{Machine Learning & Statistical Learning} which points to many methods available as \R packages.
+\R already contains many very useful packages for high-dimensional problems. In this section we review some packages which are related to our package but without any claim to be complete as currently the field is evolving very fast. A good starting point for the interested reader is the CRAN Task View \texttt{Machine Learning \& Statistical Learning} which points to many methods available as \R packages.
 
 Two classical and very established packages to estimate LASSO Regression are \Rpackage{glmnet} (\cite{glmnet})and \Rpackage{lars} (\cite{lars}).  \Rpackage{lars} fit Least Angle Regression, Lasso and Infinitesimal Forward Stagewise regression models, but does not allow data depenent penalties. \Rpackage{glmnet} fits generalized linear models via penalized maximum likelihood. The regularization path is computed for the elastic net penalty (elastic net contains LASSO as a special case) at a grid of values. A separate penalty factors can be applied to each coefficient. The \Rpackage{grplasso} (\cite{grplasso}) estimates group LASSO models. A very recent \R package is \Rpackage{flare} (\cite{flare}) which implements a family of novel regression methods (Lasso, Dantzig Selector, LAD Lasso, SQRT Lasso, Lq Lasso) and their extensions to sparse precision matrix estimation (TIGER and CLIME using L1) in high dimensions.
 
@@ -470,9 +463,9 @@ This section conatains some practical tips and tricks when using the package.
 
 \begin{itemize}
  \item Most functions require the outcome variable y, the control variables x, instruments z, or treatment variable d, as vector or matrix. Data.frames are not allowed, but can easily forced to vector/matrix.
- \item When transforming / coding factor variables to several binary variables, the function \code{model.matrix} might be useful. It also returns a matrix as required.
- \item The functions  \code{bs} from the \Rpackage{splines} and \code{poly} are useful for transforming variables into splines or orthogonal polynomials.
- \item The methods \code{predict} which are provided with the function should be used together with the argument \code{newdata}, even if prediction should be done on the passed object.
+ \item When transforming / coding factor variables to several binary variables, the function \texttt{model.matrix} might be useful. It also returns a matrix as required.
+ \item The functions  \texttt{bs} from the \Rpackage{splines} and \texttt{poly} are useful for transforming variables into splines or orthogonal polynomials.
+ \item The methods \texttt{predict} which are provided with the function should be used together with the argument \texttt{newdata}, even if prediction should be done on the passed object.
 \end{itemize}
 
 \section{Conclusion}

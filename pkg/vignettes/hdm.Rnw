@@ -287,7 +287,7 @@ curve(dnorm(x), add=TRUE)
 \end{figure}
 
 \section{Program Evaluation}
-We also provide functions for estimation and inference on policy relevant treatment effects in a high-dimensional setting. The ideas and theoretical results are given in \cite{BCFH:Policy}. The function \code{ProgEval} estimates the local average treatment effect (LATE) and the local average treatment effect of the treated (LATE-T). Moreover, local quantile treatment effects (LQTE) and the LQTE of the treated (LQTE-T) at user-specified quantiles are estimated. For calculation of the standard errors bootstrap methods can be employed, namely, the normal, wild and Bayes bootstrap. The output of a function call to \code{ProgEval} can be plotted with the function \code{LQplot}.
+We also provide functions for estimation and inference on policy relevant treatment effects in a high-dimensional setting. The ideas and theoretical results are given in \cite{BCFH:Policy}. The function \texttt{ProgEval} estimates the local average treatment effect (LATE) and the local average treatment effect of the treated (LATE-T). Moreover, local quantile treatment effects (LQTE) and the LQTE of the treated (LQTE-T) at user-specified quantiles are estimated. For calculation of the standard errors bootstrap methods can be employed, namely, the normal, wild and Bayes bootstrap. The output of a function call to \texttt{ProgEval} can be plotted with the function \texttt{LQplot}.
 We demonstrate the usage of the functions by estimating the effect of 401(k) participation on accumulated assets. The data set is contained in the package and can be accessed in the following way:
 <<label=401k_data, eval=TRUE>>=
 data(pension)
@@ -299,6 +299,32 @@ help(pension)
 
 As 401(k) participation -- the treatment variable -- is presumably endogenous, we use 401(k) eligibility as an instrument. For illustration purpose we construct a matrix of control variables containing selected socio-economic variables where the variables age, income, family size and education are transformed by high-order orthogonal polynomial. The outcome variable (e.g. total wealth) is denoted by y, the treatment variable by d, the instrument by z. The analysis of treatment effects can be done as shown below. Moreover, the LQTE and LQTE-T can also be plotted.
 
+<<label=401k_data_processing, echo=FALSE, eval=TRUE>>=
+##
+dat <- pension[,c("age", "inc", "fsize", "educ", "marr","twoearn","db","pira","hown")]
+dat$age <- (dat$age-25)/(64-25)
+dat$inc <- (dat$inc+2652)/(242124+2652)
+dat$fsize <- dat$fsize/13
+dat$educ <- dat$educ/18
+#degree of polynomials for age, eductaion, income, family, size
+nAP <- 4
+nIP <- 8
+nEP <- 2
+nFP <- 2
+ageP <- poly(dat$age, degree=nAP)
+colnames(ageP) <- paste("age", 1:4)
+incP <- poly(dat$inc, degree=nIP)
+colnames(incP) <- paste("inc", 1:8)
+educP <- poly(dat$educ, degree=nEP)
+colnames(educP) <- paste("inc", 1:2)
+fsizeP <- poly(dat$fsize, degree=nFP)
+colnames(fsizeP) <- paste("fsizeP", 1:2)
+x <- as.matrix(cbind(ageP,incP,educP,fsizeP, pension[,c("marr","twoearn","db","pira","hown")]))
+d <- pension$p401 # treatment variable
+z <- pension$e401 # instrument
+y <- pension$tw # outcome variable
+@
+
 <<label=401k_analysis, echo=FALSE, eval=TRUE>>=
 effects <- ProgEval(pension_example, y, z, d, bootstrap="wild", nRep=100)
 @
@@ -309,12 +335,15 @@ str(effects)
 <<label=401k_analysis_plot, eval=FALSE>>=
 LQplot(effects)
 @
+\begin{figure}[h!]
+\begin{center}
+\label{Program}
 \includegraphics{Program}
 \end{center}
 \caption{Local Qunatilie Treatment Effects (LQTE) and the corresponding effect of the Treated (LQTT) at selected quantiles.}
 \end{figure}
 \section{Related \R packages}
-\R already contains many very useful packages for high-dimensional problems. In this section we review some packages which are related to our package but without any claim to be complete as currently the field is evolving very fast. A good starting point for the interested reader is the CRAN Task View \texttt{Machine Learning & Statistical Learning} which points to many methods available as \R packages.
+\R already contains many very useful packages for high-dimensional problems. In this section we review some packages which are related to our package but without any claim to be complete as currently the field is evolving very fast. A good starting point for the interested reader is the CRAN Task View \texttt{Machine Learning \& Statistical Learning} which points to many methods available as \R packages.
 
 Two classical and very established packages to estimate LASSO Regression are \Rpackage{glmnet} (\cite{glmnet})and \Rpackage{lars} (\cite{lars}).  \Rpackage{lars} fit Least Angle Regression, Lasso and Infinitesimal Forward Stagewise regression models, but does not allow data depenent penalties. \Rpackage{glmnet} fits generalized linear models via penalized maximum likelihood. The regularization path is computed for the elastic net penalty (elastic net contains LASSO as a special case) at a grid of values. A separate penalty factors can be applied to each coefficient. The \Rpackage{grplasso} (\cite{grplasso}) estimates group LASSO models. A very recent \R package is \Rpackage{flare} (\cite{flare}) which implements a family of novel regression methods (Lasso, Dantzig Selector, LAD Lasso, SQRT Lasso, Lq Lasso) and their extensions to sparse precision matrix estimation (TIGER and CLIME using L1) in high dimensions.
 
@@ -324,9 +353,9 @@ This section conatains some practical tips and tricks when using the package.
 
 \begin{itemize}
  \item Most functions require the outcome variable y, the control variables x, instruments z, or treatment variable d, as vector or matrix. Data.frames are not allowed, but can easily forced to vector/matrix.
- \item When transforming / coding factor variables to several binary variables, the function \code{model.matrix} might be useful. It also returns a matrix as required.
- \item The functions  \code{bs} from the \Rpackage{splines} and \code{poly} are useful for transforming variables into splines or orthogonal polynomials.
- \item The methods \code{predict} which are provided with the function should be used together with the argument \code{newdata}, even if prediction should be done on the passed object.
+ \item When transforming / coding factor variables to several binary variables, the function \texttt{model.matrix} might be useful. It also returns a matrix as required.
+ \item The functions  \texttt{bs} from the \Rpackage{splines} and \texttt{poly} are useful for transforming variables into splines or orthogonal polynomials.
+ \item The methods \texttt{predict} which are provided with the function should be used together with the argument \texttt{newdata}, even if prediction should be done on the passed object.
 \end{itemize}
 
 \section{Conclusion}
