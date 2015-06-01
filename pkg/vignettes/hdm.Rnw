@@ -326,7 +326,7 @@ y <- pension$tw # outcome variable
 @
 
 <<label=401k_analysis, echo=FALSE, eval=TRUE>>=
-effects <- ProgEval(pension_example, y, z, d, bootstrap="wild", nRep=100)
+effects <- ProgEval(x, y, z, d, bootstrap="wild", nRep=100)
 @
 <<label=401k_analysis_output, eval=TRUE>>=
 str(effects)
