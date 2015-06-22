@@ -1,5 +1,4 @@
- # glm.lasso: type="logit", "normal"
-# to be done: logit, predict logistic
+# glm.lasso: type="logit", "normal"
 
 glm.lasso <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE, type="normal",control=list(c=1.1, gamma=.1, numIter=15, tol=10^-5, lambda="standard", numSim=10000, 
                                    numfolds=10, lambda.start=NULL, threshold=NULL)) {
@@ -304,13 +303,16 @@ localQuantile <- function(yF,d,z,taus,percs,myd1_z1x,myd0_z1x,myd1_z0x,myd0_z0x,
 ################################################################################################################################################
 #################################### Main functioin for Programm Evaluation
 ################################################################################################################################################
-ProgEval <- function(x,y,z,d, post=TRUE, intercept=TRUE, normalize=TRUE,  tau = (5:95)/100,  alpha=0.05, bootstrap=NULL, nRep=500) {
-  normalize <- FALSE
-  post <- TRUE
+ProgEval <- function(x,y,z=NULL,d, local=TRUE, post=TRUE, intercept=TRUE, normalize=TRUE,  tau = (5:95)/100,  alpha=0.05, bootstrap=NULL, nRep=500) {
   n <- dim(x)[1]
   p <- dim(x)[2]
   object <- NULL
-  
+  if (!local) z <- d
+  if (!local) {
+    object$type <- "Average Effects"
+  } else {
+    object$type <- "Local Average Effects"
+  }
   # LATE and LATT
   lambda <- 2.2*sqrt(n)*qnorm(1-(1/log(n))/(2*(2*p)))
   control <- list(c = 1.1, gamma = 0.1, numIter = 15, tol = 10^-5, lambda = "none",   lambda.start = rep(lambda, p))
@@ -417,6 +419,13 @@ ProgEval <- function(x,y,z,d, post=TRUE, intercept=TRUE, normalize=TRUE,  tau = 
   object$LQTT <- quant$lqtt
   object$bootstrap <- bootstrap
   object$tau <- Itaus
+  if (!local) {
+   names(object$LATE) <- c("se", "ate", "individual", "boot.se")
+   names(object$LATT) <- c("se", "att", "individual", "boot.se")
+   names(object$LQTE) <- c("qte", "se", "t")
+   names(object$LQTT) <- c("qtt", "se", "t")
+   names(object) <- c("ATE", "ATT", "QTE", "QTT", "bootstrap", "tau")
+  }
   return(object)
 }
 
@@ -429,28 +438,6 @@ Unique <- function(y) {
   object$index.unique <- seq_along(y)[!duplicated(y)]
   object$index.duplicated <- split(seq_along(y), y)
   return(object)
-}
-
-predict.lasso <- function (object, newdata = NULL) 
-{
-  if (missing(newdata) || is.null(newdata)) {
-    X <- model.matrix(object)
-  }
-  else {
-    X <- newdata
-  }
-  n <- length(object$residuals)
-  beta <- object$coefficients
-  if (object$options[["intercept"]]) {
-    if (is.null(object$options$mu))  object$options$mu <-0
-    if (is.null(object$options$meanx))  object$options$meanx <-0
-    yhat <- X %*% beta + object$options$mu - sum(object$options$meanx * 
-                                                   beta)
-  }
-  if (!object$options[["intercept"]]) {
-    yhat <- X %*% beta
-  }
-  return(yhat)
 }
 
 ############### plot quantile
@@ -484,6 +471,7 @@ LQplot <- function(object, title="", ylab="") {
   ###
   k <- length(object$tau)
   effect <- ucl <- lcl <- NULL
+  if (object$type=="Local Average Effects") {
   dat1 <- data.frame(effect= object$LQTE$lqte, quantile= object$tau/100, treatment=rep("LQTE",k))
   dat1$ucl <- object$LQTE$lqte +  object$LQTE$t * object$LQTE$se
   dat1$lcl <- object$LQTE$lqte -  object$LQTE$t * object$LQTE$se
@@ -492,7 +480,16 @@ LQplot <- function(object, title="", ylab="") {
   dat2$ucl <- object$LQTT$lqtt +  object$LQTT$t * object$LQTT$se
   dat2$lcl <- object$LQTT$lqtt -  object$LQTT$t * object$LQTT$se
   dat <- rbind(dat1, dat2)
-  
+  } else {
+    dat1 <- data.frame(effect= object$QTE$qte, quantile= object$tau/100, treatment=rep("QTE",k))
+    dat1$ucl <- object$QTE$qte +  object$QTE$t * object$QTE$se
+    dat1$lcl <- object$QTE$qte -  object$QTE$t * object$QTE$se
+    
+    dat2 <- data.frame(effect=object$QTT$qtt, quantile= object$tau/100, treatment=rep("QTT",k))
+    dat2$ucl <- object$QTT$qtt +  object$QTT$t * object$QTT$se
+    dat2$lcl <- object$QTT$qtt -  object$QTT$t * object$QTT$se
+    dat <- rbind(dat1, dat2)  
+  }
   return(
   qplot(quantile, effect, data=dat) + 
     geom_smooth(aes(ymin = lcl, ymax = ucl), data=dat, stat="identity") + facet_grid(. ~ treatment) +

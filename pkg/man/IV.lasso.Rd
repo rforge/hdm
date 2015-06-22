@@ -18,7 +18,7 @@ IV.lasso(x, d, y, z, post=TRUE, ...)
   \item{\dots}{arguments passed to the function \code{lasso}
 }
 }
-\details{The implementation follows the procedure described in Belloni et al. (2012). In the first stage the selected with lasso with data-driven penalties. The option \code{post=TRUE} conducts post-lasso estimation, i.e. a refit of the model with the selected variables, to estimate the optimal instruments. The parameter vector of the structural equation is then fitted by two-stage least square (tsls) estimation.}
+\details{The implementation follows the procedure described in Belloni et al. (2012). In the first stage the selected with lasso with data-driven penalties. The option \code{post=TRUE} conducts post-lasso estimation, i.e. a refit of the model with the selected variables, to estimate the optimal instruments. The parameter vector of the structural equation is then fitted by two-stage least square (tsls) estimation. If variables of the exogenous variables in \code{x} should be used as instruments, they have to be added to the instrument set \code{z} explicitly.}
 \value{
 An object of class list containing at least the following components:
 \item{coefficients}{estimated parameter vector}

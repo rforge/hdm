@@ -32,7 +32,8 @@ HC.lasso <- function(x, y, d, I3=NULL,  ...) {
   } else {
     no.selected <- 0
   }
-  return(list(alpha=unname(alpha), se=drop(se), t=unname(tval), pval=unname(pval), no.selected=no.selected, coefficients=coef(reg1)))
+  res <- list(epsilon = xi, v=v)
+  return(list(alpha=unname(alpha), se=drop(se), t=unname(tval), pval=unname(pval), no.selected=no.selected, coefficients=coef(reg1), residuals=res))
 }
 
 

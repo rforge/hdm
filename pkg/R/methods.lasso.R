@@ -276,28 +276,49 @@ model.matrix.lasso <- function(object) {
   return(mm)
 }
 
-predict.lasso <- function (object, newdata=NULL) {
+# predict.lasso <- function (object, newdata=NULL) {
+#   if (missing(newdata) || is.null(newdata)) {
+#     X <- model.matrix(object)
+#   }
+#   else {
+#     #mt <- attr(newdata, "terms")
+#     #attr(mt, "intercept") <- 0
+#     #m <- model.frame(mt, newdata)
+#     #X <- model.matrix(mt, m)
+#     X <- newdata
+#   }
+#   n <- length(object$residuals)
+#   beta <- object$coefficients
+#   if (object$options[["intercept"]]) {
+#     yhat <- X%*%beta + object$options$mu - sum(object$options$meanx*beta) # (??)
+#   }
+#   if (!object$options[["intercept"]]) {
+#     yhat <- X%*%beta
+#   }
+#   return(yhat) 
+# }
+
+predict.lasso <- function (object, newdata = NULL) 
+{
   if (missing(newdata) || is.null(newdata)) {
     X <- model.matrix(object)
   }
   else {
-    #mt <- attr(newdata, "terms")
-    #attr(mt, "intercept") <- 0
-    #m <- model.frame(mt, newdata)
-    #X <- model.matrix(mt, m)
     X <- newdata
   }
   n <- length(object$residuals)
   beta <- object$coefficients
   if (object$options[["intercept"]]) {
-    yhat <- X%*%beta + object$options$mu - sum(object$options$meanx*beta) # (??)
+    if (is.null(object$options$mu))  object$options$mu <-0
+    if (is.null(object$options$meanx))  object$options$meanx <-0
+    yhat <- X %*% beta + object$options$mu - sum(object$options$meanx * 
+                                                   beta)
   }
   if (!object$options[["intercept"]]) {
-    yhat <- X%*%beta
+    yhat <- X %*% beta
   }
-  return(yhat) 
+  return(yhat)
 }
-
 
 ###################################### Cross Validation for penalty parameter lambda
 

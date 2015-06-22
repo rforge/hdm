@@ -5,7 +5,7 @@
 Estimation and inference on treatment effects after selection amongst high-dimensional controls
 }
 \description{
-The functions estimates the effect of a treatment effect alpha0 in a setting of high-dimensional controls. The so-called post-double-selection estimator is implemented. The idea is to select variable by regression of the outcome variable on the control variables and the treatment variable on the control variables. The final estimation is done by a regression of the outcome on the treatment effect and the union of the selected variables in the first two steps. The resulting estimator for alpha0 is normal distributed which allows inference on th treatment effect.
+The functions estimates the effect of a treatment effect \eqn{\alpha_0} in a setting of high-dimensional controls. The so-called post-double-selection estimator is implemented. The idea is to select variable by regression of the outcome variable on the control variables and the treatment variable on the control variables. The final estimation is done by a regression of the outcome on the treatment effect and the union of the selected variables in the first two steps. The resulting estimator for \eqn{\alpha_0} is normal distributed which allows inference on th treatment effect. In the case of \code{HC.lasso.mult} the treatment might be multivariate, i.e. d consist of a matrix.
 }
 \usage{
 HC.lasso(x, y, d, I3 = NULL, ...)
