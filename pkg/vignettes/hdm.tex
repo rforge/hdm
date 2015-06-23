@@ -120,7 +120,7 @@ We estimate a LASSO regression by the following commands:
 \begin{Schunk}
 \begin{Sinput}
 > lasso.reg <- lasso(x=X, y=y, post=TRUE, intercept=TRUE, normalize=TRUE, 
-+       control=list(c = 1.1, gamma = 0.1, numIter = 15, tol = 10^-5, lambda = "standard", numSim = 10000, lambda.start = NULL))
++       control=list(c = 1.1, gamma = 0.1, numIter = 15, tol = 10^-5, lambda = "standard"))
 > lasso.reg <- lasso(y~X) 
 \end{Sinput}
 \end{Schunk}
@@ -180,11 +180,42 @@ Residual standard error: 0.8956
 The function \texttt{lasso} has many options which will be explained now in more detail.
 The option \texttt{post} indicates if Post-LASSO is estimated. The default value is \texttt{TRUE}. If an intercept should be included and be estimated this can be adjusted by the option \texttt{intercept}. The value \texttt{TRUE} effects that the mean is substracted both from the dependent variable and the independent variables. Often the regressors are measured on different scales which influences the results of the LASSO regression, as LASSO is not scale-invariant. With the option \texttt{normalize=TRUE} the regressors can be normalized with variance equal to one.
 
-An important choice is the choice of penalization parameter $\lambda$ and regressor specific loadings. For the choice of the penalization parameter three procedures are possible: \textquotedblleft X-dependent\textquotedblright\, \textquotedblleft X-independent\textquotedblright\ and \textquotedblleft standard\textquotedblright\ . The last two choices give quite similar results. The  \textquotedblleft X-dependent\textquotedblright\ method relies on a simulation method for which the number of simulations \texttt{numSim} can be specified. $c$ and $\gamma$ are constants used for the calcuation of $\lambda$. $c$ is required to be larger than $1$ ($1.1$ by default) and $\gamma$ is a constant in $(0,1)$. For details of the calculation of the penalization parameter we refer to \cite{BCH2011:InferenceGauss}. The calculation of the loadings follows the Appendix A in \cite{BCCH12} to which we refer for a detailed explanation. \texttt{numIter} denotes the number of iterations of the the algorithm and \texttt{tol} gives a tolerance so that the algorithm breaks when the improvement in absolute parameter values is below the tolerance.
+An important choice is the choice of penalization parameter $\lambda$ and regressor specific loadings. For the choice of the penalization parameter the following procedures are possible: \textquotedblleft X-dependent\textquotedblright\, \textquotedblleft X-independent\textquotedblright\,  \textquotedblleft cv\textquotedblright\ and \textquotedblleft standard\textquotedblright\ . %The last two choices give quite similar results. 
+The \textquotedblleft X-dependent\textquotedblright\ method relies on a simulation method for which the number of simulations \texttt{numSim} can be specified. For details of the calculation of the \textquotedblleft X-dependent\textquotedblright\ and \textquotedblleft X-independent\textquotedblright\ penalization parameter we refer to \cite{BCH2011:InferenceGauss}. The calculation of the regressor-dependent loadings which are used for the standard method follows the Appendix A in \cite{BCCH12} to which we refer for a detailed explanation. \texttt{numIter} denotes the number of iterations of the the algorithm and \texttt{tol} gives a tolerance so that the algorithm breaks when the improvement in absolute parameter values is below the tolerance. $c$ and $\gamma$ are constants used for the calcuation of $\lambda$. $c$ is required to be larger than $1$ ($1.1$ by default) and $\gamma$ is a constant in $(0,1)$
 
 The last option (\texttt{lambda.start}) is to handle a vector of initial parameter values to the function.
 
 Fitting of the LASSO regression is done in the function \texttt{LassoShooting.fit} which implements the shooting LASSO \cite{Fu:1998} with regressor dependent penalization parameters (the product of the penalization parameter $\lambda$ and the loadings).
+
+Moreover, it is also possible to construct joint confidence intervals for a low-dimensional parameter after LASSO regression. The corresponding function is \texttt{lasso.significance} and implements the method described in \cite{BCK-LAD} for a linear model. An example is the following:
+
+\begin{Schunk}
+\begin{Sinput}
+> n <- 250
+> p <- 10
+> px <- 2
+> beta <- c(rep(2,px), rep(0,p-px))
+> X <- matrix(rnorm(n*p), ncol=p)
+> y <- 1 + X %*% beta + rnorm(n)
+> lasso.sig <- lasso.significance(X, y, index = c(1:3), alpha=0.05, method="bootstrap", B=500)
+\end{Sinput}
+\begin{Soutput}
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+\end{Soutput}
+\begin{Sinput}
+> lasso.sig
+\end{Sinput}
+\begin{Soutput}
+       coeff.         se   lower CI   upper CI
+V1  1.9933784 0.06706016  1.8096206 2.17713624
+V2  2.0314223 0.06241788  1.8781272 2.18471734
+V3 -0.0554613 0.05930211 -0.2022191 0.09129649
+\end{Soutput}
+\end{Schunk}
+
+$\alpha$ denotes the significance level and \texttt{index} denotes the variables in $X$ for which a joint confidence interval should be constructed.
 
 \section{Estimation and Inference on Structural Effects in High-dimensional Settings}
 In many situations a researcher is concerned with estimating and making inference on a structural effect / treatment effect. If the treatment variable is endogenous which arises often in observational studies in Economic applications,  there are several ways to deal with the endogeneity of the treatment variable. One is to include additional control variables / observables so that conditional on those variables the treatment will be plausibly exogenous. Another method is to use instrumental variables to estimate the treatment effect. Finally, a combination of both approaches is possible. In any case, the researcher must decide which variables to include as controls and as instruments. Including all available variables might lead to overfitting and bad statistical properties of the resulting estimator, especially in small samples. In the next sections we will present functions for estimation of treatment effects in a setting with many controls, many instrumental variables and both. For an in-depth treatment of those methods we refer the reader to the original articles, namely \cite{BelloniChernozhukovHansen2011}, \cite{BCCH12}, and, \cite{CHS:2015}.
@@ -204,14 +235,14 @@ In this section we show how to do estimation in setting with high-dimensional co
 >   l$coef
 \end{Sinput}
 \begin{Soutput}
-(Intercept)         xd1         xx1         xx3 
- 0.12660933  0.56955272  0.43999105  0.02180306 
+(Intercept)         xd1         xx1         xx2         xx3 
+-0.02366614  0.54957991  0.56476076  0.08600495 -0.08028486 
 \end{Soutput}
 \begin{Sinput}
 >   l$se
 \end{Sinput}
 \begin{Soutput}
-[1] 0.07059313
+[1] 0.06351625
 \end{Soutput}
 \end{Schunk}
 With the option \texttt{I3} (a logical vector) the researcher can specify variables in \texttt{x} which should be included in any case. All other arguments, following \texttt{I3}, are passed to the function \texttt{lasso}.
@@ -224,9 +255,9 @@ To show that the estimator has the desired properties we also conduct a small si
 > colnames(result) <- c("estimate", "s.e.")
 > for (i in 1:R) { 
 +   data <- DGP.HC()
-+   l <- HC.lasso(data$X,data$y, data$d, I3=NULL, post= TRUE, intercept = TRUE, normalize=FALSE, 
-+           control=list(c=1.1, gamma=.1, numIter=15, tol=10^-5, lambda="standard",
-+                        lambda.start=NULL))
++   l <- HC.lasso(data$X,data$y, data$d, I3=NULL, post= TRUE, 
++                 intercept = TRUE, normalize=FALSE, control=list(c=1.1, gamma=.1, 
++                 numIter=15, tol=10^-5, lambda="standard"))
 +   result[i,1] <- l$alpha
 +   result[i,2] <- l$se
 + }
@@ -269,15 +300,15 @@ First, we simulate data with the function \texttt{DGP.IV} which implements the d
 >   l$coefficients
 \end{Sinput}
 \begin{Soutput}
-       [,1]
-d1 1.015131
+        [,1]
+d1 0.9958355
 \end{Soutput}
 \begin{Sinput}
 >   l$vcov
 \end{Sinput}
 \begin{Soutput}
-           d1
-d1 0.01115212
+            d1
+d1 0.008723546
 \end{Soutput}
 \end{Schunk}
 \texttt{x} denotes the control variables, \texttt{z} the instrumental variables, \texttt{d} the endogenous outcome variables, and \texttt{y} the outcome or dependent variable. Again, arguments, additionally to the \texttt{post}-option can be passed to the function \texttt{lasso} via the $\ldots$-mechanism.
@@ -335,12 +366,12 @@ To demonstrate how to apply this function we first simulate a data set with a dg
 \end{Sinput}
 \begin{Soutput}
 $coefficient
-         [,1]
-[1,] 0.989623
+        [,1]
+[1,] 1.07153
 
 $se
-           [,1]
-[1,] 0.08910734
+          [,1]
+[1,] 0.1505842
 \end{Soutput}
 \end{Schunk}
 
@@ -407,6 +438,173 @@ As 401(k) participation -- the treatment variable -- is presumably endogenous, w
 [1] "No variables selected!"
 [1] "No variables selected!"
 [1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
+[1] "No variables selected!"
 \end{Soutput}
 \end{Schunk}
 \begin{Schunk}
@@ -414,26 +612,27 @@ As 401(k) participation -- the treatment variable -- is presumably endogenous, w
 > str(effects)
 \end{Sinput}
 \begin{Soutput}
-List of 6
+List of 7
+ $ type     : chr "Local Average Effects"
  $ LATE     :List of 4
-  ..$ se        : num [1, 1] 2689
-  ..$ late      : num 8120
-  ..$ individual: num [1:9915, 1] -30238 -68129 -150066 -22357 -543607 ...
-  ..$ boot.se   : num 2537
+  ..$ se        : num [1, 1] 2878
+  ..$ late      : num 8406
+  ..$ individual: num [1:9915, 1] -29814 -64079 -145694 -22753 -503780 ...
+  ..$ boot.se   : num 2959
  $ LATT     :List of 4
-  ..$ se        : num [1, 1] 3539
-  ..$ latt      : num 11993
-  ..$ individual: num [1:9915, 1] -8370 -83635 -214033 12009 -907687 ...
-  ..$ boot.se   : num 3639
+  ..$ se        : num [1, 1] 3719
+  ..$ latt      : num 12703
+  ..$ individual: num [1:9915, 1] -7603 -73692 -204207 10693 -808421 ...
+  ..$ boot.se   : num 3449
  $ LQTE     :List of 3
-  ..$ lqte: num [1:89] NA -626.1 40.4 988.5 842.8 ...
-  ..$ se  : num [1:89] NA NA NA 724 529 ...
-  ..$ t   : Named num 3.69
+  ..$ lqte: num [1:89] NA -1303.4 -501.2 15.3 303.8 ...
+  ..$ se  : num [1:89] NA NA NA 1036 684 ...
+  ..$ t   : Named num 3.51
   .. ..- attr(*, "names")= chr "95%"
  $ LQTT     :List of 3
-  ..$ lqtt: num [1:89] 2182 2043 1681 2396 3251 ...
-  ..$ se  : num [1:89] NA 635 498 419 441 ...
-  ..$ t   : Named num 3.31
+  ..$ lqtt: num [1:89] 1125 1316 1684 2419 3230 ...
+  ..$ se  : num [1:89] NA NA NA 535 586 ...
+  ..$ t   : Named num 3.97
   .. ..- attr(*, "names")= chr "95%"
  $ bootstrap: chr "wild"
  $ tau      : int [1:89] 1 2 3 4 5 6 7 10 11 12 ...
