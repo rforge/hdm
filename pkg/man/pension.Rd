@@ -10,11 +10,12 @@
   \describe{
       \item{p401}{participation in 401(k)}
       \item{e401}{eligibility for 401(k)}
+      \item{a401}{401(k) assets}
       \item{tw}{total wealth (in US $)}
-      \item{tfa}{financial assets (in US $)}
+      \item{tfa}{total financial assets (in US $)}
       \item{net_tfa}{net financial assets (in US $)}
-      %\item{nifa}{}
-      %\item{net_nifa}{}
+      \item{nifa}{non-401k financial assets (in US $)}
+      \item{net_nifa}{net non-401k financial assets}
       \item{net_n401}{net non-401(k) assets (in US $)}
       \item{ira}{individual retirement account (IRA)}
       \item{inc}{income (in US $)}
@@ -27,7 +28,7 @@
       \item{educ}{education (in years)}
       \item{male}{male}
       \item{twoearn}{two earners}
-      %\item{i1-i7}{}
+      \item{nohs, hs, smcol, col}{dummies for education: no high-school, high-school, some college, college}
       %\item{a1-a5}{}
       %\item{wtw1-wtw7}{}
       %\item{f1-f6}{}
