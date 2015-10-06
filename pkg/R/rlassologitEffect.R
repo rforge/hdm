@@ -1,0 +1,269 @@
+#' rigorous Lasso for Logistic Models: Inference
+#'
+#' The functions estimates selected (low-dimensional) coefficients in a high-dimensional logistic model.
+#'
+#' The functions estimates selected (low-dimensional) coefficients in a high-dimensional logistic model.
+#' An application is e.g. estimation of a treatment effect \eqn{\alpha_0} in a
+#' setting of high-dimensional controls. The function is a wrap function for \code{rlassologitEffectone} which does inference for only one variable (d).
+#'
+#' @param x matrix of regressor variables serving as controls and potential
+#' treatments
+#' @param y outcome variable
+#' @param index vector of integers indicating the position (column) of
+#' variables of x which should be used as treatment variables.
+#' @param I3 logical vector with same length as the number of controls;
+#' indicates if variables (TRUE) should be included in any case.
+##' @param \dots parameters passed to the lasso functions used for the double selection procedure.
+#' @param \dots additional paramters
+#' @return The function returns an object of class \code{rlassologitEffect} with the following entries: \item{coefficients}{estimated
+#' value of the coefficients} \item{se}{standard error}
+#' \item{t}{t-statistic} \item{pval}{p-value} \item{samplesize}{sample size of the data set} \item{I}{index of variables of the union of the lasso regressions}
+#' @references A. Belloni, V. Chernozhukov, Y. Wei (2013). Honest confidence regions for a regression parameter in logistic regression with a loarge number of controls.
+#' cemmap working paper CWP67/13.
+#' @keywords Estimation Inference Logistic Lasso
+#' @export
+#' @rdname rlassologitEffect
+
+rlassologitEffect <- function(x, ...)
+  UseMethod("rlassologitEffect") # definition generic function
+
+#' @rdname rlassologitEffect
+#' @export
+rlassologitEffect.default <- function(x, y, index=c(1:ncol(x)), I3=NULL, ...) {
+  if(is.logical(index)){
+    k <- p1 <- sum(index)
+  } else {
+    k <- p1 <- length(index)
+  }
+  n <- dim(x)[1]
+  # preprocessing index
+  # numerischer Vektor
+  if (is.numeric(index)){
+    index <- as.integer(index)
+    stopifnot(all(index<=ncol(x)) && length(index)<=ncol(x))
+  } else {
+    # logical Vektor
+    if (is.logical(index)){
+      stopifnot(length(index)==ncol(x))
+      index <- which(index==T)
+    } else {
+      # character Vektor
+      if(is.character(index)){
+        stopifnot(all(is.element(index,colnames(x))))
+        index <- which(is.element(colnames(x),index))
+      } else {
+        stop("argument index has an invalid type")
+      }
+    }
+  }
+
+  # check validity of I3
+  I3ind <- which(I3==T)
+  if (length(intersect(index, I3ind)!=0)) stop("I3 and index must not overlap!")
+  if (is.null(colnames(x))) colnames(x) <- paste("V", 1:dim(x)[2], sep="")
+  coefficients <- as.vector(rep(NA_real_,k))
+  se <-  rep(NA_real_,k)
+  t <-  rep(NA_real_,k)
+  pval <-  rep(NA_real_,k)
+  lasso.regs <- vector("list", k)
+  reside <- matrix(NA, nrow=n, ncol=p1)
+  residv <- matrix(NA, nrow=n, ncol=p1)
+  names(coefficients) <- names(se) <- names(t) <- names(pval) <- names(lasso.regs) <- colnames(reside) <- colnames(residv) <-colnames(x)[index]
+
+  for (i in 1:k)
+  {
+    d <- x[,index[i], drop=FALSE]
+    Xt <- x[,-index[i], drop=FALSE]
+
+    lasso.regs[[i]] <- try(col <- rlassologitEffectone (Xt,y,d, I3=I3))
+    if(class(lasso.regs[[i]]) == "try-error") {
+      next
+    }
+    else {
+      coefficients[i] <- col$alpha
+      se[i] <- col$se
+      t[i] <- col$t
+      pval[i] <- col$pval
+      #reside[,i] <- col$residuals$epsilon
+      # residv[,i] <- col$residuals$v
+    }
+  }
+  residuals <- list(e=reside, v=residv)
+  res <- list(coefficients=coefficients, se=se, t=t, pval=pval, lasso.regs=lasso.regs, index=I, call=match.call(), samplesize=n, residuals=residuals)
+  class(res) <- "rlassologitEffect"
+  return(res)
+}
+
+
+#' @rdname rlassologitEffect
+#' @param d variable for which inference is conducted (treatment variable)
+#' @export
+#'
+rlassologitEffectone <- function(x, y, d, I3=NULL) {
+  d <- as.matrix(d, ncol=1)
+  y <- as.matrix(y, ncol=1)
+  kx <- p <- dim(x)[2]
+  n <- dim(x)[1]
+  if (is.null(colnames(d))) colnames(d) <- "d1"
+  if (is.null(colnames(x)) & !is.null(x)) colnames(x) <- paste("x", 1:kx, sep="")
+  # Step 1
+  la1 <- 1.1/2*sqrt(n)*qnorm(1-0.05/(max(n,(p+1)*log(n))))
+  dx <- cbind(d,x)
+  l1 <- rlogisticlasso(dx, y, post=TRUE, normalize=TRUE, intercept=TRUE, penalty=list(lambda.start=la1))
+  t <- predict(l1, type="link", newdata=dx)
+  sigma2 <- exp(t)/(1+exp(t))
+  w <-  exp(t)/(1+exp(t))^2
+  f <- w/sigma2
+  I1 <- l1$index[-1]
+  # Step 2
+  la2 <- rep(2.2*sqrt(n)*qnorm(1-0.05/(max(n,p*log(n)))),p)
+  xf <- x*as.vector(f)
+  df <- d*f
+  l2 <- rlasso(xf, df, post=TRUE, normalize=TRUE, intercept=TRUE, penalty=list(method="none", lambda.start=la2, c=1.1, gamma=0.1))
+  I2 <- l2$index
+  z <- l2$residual/sigma2
+  # Step 3
+  if (is.logical(I3)) {
+    I <- I1+I2+I3
+    I <- as.logical(I)
+  } else {
+    I <- I1+I2
+    I <- as.logical(I)
+  }
+  xselect <- x[,I]
+  p3 <- dim(xselect)[2]
+  la3 <- 1.1/2*sqrt(n)*qnorm(1-0.05/(max(n,(p3+1)*log(n))))
+  l3 <-  rlogisticlasso(cbind(d,xselect), y, post=TRUE, normalize=TRUE, intercept=TRUE, penalty=list(lambda.start=la3))
+  alpha <- l3$coefficients[1]
+  t3 <- predict(l3, type="link", newdata=cbind(d,xselect))
+  G3 <- exp(t3)/(1+exp(t3))
+  w3 <-  G3*(1-G3)
+  S21 <- 1/mean(w3*d*z)^2*mean((y-G3)^2*z^2)
+  xtilde <- x[,l3$index]
+  p2 <- sum(l3$index)+1
+  b <- cbind(d, xtilde)
+  p4 <- dim(b)[2]
+  A <- matrix(0, ncol=p4, nrow=p4)
+  for (i in 1:n) {
+    A <- A + w3[i]*outer(b[i,], b[i,])
+  }
+  S22 <- solve(1/n*A)[1,1]
+  S2 <- max(S21, S22)
+  se <- sqrt(S2/n)
+  tval <- alpha/se
+  pval <- 2*pnorm(-abs(tval))
+  if (is.null(I)) {
+    no.selected <- 1
+  } else {
+    no.selected <- 0
+  }
+  return(list(alpha=unname(alpha), se=drop(se), t=unname(tval), pval=unname(pval), coefficients=coef(l3), residuals=l3$residuals))
+}
+
+
+
+################# Methods for rlassologitEffect
+
+#' Methods for S3 object \code{rlassologitEffect}
+#'
+#' Objects of class \code{rlassologitEffect} are construced by \code{rlassologitEffect.default} or \code{rlassoLM.formula} (TBD).
+#' \code{print.rlassologitEffect} prints and displays some information about fitted \code{rlassologitEffect} objects.
+#' \code{summary.rlassologitEffect} summarizes information of a fitted \code{rlassologitEffect} object.
+#' \code{confint.rlassologitEffect} extracts the confidence intervals.
+#' @param object An object of class \code{rlassologitEffect}
+#' @param x An object of class \code{rlassologitEffect}
+#' @param digits number of digits
+#' @param ... arguments passed to the print function and other methods
+#' @keywords methods rlassologitEffect
+#' @rdname methods.rlassologitEffect
+#' @aliases methods.rlassologitEffect print.rlassologitEffect summary.rlassologitEffect confint.rlassologitEffect
+#' @export
+
+print.rlassologitEffect <- function(x, digits = max(3L, getOption("digits") - 3L), ...) {
+  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), "\n\n", sep = "")
+  if (length(coef(x))) {
+    cat("Coefficients:\n")
+    print.default(format(coef(x), digits = digits), print.gap = 2L,
+                  quote = FALSE)
+  }
+  else cat("No coefficients\n")
+  cat("\n")
+  invisible(coef(x))
+}
+
+
+#' @rdname methods.rlassologitEffect
+#' @export
+
+summary.rlassologitEffect <- function(object, digits = max(3L, getOption("digits") - 3L), ...) {
+  if (length(coef(object))) {
+    k <- length(object$coefficients)
+    table <- matrix(NA,ncol=4,nrow=k)
+    rownames(table) <- names(object$coefficient)
+    colnames(table) <- c("coeff.", "se.", "t-value", "p-value")
+    table[,1] <- object$coefficient
+    table[,2] <- object$se
+    table[,3] <- object$t
+    table[,4] <- object$pval
+    print("Estimation of the effect of selected variables in a high-dimensional regression")
+    printCoefmat(table, digits=digits, P.values=TRUE, has.Pvalue=TRUE)
+    cat("\n")
+  } else {
+    cat("No coefficients\n")
+  }
+  cat("\n")
+  invisible(table)
+}
+
+#' @rdname methods.rlassologitEffect
+#' @param parm a specification of which parameters are to be given confidence intervals, either a vector of numbers or a vector of names. If missing, all parameters are considered.
+#' @param level	the confidence level required.
+#' @param joint logical, if joint confidence intervals should be clalculated
+#' @export
+
+confint.rlassologitEffect <- function(object, parm, level=0.95, joint=FALSE, ...) {
+  B <- 500 # number of bootstrap repitions
+  n <- object$samplesize
+  k <- p1 <- length(object$coefficient)
+  cf <- coef(object)
+  pnames <- names(cf)
+  if (missing(parm))
+    parm <- pnames
+  else if (is.numeric(parm))
+    parm <- pnames[parm]
+  if (!joint) {
+    a <- (1 - level)/2
+    a <- c(a, 1 - a)
+    fac <- qt(a, n-k)
+    pct <- format.perc(a, 3)
+    ci <- array(NA, dim = c(length(parm), 2L), dimnames = list(parm,
+                                                               pct))
+    ses <- object$se[parm]
+    ci[] <- cf[parm] + ses %o% fac
+  }
+
+  if (joint) {
+    phi <- object$residuals$e*object$residuals$v
+    m <- 1/sqrt(colMeans(phi^2))
+    phi <- t(t(phi)/m)
+    sigma <- sqrt(colMeans(phi^2))
+    sim <- vector("numeric", length=B)
+    for (i in 1:B) {
+      xi <- rnorm(n)
+      phi_temp <- phi*xi
+      Nstar <- 1/sqrt(n)*colSums(phi_temp)
+      sim[i] <- max(abs(Nstar))
+    }
+    a <- (1 - level)/2
+    ab <- c(a, 1 - a)
+    pct <- format.perc(ab, 3)
+    ci <- array(NA, dim = c(length(parm), 2L), dimnames = list(parm,
+                                                               pct))
+    hatc <- quantile(sim, probs=1-a)
+    ci[,1] <- cf[parm] - hatc*1/sqrt(n)*sigma
+    ci[,2] <- cf[parm] + hatc*1/sqrt(n)*sigma
+  }
+  return(ci)
+}
+
+

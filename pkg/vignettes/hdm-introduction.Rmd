@@ -1,0 +1,18 @@
+---
+title: "High-Dimensional Metrics"
+author: "Victor Chernozhukov, Christian Hansen, Martin Spindler"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{High-Dimensional Metrics}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Overview
+
+# Example
+
+
+
+

@@ -1,0 +1,668 @@
+globalVariables(c("post", "intercept", "normalize", "penalty", "control", "error"))
+
+#' rlasso: Function for Lasso estimation under homoskedastic and heteroskeadstic non-Gaussian
+#' disturbances
+#'
+#' The function estimates the coefficients of a Lasso regression with
+#' data-driven penalty under homoskedasticity and heteroskedasticity with non-Gaussian noise. The
+#' method of the data-driven penalty can be chosen. The object which is
+#' returned is of the S3 class \code{rlasso}.
+#'
+#' The function estimates the coefficients of a Lasso regression with
+#' data-driven penalty under homosheteroskedasticity and non-Gaussian noise. The
+#' method of the data-driven penalty can be chosen ("X-dependent",
+#' "X-independent", "standard", "none", "cv"). For details of the
+#' implementation of the Algorithm for estimation of the data-driven penalty,
+#' in particular the regressor-dependent loadings, we refer to Appendix A in
+#' Belloni et al.~(2012). When the option "none" is chosen (together with
+#' \code{lambda.start}), lambda is set to \code{lambda.start} and the
+#' regressor-dependent loadings are used. The options "X-dependent" and
+#' "X-independent" are described in Belloni et al.~(2013). The method "cv" does
+#' cross validation to determine the "optimal" value for lambda (with
+#' regressor-dependent loadings). The option \code{nfolds} gives the number of
+#' folds used for cross validation. The method "standard", which is recommended
+#' and the default option, employs data-dependent loadings and sets
+#' \eqn{\lambda = 2*c*\sqrt(n)*\sqrt(2*\log(2*p*\log(n)/\gamma))}.
+#' \code{lambda.start} can be component-specific. When used with one of the
+#' other option, the values are used as starting values.
+#'
+#' The option \code{post=TRUE} conducts post-lasso estimation, i.e. a refit of
+#' the model with the selected variables.
+#'
+#' @aliases rlasso rlasso.default rlasso.formula
+#' @param y dependent variable (vector or matrix)
+#' @param x regressors (matrix or data.frame)
+#' @param formula an object of class "formula" (or one that can be coerced to
+#' that class): a symbolic description of the model to be fitted in the form
+#' \code{y~x}
+#' @param data an optional data frame, list or environment (or object coercible
+#' by as.data.frame to a data frame) containing the variables in the model. If
+#' not found in data, the variables are taken from environment(formula),
+#' typically the environment from which \code{rlasso} is called.
+#' @param post logical. If \code{TRUE}, post-lasso estimation is conducted.
+#' @param intercept logical. If \code{TRUE}, intercept is included which is not
+#' penalized.
+#' @param normalize logical. If \code{TRUE}, design matrix \code{x} is scaled.
+#' @param penalty list with options for the calculation of the penalty.  \code{c} and \code{gamma} constants for the penalty (for all methods except "CV") with default \code{c=1} and \code{gamma=0.1}, \code{method} method for penalty choice ("X-dependent",
+#' "X-independent", "standard", "none", "CV"), \code{numfolds} number of folds
+#' for the "cross validation" method, \code{numSim} number of simulations for
+#' the "X-dependent" method, \code{lambda.start} initial penalization value, compulsory for method "none"
+#' @param control list with control values.
+#' \code{numIter} number of iterations for the algorithm for
+#' the estimation of the variance and data-driven penalty, ie. loadings,
+#' \code{tol} tolerance for improvement of the estimated variances.
+#'\code{threshold} is applied to the final estimated lasso
+#' coefficients. Absolute values below the threshold are set to zero.
+#' @param ... further arguments (only for consistent defintion of methods)
+#' @return \code{rlasso} returns an object of class \code{rlasso} An object of
+#' class "rlasso" is a list containing at least the following components:
+#' \item{coefficients}{parameter estimates (named vector of coefficients without intercept)} \item{intercept.value}{value of the intercept}
+#' \item{index}{index of selected
+#' variables (logical vector)} \item{lambda}{data-driven penalty term for each
+#' variable, product of lambda0 (the penalization paramter) and the loadings}
+#' \item{lambda0}{penalty term} \item{loadings}{loading for each regressor}
+#' \item{residuals}{residuals, response minus fitted values} \item{sigma}{root of the variance of
+#' the residuals} \item{iter}{number of iterations} \item{call}{function call}
+#' \item{options}{options}
+#' @references A. Belloni, D. Chen, V. Chernozhukov and C. Hansen (2012).
+#' Sparse models and methods for optimal instruments with an application to
+#' eminent domain. \emph{Econometrica} 80 (6), 2369-2429.
+#'
+#' A. Belloni, V. Chernozhukov and C. Hansen (2013). Inference for
+#' high-dimensional sparse econometric models. In Advances in Economics and
+#' Econometrics: 10th World Congress, Vol. 3: Econometrics, Cambirdge
+#' University Press: Cambridge, 245-295.
+#' @keywords Lasso data-driven penalty non-Gaussian heteroscedasticity
+#' @export
+#' @rdname rlasso
+#@examples
+#
+#  ## DGP
+# library(hdm2)
+# library(MASS)
+# n <- 250
+# p <- 100
+# px <- 10
+# X <- matrix(rnorm(n*p), ncol=p)
+# beta <- c(rep(2,px), rep(0,p-px))
+# y <- 1 + X%*%beta + rnorm(n)
+# ## Lasso estimation
+# lasso.reg <- rlasso(x=X, y=y, post=TRUE, intercept=TRUE)
+# # Methods for Lasso
+# print(lasso.reg, all=FALSE)
+# summary(lasso.reg, all=FALSE)
+# yhat <- predict(lasso.reg)
+# Xnew <- matrix(rnorm(n*p), ncol=p)
+# yhat.new <- predict(lasso.reg, newdata=Xnew)
+
+
+#lasso <- function(x,  post = TRUE, intercept = TRUE, normalize = TRUE,
+#                  penalty = list(method = "standard", lambda.start = NULL, c = 1.1, gamma = 0.1),
+#                  control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...)
+#lasso <- function(x, y, post = TRUE, intercept = TRUE, normalize = TRUE,
+#                  penalty = list(method = "standard", lambda.start = NULL, c = 1.1, gamma = 0.1),
+#                  control = list(numIter = 15, tol = 10^-5, threshold = NULL))
+rlasso <- function(x, ...)
+UseMethod("rlasso") # definition generic function
+
+
+#' @rdname rlasso
+#' @export
+
+
+rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, normalize = TRUE,
+                          penalty = list(method = "standard", lambda.start = NULL, c = 1.1, gamma = 0.1),
+                          control = list(numIter = 15, tol = 10^-5, threshold = NULL),...) {
+  n <- dim(x)[1]
+  p <- dim(x)[2]
+  if (is.null(colnames(x)))
+    colnames(x) <- paste("V", 1:p, sep = "")
+  ind.names <- 1:p
+  eps <- 10^-9  # precision for scaling
+  # checking input numIter, tol
+  if (!exists("numIter", where = control)) {
+    control$numIter = 15
+    message("numIter in control not provided. Set to default 15")
+  }
+
+  if (!exists("tol", where = control)) {
+    control$tol = 10^-5
+    message("tol in control not provided. Set to default 10^-5")
+  }
+
+  # Intercept handling and scaling
+  if (intercept) {
+    meanx <- colMeans(x)
+    x <- scale(x, meanx, FALSE)
+    mu <- mean(y)
+    y <- y - mu
+  } else {
+    meanx <- rep(0, p)
+    mu <- 0
+  }
+  ind <- NULL
+  if (normalize) {
+    normx <- sqrt(apply(x, 2, var))
+    ind <- which(normx < eps)
+    if (length(ind) != 0) {
+      x <- x[, -ind]
+      normx <- normx[-ind]
+      ind.names <- ind.names[-ind]
+      p <- dim(x)[2]
+      if (!is.null(penalty$lambda.start)) {
+        penalty$lambda.start <- penalty$lambda.start[-ind]
+      }
+    }
+    x <- scale(x, FALSE, normx)
+  } else {
+    normx <- rep(1, p)
+  }
+
+  XX <- crossprod(x)
+  Xy <- crossprod(x, y)
+
+  # Cross Validation
+  if (penalty$method == "CV") {
+    if (!exists("numFolds", where = penalty)) {
+      penalty$numFolds = 10
+      message("Number of Folds (numFolds) missing as element is penalty, set to 10")
+    }
+    cv <- cv.lasso(x, y, K = penalty$numFolds, lambda.grid = penalty$grid,
+                   post, intercept, normalize)
+    lambda.cv <- max(cv$lambda.cv)
+    control <- list(numIter = control$numIter, tol = control$tol)
+    penalty <- list(method = "none", lambda.start = rep(lambda.cv,
+                                                        p))
+    fit <- rlasso(x, y, post, intercept, normalize, control = control,
+                 penalty = penalty)
+    return(fit)
+  }
+
+  pen <- lambdaCalculation(penalty = penalty, y = y, x = x)
+  lambda <- pen$lambda
+  Ups0 <- Ups1 <- pen$Ups0
+  lambda0 <- pen$lambda0
+
+  mm <- 1
+  s0 <- sqrt(var(y))
+  while (mm < control$numIter) {
+    # calculation parameters
+    coefTemp <- LassoShooting.fit(x, y, lambda, XX = XX, Xy = Xy)$coefficients
+    coefTemp[is.na(coefTemp)] <- 0
+    ind1 <- (abs(coefTemp) > 0)
+    x1 <- as.matrix(x[, ind1, drop = FALSE])
+    if (dim(x1)[2] == 0) {
+      message("No variables selected!")
+      est <- list(coefficients = rep(0, p), intercept.value=mean(y), index = rep(FALSE, p),
+                  lambda = lambda, lambda0 = lambda0, loadings = Ups0, residuals = y -
+                    mean(y), sigma = var(y), iter = mm, call = match.call(),
+                  options = list(post = post, intercept = intercept, normalize = normalize,
+                                 control = control, mu = mu, meanx = meanx, scalex = normx,
+                                 ind.scaled = ind))
+      class(est) <- "rlasso"
+      return(est)
+    }
+
+    # refinement variance estimation
+    if (post) {
+      reg <- lm(y ~ -1 + x1)
+      coefT <- coef(reg)
+      coefT[is.na(coefT)] <- 0
+      e1 <- y - x1 %*% coefT
+      coefTemp[ind1] <- coefT
+    }
+    if (!post) {
+      e1 <- y - x1 %*% coefTemp[ind1]
+    }
+    s1 <- sqrt(var(e1))
+
+    # X-independent
+    if (penalty$method == "X-independent") {
+      lambda <- rep(pen$lambda0 * s1, p)
+    }
+    # X-dependent
+    if (penalty$method == "X-dependent") {
+      lambda <- rep(pen$lambda0 * s1, p)
+    }
+    # standard
+    if (penalty$method == "standard") {
+      Ups1 <- 1/sqrt(n) * sqrt(t(t(e1^2) %*% (x^2)))
+      lambda <- pen$lambda0 * Ups1
+    }
+    # none
+    if (penalty$method == "none") {
+      Ups1 <- 1/sqrt(n) * sqrt(t(t(e1^2) %*% (x^2)))
+      lambda <- pen$lambda0 * Ups1
+    }
+
+    mm <- mm + 1
+    if (abs(s0 - s1) < control$tol) {
+      break
+    }
+    s0 <- s1
+  }
+
+  if (dim(x1)[2] == 0) {
+    coefTemp = NULL
+    ind1 <- rep(0, p)
+  }
+  coefTemp <- scale(t(coefTemp), FALSE, normx)
+  coefTemp <- as.vector(coefTemp)
+  coefTemp[abs(coefTemp) < control$threshold] <- 0
+  ind1 <- as.vector(ind1)
+  names(coefTemp) <- names(ind1) <- colnames(x)
+  if (intercept) {
+    if (is.null(mu)) mu <-0
+    if (is.null(meanx))  meanx <-  rep(0, length(coefTemp))  #<- 0
+    if (sum(ind)==0) {
+      intercept.value <- mu - sum(meanx*coefTemp)
+    } else {
+      intercept.value <- mu - sum(meanx[-ind]*coefTemp)
+    }
+  } else {
+    intercept.value <- NA
+  }
+  est <- list(coefficients = coefTemp, intercept.value=intercept.value, index = ind1, lambda = lambda,
+              lambda0 = lambda0, loadings = Ups1, residuals = e1, sigma = s1,
+              iter = mm, call = match.call(), options = list(post = post, intercept = intercept,
+                                                             normalize = normalize, control = control, penalty = penalty,
+                                                             mu = mu, meanx = meanx, scalex = normx, ind.scaled = ind))
+  class(est) <- "rlasso"
+  return(est)
+}
+
+
+
+#' @rdname rlasso
+#' @export
+
+rlasso.formula <- function(formula, data, post = TRUE, intercept = TRUE,
+                          normalize = TRUE, penalty = list(method = "standard", lambda.start = NULL,
+                                                           c = 1.1, gamma = 0.1), control = list(numIter = 15, tol = 10^-5,
+                                                                                                 threshold = NULL), ...) {
+  cl <- match.call()
+  mf <- match.call(expand.dots = FALSE)
+  m <- match(c("formula", "data"), names(mf), 0L)
+  mf <- mf[c(1L, m)]
+  mf$drop.unused.levels <- TRUE
+  mf[[1L]] <- quote(stats::model.frame)
+  mf <- eval(mf, parent.frame())
+  mt <- attr(mf, "terms")
+  attr(mt, "intercept") <- 0
+  y <- model.response(mf, "numeric")
+  x <- model.matrix(mt, mf)
+
+  est <- rlasso(x, y, post = post, intercept = intercept, normalize = normalize, penalty=penalty,
+               control = control)
+  est$call <- cl
+  return(est)
+}
+
+
+################ function lambdaCalculation
+
+#' Function for Calculation of the penalty parameter
+#'
+#' This functions implements different methods for calculation of the parameter lambda. Further details can be found under \link{rlasso}.
+#'
+#' @param penalty list with options for the calculation of the penalty.  \code{c} and \code{gamma} constants for the penalty (all methods except "CV"), \code{method} method for penalty choice ("X-dependent",
+#' "X-independent", "standard", "none", "CV"), \code{numfolds} number of folds
+#' for the "cross validation" method, \code{numSim} number of simulations for
+#' the "X-dependent" method, \code{lambda.start} initial penalization value, compulsory for method "none"
+#' @param x matrix of regressor variables
+#' @param y residual which is used for calculation of the variance or the data-dependent loadings
+#' @return The functions returns a list with the penalty \code{lambda} which is the product of \code{lambda0} and \code{Ups0}. \code{Ups0}
+#' denotes either the variance or the data-dependent loadings for the regressors. \code{method} gives the selected method for the calculation.
+#' @export
+
+
+lambdaCalculation <- function(penalty = list(method = "standard", lambda.start = NULL,
+                                             c = 1.1, gamma = 0.1), y = NULL, x = NULL) {
+  checkmate::checkChoice(penalty$method, c("standard", "X-dependent", "X-independent",
+                                "none"))
+  if (!exists("c", where = penalty)) {
+    penalty$c = 1.1
+    message("c in penalty not provided. Set to default 1.1")
+  }
+  if (!exists("gamma", where = penalty)) {
+    penalty$gamma = 0.1
+    message("gamma in penalty not provided. Set to default 0.1")
+  }
+
+
+  # X-independent
+  if (penalty$method == "X-independent") {
+    p <- dim(x)[2]
+    n <- dim(x)[1]
+    lambda0 <- 2 * penalty$c * sqrt(n) * qnorm(1 - penalty$gamma/(2 *
+                                                                    p))
+    Ups0 <- sqrt(var(y))
+    lambda <- rep(lambda0 * Ups0, p)
+  }
+
+  # X-dependent
+  if (penalty$method == "X-dependent") {
+    if (!exists("numSim", where = penalty)) {
+      penalty$numSim = 10000
+      message("numSim in penalty for method \"X-dependent\" not provided. Set to default 10000")
+    }
+    p <- dim(x)[2]
+    n <- dim(x)[1]
+    R <- penalty$numSim
+    sim <- vector("numeric", length = R)
+    for (l in 1:R) {
+      g <- matrix(rep(rnorm(n), each = p), ncol = p, byrow = TRUE)
+      sim[l] <- n * max(2 * colMeans(x * g))
+    }
+    lambda0 <- penalty$c * quantile(sim, probs = 1 - penalty$gamma)
+    Ups0 <- sqrt(var(y))
+    lambda <- rep(lambda0 * Ups0, p)
+  }
+
+  # 'standard'
+  if (penalty$method == "standard") {
+    p <- dim(x)[2]
+    n <- dim(x)[1]
+    # lambda0 <- 2*penalty$c*sqrt(n)*sqrt(2*log(2*p*log(n)/penalty$gamma))
+    lambda0 <- 2 * penalty$c * sqrt(n) * qnorm(1 - penalty$gamma/(2 *
+                                                                    p * 1))  # 1=num endogenous variables
+    Ups0 <- 1/sqrt(n) * sqrt(t(t(y^2) %*% (x^2)))
+    lambda <- lambda0 * Ups0
+  }
+
+  if (!is.null(penalty$lambda.start)) {
+    p <- dim(x)[2]
+    if (length(penalty$lambda.start) == 1) {
+      lambda.start <- rep(penalty$lambda.start, p)
+    }
+    lambda <- as.matrix(penalty$lambda.start)
+  }
+
+  if (penalty$method == "none") {
+    if (is.null(penalty$lambda.start) | !exists("lambda.start", where = penalty))
+      error("For method none lambda.start must be provided")
+    n <- dim(x)[1]
+    lambda0 <- penalty$lambda.start
+    Ups0 <- 1/sqrt(n) * sqrt(t(t(y^2) %*% (x^2)))
+    lambda <- lambda0 * Ups0
+  }
+
+  return(list(lambda0 = lambda0, lambda = lambda, Ups0 = Ups0, method = penalty$method))
+}
+
+
+
+#' Cross validation for penalty lambda for Lasso
+#'
+#' \code{cv.lasso} computes the K-fold cross-validated mean squared prediction
+#' error for lasso.
+#'
+#' If no grid for lambda is specified, a grid is automatically constructed with
+#' size of 100 grid points.
+#'
+#' @param x regressors (matrix); input to \code{lasso}
+#' @param y dependent variable; input to \code{lasso}
+#' @param K number of folds
+#' @param lambda.grid grid for lambda on which the search is conducted.
+#' @param post if \code{TRUE}, Post-Lasso estimation is done.
+#' @param intercept if \code{TRUE}, intercept is included.
+#' @param normalize if \code{TRUE}, regressors are normalized.
+#' @return The function returns a list with the following components
+#' \item{lambda.grid}{grid for lambda, as above.} \item{cv}{CV curve at each
+#' value of lambda.grid} \item{cv.error}{standard error of the CV curve}
+#' \item{lambda.cv}{lambda values which minimize the cross validated mean
+#' square error; need not be unique.}
+#' @keywords Lasso Cross Validation CV lambda penalty parameter
+
+cv.lasso <- function(x, y, K = 10, lambda.grid = NULL, post = TRUE, intercept = TRUE,
+                     normalize = TRUE) {
+  n <- dim(x)[2]
+  if (is.null(lambda.grid)) {
+    # lambda <- lasso(x, y, post, intercept, normalize)$lambda0
+    lambda.max <- 2 * max(abs(colSums(x * as.vector(y))))
+    lambda.grid <- seq(0, floor(lambda.max) * 2, length.out = 100)
+  }
+  n <- length(y)
+  p <- dim(x)[2]
+  folds <- K
+  all.folds <- split(sample(1:n), rep(1:folds, length = n))
+  residmat <- matrix(NA, length(lambda.grid), K)
+  for (j in 1:length(lambda.grid)) {
+    for (i in seq(K)) {
+      omit <- all.folds[[i]]
+      fit <- rlasso(x[-omit, , drop = FALSE], y[-omit], post = post,
+                   intercept = intercept, normalize = normalize, control = list(numIter = 15,
+                                                                                tol = 10^-5, lambda = "none", lambda.start = rep(lambda.grid[j],
+                                                                                                                                 p)))
+      fitvalues <- predict(fit, x[omit, , drop = FALSE])
+      if (length(omit) == 1)
+        fitvalues <- matrix(fitvalues, nrow = 1)
+      residmat[j, i] <- apply((y[omit] - fitvalues)^2, 2, mean)
+    }
+    if (sum(fit$index) == 0)
+      break
+  }
+  cv <- apply(residmat, 1, mean)
+  cv.error <- sqrt(apply(residmat, 1, var)/K)
+  ind <- which(cv == min(cv, na.rm = T))
+  lambda.cv <- lambda.grid[ind]
+  object <- list(lambda.grid = lambda.grid, cv = cv, cv.error = cv.error,
+                 lambda.cv = lambda.cv)
+  return(object)
+}
+
+
+
+################# Methods for Lasso
+
+#' Methods for S3 object \code{rlasso}
+#'
+#' Objects of class \code{rlasso} are constructed by \code{rlasso.formula} or \code{rlasso.default}.
+#' \code{print.rlasso} prints and displays some information about fitted \code{rlasso} objects.
+#' \code{summary.rlasso} summarizes information of a fitted \code{rlasso} object.
+#' \code{predict.rlasso} predicts values based on a \code{rlasso} object.
+#' \code{model.matrix.rlasso} constructs the model matrix of a \code{rlasso} object.
+#'
+#' @param object An object of class \code{rlasso}
+#' @param x An object of class \code{rlasso}
+#' @param all logical, indicates if coefficients of all variables (TRUE) should be displayed or only the non-zero ones (FALSE)
+#' @param digits significant digits in printout
+#' @param newdata new data set for prediction. An optional data frame in which to look for variables with which to predict. If omitted, the fitted values are returned.
+#' @param ... arguments passed to the print function and other methods
+#' @keywords methods rlasso
+#' @rdname methods.rlasso
+#' @aliases methods.rlasso print.rlasso summary.rlasso predict.rlasso model.matrix.rlasso
+#' @export
+
+print.rlasso <- function(x, all=TRUE ,digits = max(3L, getOption("digits") - 3L), ...) {
+  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), "\n\n", sep = "")
+  if (length(coef(x))) {
+    if (all) {
+      cat("Coefficients:\n")
+      print.default(format(coef(x), digits = digits), print.gap = 2L,
+                    quote = FALSE)
+    } else {
+      print.default(format(coef(x)[x$index], digits = digits), print.gap = 2L,
+                    quote = FALSE)
+    }
+  }
+  else cat("No coefficients\n")
+  cat("\n")
+  invisible(x)
+}
+
+#' @rdname methods.rlasso
+#' @export
+
+summary.rlasso <- function(object, all=TRUE, digits = max(3L, getOption("digits") - 3L), ...) {
+  cat("\nCall:\n", paste(deparse(object$call), sep = "\n", collapse = "\n"), "\n", sep = "")
+  cat("\nPost-Lasso Estimation: ",  paste(deparse(object$options$post), sep = "\n", collapse = "\n"), "\n", sep = " ")
+  coefs <- object$coefficients
+  p <- length(coefs)
+  num.selected <- sum(abs(object$coefficients)>0)
+  cat("\nTotal number of variables:", p)
+  cat("\nNumber of selected variables:", num.selected, "\n", sep=" ")
+  resid <- object$residuals
+  cat("\nResiduals: \n")
+  nam <- c("Min", "1Q", "Median", "3Q", "Max")
+  rq <- structure(apply(t(resid), 1L, quantile), dimnames = list(nam, dimnames(resid)[[2L]]))
+  print(drop(t(rq)), digits = digits)
+  cat("\n")
+  if (all) {
+    coefm <- matrix(NA, length(coefs), 1)
+    coefm[,1] <- coefs
+    colnames(coefm) <- "Estimate"
+    rownames(coefm) <- names(coefs)
+    printCoefmat(coefm, digits = digits, na.print = "NA")
+  } else {
+    coefs <- coefs[abs(coefs)>0]
+    coefm <- matrix(NA, length(coefs), 1)
+    coefm[,1] <- coefs
+    colnames(coefm) <- "Estimate"
+    rownames(coefm) <- names(coefs)
+    printCoefmat(coefm, digits = digits, na.print = "NA")
+  }
+  cat("\nResidual standard error:", format(signif(object$sigma, digits)))
+  cat("\n")
+  invisible(object)
+}
+
+#' @rdname methods.rlasso
+#' @export
+
+model.matrix.rlasso <- function(object, ...) {
+  if (is.call(object$call[[2]])) {
+    if(is.null(object$call$data)){
+      X <- model.frame(object$call[[2]])
+      mt <- attr(X, "terms")
+      attr(mt, "intercept") <- 0
+      mm <- model.matrix(mt, X)
+    } else {
+      dataev <- eval(object$call$data)
+      mm <- as.matrix(dataev[,names(object$coefficients)])
+    }
+  } else {
+    mm <- eval(object$call[[2]])
+  }
+  return(mm)
+}
+
+# old version: to be deleted
+# model.matrix.rlasso <- function(object, ...) {
+#   if (is.call(object$call[[2]])) {
+#     X <- model.frame(object$call[[2]])
+#     mt <- attr(X, "terms")
+#     attr(mt, "intercept") <- 0
+#     mm <- model.matrix(mt, X)
+#   } else {
+#     mm <- eval(object$call[[2]])
+#   }
+#   return(mm)
+# }
+
+# predict.lasso <- function (object, newdata=NULL) {
+#   if (missing(newdata) || is.null(newdata)) {
+#     X <- model.matrix(object)
+#   }
+#   else {
+#     #mt <- attr(newdata, "terms")
+#     #attr(mt, "intercept") <- 0
+#     #m <- model.frame(mt, newdata)
+#     #X <- model.matrix(mt, m)
+#     X <- newdata
+#   }
+#   n <- length(object$residuals)
+#   beta <- object$coefficients
+#   if (object$options[["intercept"]]) {
+#     yhat <- X%*%beta + object$options$mu - sum(object$options$meanx*beta) # (??)
+#   }
+#   if (!object$options[["intercept"]]) {
+#     yhat <- X%*%beta
+#   }
+#   return(yhat)
+# }
+
+#' @rdname methods.rlasso
+#' @export
+
+predict.rlasso <- function (object, newdata = NULL, ...){
+  if (missing(newdata) || is.null(newdata)) {
+    X <- model.matrix(object)
+
+    if(sum(object$options$ind.scale)!=0) {
+      X <- X[,-object$options$ind.scale]
+    }
+  }
+  else {
+    varcoef <- names(object$coefficients)
+    if(all(is.element(varcoef,colnames(newdata)))){
+      X <- as.matrix(newdata[,varcoef])
+    } else {
+      X <- as.matrix(newdata)
+
+      if(sum(object$options$ind.scale)!=0) {
+        X <- X[,-object$options$ind.scale]
+      }
+      stopifnot(ncol(X)==length(object$coefficients))
+    }
+  }
+  n <- dim(X)[1] #length(object$residuals)
+  beta <- object$coefficients
+
+  if (object$options[["intercept"]]) {
+    yhat <- X %*% beta + object$intercept.value
+    if (dim(X)[2]==0) yhat <- rep(object$intercept.value, n)
+  }
+  if (!object$options[["intercept"]]) {
+    yhat <- X %*% beta
+    if (dim(X)[2]==0) yhat <- rep(0, n)
+  }
+  return(yhat)
+}
+
+# predict.rlasso <- function (object, newdata = NULL, ...)
+# {
+#   if (missing(newdata) || is.null(newdata)) {
+#     X <- model.matrix(object)
+#   }
+#   else {
+#     if (object$call[[1]]=="lasso.formula") {
+#       f <- as.formula(object$call[[2]])
+#       X <- model.matrix(f,newdata)[,-1]
+#     } else {
+#     X <- as.matrix(newdata)
+#     }
+#   }
+#
+#   n <- length(object$residuals)
+#   beta <- object$coefficients
+#   #if (object$options[["intercept"]]) {
+#   #  if (is.null(object$options$mu))  object$options$mu <-0
+#   #  if (is.null(object$options$meanx))  object$options$meanx <-0
+#   #  yhat <- X %*% beta + object$options$mu - sum(object$options$meanx *
+#   #                                                 beta)
+#   #}
+#   if(sum(object$options$ind.scale)!=0) {
+#     X <- X[,-object$options$ind.scale]
+#   }
+#
+#   if (object$options[["intercept"]]) {
+#     yhat <- X %*% beta + object$intercept.value
+#   }
+#   if (!object$options[["intercept"]]) {
+#     yhat <- X %*% beta
+#   }
+#   return(yhat)
+# }
+
+#######################
+
+
+
+
+
+
+
+
+
+

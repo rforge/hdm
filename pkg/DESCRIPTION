@@ -2,9 +2,16 @@ Package: hdm
 Type: Package
 Title: High-Dimensional Metrics
 Version: 0.1
-Date: 2015-05-24
-Author: Victor Chernozhukov, Christian Hansen, Martin Spindler
-Maintainer: Martin Spindler <spindler@mea.mpisoc.mpg.de>
-Depends: R (>= 2.10.0), MASS, glmnet, ggplot2
+Date: 2015-09-07
+Authors@R: c(person("Martin", "Spindler", email="spindler@mea.mpisoc.mpg.de", role="cre"), person("Victor", "Chernozhukov", role="aut"), person("Christian", "Hansen", role="aut"))
+Depends: R (>= 3.0.0)
 Description: This package provides the implementation of selected high-dimensional statistical and econometric methods.
 License: GPL-3
+LazyData: TRUE
+Imports: MASS,
+    glmnet,
+    ggplot2,
+    checkmate
+Suggests: testthat,
+    knitr
+VignetteBuilder: knitr
