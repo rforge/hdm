@@ -1,4 +1,4 @@
- %\VignetteIndexEntry{High-Dimensional Metrics, Lasso}
+%\VignetteIndexEntry{High-Dimensional Metrics, Lasso}
 %\VignetteDepends{hdm, MASS, glmnet, ggplot2}
 %\VignettePackage{hdm}
 \documentclass{amsart}

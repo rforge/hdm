@@ -2,8 +2,8 @@
 
 lasso <- function(x, ...) UseMethod("lasso") # definition generic function
 
-lasso.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE, 
-                          control=list(c=1.1, gamma=.1, numIter=15, tol=10^-5, lambda="standard", numSim=10000, 
+lasso.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
+                          control=list(c=1.1, gamma=.1, numIter=15, tol=10^-5, lambda="standard", numSim=10000,
                                        numfolds=10, lambda.start=NULL, threshold=NULL)) {
   n <- dim(x)[1]
   p <- dim(x)[2]
@@ -15,7 +15,7 @@ lasso.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
   numIter <- control$numIter
   lambda.start <- control$lambda.start
   threshold <- control$threshold
-  
+
   tol <- control$tol
   Ups0 <- Ups1 <- NULL # for the case not used
   # Intercept handling and scaling
@@ -28,7 +28,7 @@ lasso.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
     meanx <- rep(0, p)
     mu <- 0
   }
-  
+
   if (normalize) {
     normx <- sqrt(apply(x,2,var))
     ind <- which(normx < eps)
@@ -43,11 +43,11 @@ lasso.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
   } else {
     normx <- rep(1,p)
   }
-  
+
   XX <- crossprod(x)
-  Xy <- crossprod(x,y) 
-  
-  
+  Xy <- crossprod(x,y)
+
+
   # calculation lambda
   # cross validation
   if (control$lambda=="CV") {
@@ -56,12 +56,12 @@ lasso.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
     control <- list(numIter=numIter, tol=10^-5, lambda="none", lambda.start=rep(lambda.cv,p))
     fit <- lasso(x, y, post, intercept, normalize, control=control)
     return(fit)
-  }   
+  }
   # X-independent
   if (control$lambda=="X-independent") {
     lambda0 <- 2*c*sqrt(n)*qnorm(1-gamma/(2*p))
     lambda <- rep(2*c*sqrt(n)*qnorm(1-gamma/(2*p))*sqrt(var(y)),p)
-  }   
+  }
   # X-dependent
   if (control$lambda=="X-dependent") {
     R <- control$numSim
@@ -79,9 +79,9 @@ lasso.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
     lambda0 <- 2*c*sqrt(n)*sqrt(2*log(2*p*log(n)/gamma))
     e0 <- y - mean(y)
     Ups0 <- 1/sqrt(n)*sqrt(t(t(e0^2)%*%(x^2)))
-    lambda <- lambda0*Ups0     
+    lambda <- lambda0*Ups0
   }
-  
+
   if (!is.null(lambda.start)) {
     #lambda0 <- lambda.start
     if (length(lambda.start)==1) {
@@ -89,15 +89,15 @@ lasso.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
     }
     lambda <-diag(p)%*%as.matrix(lambda.start)
   }
-  
+
   if (control$lambda=="none") {
     lambda0 <- lambda.start
     e0 <- y - mean(y)
     Ups0 <- 1/sqrt(n)*sqrt(t(t(e0^2)%*%(x^2)))
-    lambda <- lambda0*Ups0 
+    lambda <- lambda0*Ups0
   }
-  
-  
+
+
   # calculation first parameters
   coefTemp <- LassoShooting.fit(x, y, lambda, XX=XX, Xy=Xy)$coefficients
   coefTemp[is.na(coefTemp)] <- 0
@@ -105,9 +105,9 @@ lasso.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
   x1 <- as.matrix(x[,ind1, drop=FALSE])
   if (dim(x1)[2]==0) {
     print("No variables selected!")
-    #est <- list(coefficients=rep(0,p), index=rep(FALSE,p), lambda=lambda, residuals=y - mean(y), sigma=var(y), 
+    #est <- list(coefficients=rep(0,p), index=rep(FALSE,p), lambda=lambda, residuals=y - mean(y), sigma=var(y),
     #            iter=0, call=match.call(), options=list(post=post, intercept=intercept, normalize=normalize, control=control))
-    est <- list(coefficients=rep(0,p), index=rep(FALSE,p), lambda=lambda, lambda0=lambda0, loadings=Ups0, residuals=y - mean(y), sigma=var(y), iter=0, call=match.call(), 
+    est <- list(coefficients=rep(0,p), index=rep(FALSE,p), lambda=lambda, lambda0=lambda0, loadings=Ups0, residuals=y - mean(y), sigma=var(y), iter=0, call=match.call(),
                 options=list(post=post, intercept=intercept, normalize=normalize, control=control, mu=mu, meanx=meanx, scalex=normx))
     class(est) <- "lasso"
     return(est)
@@ -127,13 +127,13 @@ lasso.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
   }
   s1 <- sqrt(var(e1))
   s0 <- sqrt(var(y))
-  
+
   while (mm<numIter) {
     if (dim(x1)[2]==0) {break}
     # X-independent
     if (control$lambda=="X-independent") {
-      lambda <- rep(2*c*sqrt(n)*qnorm(1-gamma/(2*p))*s1,p)  
-    }   
+      lambda <- rep(2*c*sqrt(n)*qnorm(1-gamma/(2*p))*s1,p)
+    }
     # X-dependent
     if (control$lambda=="X-dependent") {
       lambda <- rep(c*quantile(sim, probs=1-gamma/2)*s1,p)
@@ -148,19 +148,19 @@ lasso.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
       Ups1 <- 1/sqrt(n)*sqrt(t(t(e1^2)%*%(x^2)))
       lambda <- lambda0*Ups1
     }
-    
+
     coefTemp <- LassoShooting.fit(x, y, lambda, XX=XX, Xy=Xy)$coefficients
     coefTemp[is.na(coefTemp)] <- 0
     ind1 <- (abs(coefTemp) > 0)
     x1 <- as.matrix(x[,ind1, drop=FALSE])
-    
+
     if (dim(x1)[2]==0) { # added
-      est <- list(coefficients=rep(0,p), index=rep(FALSE,p), lambda=lambda, lambda0=lambda0, loadings=Ups0, residuals=y - mean(y), sigma=var(y), iter=0, call=match.call(), 
+      est <- list(coefficients=rep(0,p), index=rep(FALSE,p), lambda=lambda, lambda0=lambda0, loadings=Ups0, residuals=y - mean(y), sigma=var(y), iter=0, call=match.call(),
                   options=list(post=post, intercept=intercept, normalize=normalize, control=control, mu=mu, meanx=meanx, scalex=normx))
       class(est) <- "lasso"
       return(est)
     }
-    
+
     if (post) {
       reg <- lm(y ~ -1 + x1)
       coefT <- coef(reg)
@@ -175,10 +175,10 @@ lasso.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
     }
     s0 <- s1
     s1 <- sqrt(var(e1))
-    mm <- mm+1 
-    if(abs(s0-s1)<tol) {break}      
+    mm <- mm+1
+    if(abs(s0-s1)<tol) {break}
   }
-  
+
   if (dim(x1)[2]==0) {
     coefTemp=NULL
     ind1 <- rep(0,p)
@@ -189,7 +189,7 @@ lasso.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
   ind1 <- as.vector(ind1)
   names(coefTemp) <- names(ind1) <- colnames(x)
   est <- list(coefficients=coefTemp, index=ind1, lambda=lambda, lambda0=lambda0, loadings=Ups1, residuals=e1, sigma=s1, iter=mm, call=match.call(), options=list(post=post, intercept=intercept, normalize=normalize, control=control, mu=mu, meanx=meanx, scalex=normx))
-  class(est) <- "lasso" 
+  class(est) <- "lasso"
   return(est)
 }
 
@@ -207,7 +207,7 @@ lasso.formula <- function(formula, data, post=TRUE, intercept=TRUE, normalize=TR
   attr(mt, "intercept") <- 0
   y <- model.response(mf, "numeric")
   x <- model.matrix(mt, mf)
-  
+
   est <- lasso(x,y, post=post, intercept=intercept, normalize=normalize, control=control)
   est$call <- cl
   return(est)
@@ -219,11 +219,11 @@ print.lasso <- function(object, all=TRUE ,digits = max(3L, getOption("digits") -
   if (length(coef(object))) {
     if (all) {
     cat("Coefficients:\n")
-    print.default(format(coef(object), digits = digits), print.gap = 2L, 
+    print.default(format(coef(object), digits = digits), print.gap = 2L,
                   quote = FALSE)
     } else {
-      print.default(format(coef(object)[object$index], digits = digits), print.gap = 2L, 
-                    quote = FALSE)  
+      print.default(format(coef(object)[object$index], digits = digits), print.gap = 2L,
+                    quote = FALSE)
     }
   }
   else cat("No coefficients\n")
@@ -236,7 +236,7 @@ summary.lasso <- function(object, all=TRUE, digits = max(3L, getOption("digits")
   cat("\nPost-Lasso Estimation: ",  paste(deparse(object$options$post), sep = "\n", collapse = "\n"), "\n", sep = " ")
   coefs <- object$coefficients
   p <- length(coefs)
-  num.selected <- sum(abs(object$coefficients)>0) 
+  num.selected <- sum(abs(object$coefficients)>0)
   cat("\nTotal number of variables:", p)
   cat("\nNumber of selected variables:", num.selected, "\n", sep=" ")
   resid <- object$residuals
@@ -244,7 +244,7 @@ summary.lasso <- function(object, all=TRUE, digits = max(3L, getOption("digits")
   nam <- c("Min", "1Q", "Median", "3Q", "Max")
   rq <- structure(apply(t(resid), 1L, quantile), dimnames = list(nam, dimnames(resid)[[2L]]))
   print(drop(t(rq)), digits = digits)
-  cat("\n") 
+  cat("\n")
   if (all) {
   coefm <- matrix(NA, length(coefs), 1)
   coefm[,1] <- coefs
@@ -295,10 +295,10 @@ model.matrix.lasso <- function(object) {
 #   if (!object$options[["intercept"]]) {
 #     yhat <- X%*%beta
 #   }
-#   return(yhat) 
+#   return(yhat)
 # }
 
-predict.lasso <- function (object, newdata = NULL) 
+predict.lasso <- function (object, newdata = NULL)
 {
   if (missing(newdata) || is.null(newdata)) {
     X <- model.matrix(object)
@@ -311,8 +311,7 @@ predict.lasso <- function (object, newdata = NULL)
   if (object$options[["intercept"]]) {
     if (is.null(object$options$mu))  object$options$mu <-0
     if (is.null(object$options$meanx))  object$options$meanx <-0
-    yhat <- X %*% beta + object$options$mu - sum(object$options$meanx * 
-                                                   beta)
+    yhat <- X %*% beta + object$options$mu -
   }
   if (!object$options[["intercept"]]) {
     yhat <- X %*% beta
@@ -340,7 +339,7 @@ cv.lasso <- function (x, y, K = 10, lambda.grid=NULL, post=TRUE, intercept=TRUE,
       fit <- lasso(x[-omit, , drop = FALSE], y[-omit], post=post, intercept=intercept, normalize=normalize,
                    control=list(numIter=15, tol=10^-5, lambda="none", lambda.start=rep(lambda.grid[j],p)))
       fitvalues <- predict(fit, x[omit, , drop = FALSE])
-      if (length(omit) == 1) 
+      if (length(omit) == 1)
         fitvalues <- matrix(fitvalues, nrow = 1)
       residmat[j, i] <- apply((y[omit] - fitvalues)^2, 2, mean)
     }
@@ -352,4 +351,4 @@ cv.lasso <- function (x, y, K = 10, lambda.grid=NULL, post=TRUE, intercept=TRUE,
   lambda.cv <- lambda.grid[ind]
   object <- list(lambda.grid = lambda.grid, cv = cv, cv.error = cv.error, lambda.cv=lambda.cv)
   return(object)
-} 
+}
