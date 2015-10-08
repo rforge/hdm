@@ -11,7 +11,7 @@
 #' @param x exogenous variables
 #' @param z instruments
 #' @return The function returns a list with the following elements \item{coefficients}{coefficients}
-#' \item{vcov}{variance-covariance matrix} \item{residuals}{difference of outcome minus predicted values}
+#' \item{vcov}{variance-covariance matrix} \item{residuals}{outcome minus predicted values}
 #' @keywords Instrumental Variables
 #' @keywords Endogeneity
 #' @keywords 2SLS

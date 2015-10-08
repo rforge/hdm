@@ -1,4 +1,4 @@
-globalVariables(c("post", "intercept", "normalize", "penalty", "control", "error"))
+globalVariables(c("post", "intercept", "normalize", "penalty", "control", "error", "n", "aes"))
 
 #' rlasso: Function for Lasso estimation under homoskedastic and heteroskeadstic non-Gaussian
 #' disturbances
@@ -9,7 +9,7 @@ globalVariables(c("post", "intercept", "normalize", "penalty", "control", "error
 #' returned is of the S3 class \code{rlasso}.
 #'
 #' The function estimates the coefficients of a Lasso regression with
-#' data-driven penalty under homosheteroskedasticity and non-Gaussian noise. The
+#' data-driven penalty under heteroskedasticity and non-Gaussian noise. The
 #' method of the data-driven penalty can be chosen ("X-dependent",
 #' "X-independent", "standard", "none", "cv"). For details of the
 #' implementation of the Algorithm for estimation of the data-driven penalty,
@@ -22,7 +22,7 @@ globalVariables(c("post", "intercept", "normalize", "penalty", "control", "error
 #' regressor-dependent loadings). The option \code{nfolds} gives the number of
 #' folds used for cross validation. The method "standard", which is recommended
 #' and the default option, employs data-dependent loadings and sets
-#' \eqn{\lambda = 2*c*\sqrt(n)*\sqrt(2*\log(2*p*\log(n)/\gamma))}.
+#' \eqn{\lambda = 2*c*\sqrt{n}*\sqrt{2*\log(2*p*\log(n)/\gamma)}}.
 #' \code{lambda.start} can be component-specific. When used with one of the
 #' other option, the values are used as starting values.
 #'
@@ -56,10 +56,11 @@ globalVariables(c("post", "intercept", "normalize", "penalty", "control", "error
 #' @param ... further arguments (only for consistent defintion of methods)
 #' @return \code{rlasso} returns an object of class \code{rlasso} An object of
 #' class "rlasso" is a list containing at least the following components:
-#' \item{coefficients}{parameter estimates (named vector of coefficients without intercept)} \item{intercept.value}{value of the intercept}
+#' \item{coefficients}{parameter estimates (named vector of coefficients without intercept)}
+#' \item{intercept.value}{value of the intercept}
 #' \item{index}{index of selected
 #' variables (logical vector)} \item{lambda}{data-driven penalty term for each
-#' variable, product of lambda0 (the penalization paramter) and the loadings}
+#' variable, product of lambda0 (the penalization parameter) and the loadings}
 #' \item{lambda0}{penalty term} \item{loadings}{loading for each regressor}
 #' \item{residuals}{residuals, response minus fitted values} \item{sigma}{root of the variance of
 #' the residuals} \item{iter}{number of iterations} \item{call}{function call}
@@ -75,25 +76,24 @@ globalVariables(c("post", "intercept", "normalize", "penalty", "control", "error
 #' @keywords Lasso data-driven penalty non-Gaussian heteroscedasticity
 #' @export
 #' @rdname rlasso
-#@examples
-#
-#  ## DGP
-# library(hdm2)
-# library(MASS)
-# n <- 250
-# p <- 100
-# px <- 10
-# X <- matrix(rnorm(n*p), ncol=p)
-# beta <- c(rep(2,px), rep(0,p-px))
-# y <- 1 + X%*%beta + rnorm(n)
-# ## Lasso estimation
-# lasso.reg <- rlasso(x=X, y=y, post=TRUE, intercept=TRUE)
-# # Methods for Lasso
-# print(lasso.reg, all=FALSE)
-# summary(lasso.reg, all=FALSE)
-# yhat <- predict(lasso.reg)
-# Xnew <- matrix(rnorm(n*p), ncol=p)
-# yhat.new <- predict(lasso.reg, newdata=Xnew)
+#' @examples
+#'  ## DGP
+#' library(hdm)
+#' library(MASS)
+#' n <- 250
+#' p <- 100
+#' px <- 10
+#' X <- matrix(rnorm(n*p), ncol=p)
+#' beta <- c(rep(2,px), rep(0,p-px))
+#' y <- 1 + X%*%beta + rnorm(n)
+#' ## Lasso estimation
+#' lasso.reg <- rlasso(x=X, y=y, post=TRUE, intercept=TRUE)
+#' # Methods for Lasso
+#' print(lasso.reg, all=FALSE)
+#' summary(lasso.reg, all=FALSE)
+#' yhat <- predict(lasso.reg)
+#' Xnew <- matrix(rnorm(n*p), ncol=p)
+#' yhat.new <- predict(lasso.reg, newdata=Xnew)
 
 
 #lasso <- function(x,  post = TRUE, intercept = TRUE, normalize = TRUE,
@@ -303,7 +303,7 @@ rlasso.formula <- function(formula, data, post = TRUE, intercept = TRUE,
 
 #' Function for Calculation of the penalty parameter
 #'
-#' This functions implements different methods for calculation of the parameter lambda. Further details can be found under \link{rlasso}.
+#' This function implements different methods for calculation of the parameter lambda. Further details can be found under \link{rlasso}.
 #'
 #' @param penalty list with options for the calculation of the penalty.  \code{c} and \code{gamma} constants for the penalty (all methods except "CV"), \code{method} method for penalty choice ("X-dependent",
 #' "X-independent", "standard", "none", "CV"), \code{numfolds} number of folds
@@ -400,8 +400,8 @@ lambdaCalculation <- function(penalty = list(method = "standard", lambda.start =
 #' If no grid for lambda is specified, a grid is automatically constructed with
 #' size of 100 grid points.
 #'
-#' @param x regressors (matrix); input to \code{lasso}
-#' @param y dependent variable; input to \code{lasso}
+#' @param x regressors (matrix)
+#' @param y dependent variable
 #' @param K number of folds
 #' @param lambda.grid grid for lambda on which the search is conducted.
 #' @param post if \code{TRUE}, Post-Lasso estimation is done.

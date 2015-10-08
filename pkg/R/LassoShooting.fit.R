@@ -3,8 +3,8 @@
 #' Implementation of the Shooting Lasso (Fu, 1998) with variable dependent
 #' penalization weights.
 #'
-#' The function impements the Shooting Lasso (Fu, 1998) with variable dependent
-#' penalization. The argruments \code{XX} and \code{Xy} are optional and allow to use precalculated matrices which might improve performance.
+#' The function implements the Shooting Lasso (Fu, 1998) with variable dependent
+#' penalization. The arguments \code{XX} and \code{Xy} are optional and allow to use precalculated matrices which might improve performance.
 #'
 #' @param x matrix of regressor variables (\code{n} times \code{p} where
 #' \code{n} denotes the number of observations and \code{p} the number of
@@ -14,13 +14,13 @@
 #' regressor
 #' @param control list with control parameters: \code{maxIter} maximal number
 #' of iterations, \code{optTol} tolerance for parameter precision,
-#' \code{zeroThreshold} threshold applied to the estimated cofficients
+#' \code{zeroThreshold} threshold applied to the estimated coefficients
 #' for numerical issues.
 #' @param XX optional, precalculated matrix \eqn{t(X)*X}
 #' @param Xy optional, precalculated matrix \eqn{t(X)*y}
 #' @param beta.start start value for beta
 #' @return \item{coefficients}{estimated coefficients by the Shooting Lasso
-#' Algorithm} \item{coef.list}{list of coefficient from each iteration}
+#' Algorithm} \item{coef.list}{list of coefficients from each iteration}
 #' \item{num.it}{number of iterations run}
 #' @references Fu, W. (1998). Penalized regressions: the bridge vs the lasso.
 #' \emph{Journal of Computational and Graphical Software} 7, 397-416.

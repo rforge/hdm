@@ -1,6 +1,6 @@
 #' rigorous Lasso for Logistic Models: Inference
 #'
-#' The functions estimates selected (low-dimensional) coefficients in a high-dimensional logistic model.
+#' The function estimates selected (low-dimensional) coefficients in a high-dimensional logistic model.
 #'
 #' The functions estimates selected (low-dimensional) coefficients in a high-dimensional logistic model.
 #' An application is e.g. estimation of a treatment effect \eqn{\alpha_0} in a
@@ -9,15 +9,14 @@
 #' @param x matrix of regressor variables serving as controls and potential
 #' treatments
 #' @param y outcome variable
-#' @param index vector of integers indicating the position (column) of
+#' @param index vector of integers, logical or names indicating the position (column) or name of
 #' variables of x which should be used as treatment variables.
 #' @param I3 logical vector with same length as the number of controls;
 #' indicates if variables (TRUE) should be included in any case.
-##' @param \dots parameters passed to the lasso functions used for the double selection procedure.
-#' @param \dots additional paramters
+#' @param \dots additional parameters
 #' @return The function returns an object of class \code{rlassologitEffect} with the following entries: \item{coefficients}{estimated
-#' value of the coefficients} \item{se}{standard error}
-#' \item{t}{t-statistic} \item{pval}{p-value} \item{samplesize}{sample size of the data set} \item{I}{index of variables of the union of the lasso regressions}
+#' value of the coefficients} \item{se}{standard errors}
+#' \item{t}{t-statistics} \item{pval}{p-values} \item{samplesize}{sample size of the data set} \item{I}{index of variables of the union of the lasso regressions}
 #' @references A. Belloni, V. Chernozhukov, Y. Wei (2013). Honest confidence regions for a regression parameter in logistic regression with a loarge number of controls.
 #' cemmap working paper CWP67/13.
 #' @keywords Estimation Inference Logistic Lasso
@@ -166,13 +165,13 @@ rlassologitEffectone <- function(x, y, d, I3=NULL) {
 
 #' Methods for S3 object \code{rlassologitEffect}
 #'
-#' Objects of class \code{rlassologitEffect} are construced by \code{rlassologitEffect.default} or \code{rlassoLM.formula} (TBD).
+#' Objects of class \code{rlassologitEffect} are construced by \code{rlassologitEffect.default} or \code{rlassologitEffect.formula} (TBD).
 #' \code{print.rlassologitEffect} prints and displays some information about fitted \code{rlassologitEffect} objects.
 #' \code{summary.rlassologitEffect} summarizes information of a fitted \code{rlassologitEffect} object.
 #' \code{confint.rlassologitEffect} extracts the confidence intervals.
 #' @param object An object of class \code{rlassologitEffect}
 #' @param x An object of class \code{rlassologitEffect}
-#' @param digits number of digits
+#' @param digits number of significant digits in printout
 #' @param ... arguments passed to the print function and other methods
 #' @keywords methods rlassologitEffect
 #' @rdname methods.rlassologitEffect

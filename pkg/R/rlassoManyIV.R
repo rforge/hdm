@@ -36,10 +36,10 @@ rlassoManyIV <- function(x,z,y,d,...) {
   lasso.d.x <- rlasso(x,d,...)
   if (sum(lasso.d.zx$index)==0) return(list(alpha=NA, se=NA))
   ind.dzx <- lasso.d.zx$index
-  PZ <- Z[,ind.dzx]%*%solve(t(Z[,ind.dzx])%*%Z[,ind.dzx])%*%t(Z[,ind.dzx])%*%d
+  PZ <- Z[,ind.dzx]%*%MASS::ginv(t(Z[,ind.dzx])%*%Z[,ind.dzx])%*%t(Z[,ind.dzx])%*%d
   lasso.PZ.x <- rlasso(x,PZ,...)
   ind.PZx <- lasso.PZ.x$index
-  Dr <- d- x[,ind.PZx]%*%solve(t(x[,ind.PZx])%*%x[,ind.PZx])%*%t(x[,ind.PZx])%*%PZ
+  Dr <- d- x[,ind.PZx]%*%MASS::ginv(t(x[,ind.PZx])%*%x[,ind.PZx])%*%t(x[,ind.PZx])%*%PZ
   Yr <- lasso.y.x$residuals
   Zr <- lasso.PZ.x$residuals
   result <- tsls(Yr,Dr,x=NULL,Zr)
@@ -102,9 +102,9 @@ rlassoManyIVmult <- function(x,z,y,d,...) {
 
 #' Methods for S3 object \code{rlassoManyIV}
 #'
-#' Objects of class \code{rlassoIV} are constructed by \code{rlassoManyIV}.
-#' \code{print.rlassoIV} prints and displays some information about fitted \code{rlassoManyIV} objects.
-#' \code{summary.rlassoManyIV} summarizes information of a fitted \code{rlassoIV} object.
+#' Objects of class \code{rlassoManyIV} are constructed by \code{rlassoManyIV}.
+#' \code{print.rlassoManyIV} prints and displays some information about fitted \code{rlassoManyIV} objects.
+#' \code{summary.rlassoManyIV} summarizes information of a fitted \code{rlassoManyIV} object.
 #' \code{confint.rlassoManyIV} extracts the confidence intervals.
 #' @param object An object of class \code{rlassoManyIV}
 #' @param x An object of class \code{rlassoManyIV}

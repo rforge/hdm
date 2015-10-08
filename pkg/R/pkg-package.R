@@ -1,4 +1,4 @@
-#' hdm2: High-Dimensional Metrics
+#' hdm: High-Dimensional Metrics
 #'
 #' This packages implements high-dimensional methods with a focus on
 #' Econometrics.
@@ -70,7 +70,7 @@ NULL
 #' @name pension
 #' @aliases 401(k) plans wealth data pension
 #' @docType data
-#' @format Dataframe with the following variables (amongst others): \describe{
+#' @format \describe{Dataframe with the following variables (amongst others): 
 #' \item{p401}{participation in 401(k)} \item{e401}{eligibility for 401(k)}
 #' \item{a401}{401(k) assets}
 #' \item{tw}{total wealth (in US $)} \item{tfa}{financial assets (in US $)}
@@ -87,16 +87,8 @@ NULL
 #' \item{hown}{home owner} \item{educ}{education (in years)} \item{male}{male}
 #' \item{twoearn}{two earners} %\item{i1-i7}{} %\item{a1-a5}{}
 #' \item{nohs, hs, smcol, col}{dummies for education: no high-school, high-school, some college, college}
-#' %\item{wtw1-wtw7}{} %\item{f1-f6}{}
 #' \item{hmort}{home mortage (in US $)}
-#' \item{hequity}{home equity (in US $)} \item{hval}{home value (in US $)}
-#'
-#' % "wgt" "a401" "tfa_he" "dum91" "nohs" "hs" "smcol" "col" "a" "icat" "ecat"
-#' "f" "zhat" "wntfa1" "wntfa2" "wntfa3" "wntfa4" "wntfa5" "wntfa6" "wntfa7"
-#' "wnet_nifa1" "wnet_nifa2" "wnet_nifa3" "wnet_nifa4" "wnet_nifa5"
-#' "wnet_nifa6" "wnet_nifa7" "wnet_n4014"
-#'
-#' }
+#' \item{hequity}{home equity (in US $)} \item{hval}{home value (in US $)}}
 #' @references V. Chernohukov, C. Hansen (2004). The impact of 401(k)
 #' participation on the wealth distribution: An instrumental quantile
 #' regression analysis. The Review of Economic and Statistics 86 (3), 735--751.

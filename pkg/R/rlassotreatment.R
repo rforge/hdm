@@ -15,8 +15,8 @@
 #' Functions for estimation of treatment effects
 #'
 #' The functions estimate the average treatment effect (ATE), the ATE of the tretated (ATET), the local average treatment effects (LATE) and the LATE of
-#' the tretated (LATET). The estimated functions rely on immunized / orthogonal moment
-#' conditions which guarante valid post-selection inference in a high-dimensional setting. Further details can be found in Belloni et al. (2014).
+#' the tretated (LATET). The estimation methods rely on immunized / orthogonal moment
+#' conditions which guarantee valid post-selection inference in a high-dimensional setting. Further details can be found in Belloni et al. (2014).
 #'
 #' Details can be found in Belloni et al. (2014).
 #'
@@ -28,7 +28,7 @@
 #' @param bootstrap boostrap method which should be employed: "none", "Bayes",
 #' "normal", "wild"
 #' @param nRep number of replications for the bootstrap
-#' @return Functions return an object of class \code{TE} with estimated effects, standard errors and
+#' @return Functions return an object of class \code{rlassoTE} with estimated effects, standard errors and
 #' individual effects in the form of a \code{list}.
 #' @references A. Belloni, V. Chernozhukov, I. Fernandez-Val, and C. Hansen
 #' (2014). Program evaluation with high-dimensional data. Working Paper.
@@ -53,6 +53,10 @@ rlassoATET <- function(x,d,y, bootstrap=NULL, nRep=500) {
   return(res)
 }
 #' @export
+#' @param post logical. If \code{TRUE}, post-lasso estimation is conducted.
+#' @param intercept logical. If \code{TRUE}, intercept is included which is not
+#' penalized.
+#' @param normalize logical. If \code{TRUE}, design matrix \code{x} is scaled.
 #' @rdname TE
 
 rlassoLATE <- function(x,d,y,z, bootstrap=NULL, nRep=500, post=TRUE, intercept=TRUE, normalize=TRUE) {
@@ -206,13 +210,13 @@ rlassoLATET <- function(x, d, y, z, bootstrap=NULL, nRep=500, post=TRUE, interce
 
 #' Methods for S3 object \code{rlassoTE}
 #'
-#' Objects of class \code{rlassoTE} are construced by  \code{rlassoATE},  \code{rlassoATET}, \code{rlassoLATE},  \code{rlassoLATET}.
+#' Objects of class \code{rlassoTE} are constructed by  \code{rlassoATE},  \code{rlassoATET}, \code{rlassoLATE},  \code{rlassoLATET}.
 #' \code{print.rlassoTE} prints and displays some information about fitted \code{rlassoTE} objects.
-#' \code{summary.rlassoTE} summarizes information of a fitted \code{rlassoIV} object.
+#' \code{summary.rlassoTE} summarizes information of a fitted \code{rlassoTE} object.
 #' \code{confint.rlassoTE} extracts the confidence intervals.
 #' @param object An object of class \code{rlassoTE}
 #' @param x An object of class \code{rlassoTE}
-#' @param digits number of digits
+#' @param digits number of significant digits in printout
 #' @param ... arguments passed to the print function and other methods
 #' @param parm a specification of which parameters are to be given confidence intervals, either a vector of numbers or a vector of names. If missing, all parameters are considered.
 #' @param level	the confidence level required.

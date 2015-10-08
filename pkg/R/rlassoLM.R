@@ -10,7 +10,8 @@
 #' the control variables. The final estimation is done by a regression of the
 #' outcome on the treatment effect and the union of the selected variables in
 #' the first two steps. The resulting estimator for \eqn{\alpha_0} is normal
-#' distributed which allows inference on the treatment effect.
+#' distributed which allows inference on the treatment effect. It presents a wrap function for \code{rlassoLMone} 
+#' which does inference for a single variable.
 #'
 #' @param x matrix of regressor variables serving as controls and potential
 #' treatments
@@ -19,19 +20,33 @@
 #' @param data data.frame in connection with \code{formula}
 #' @param index vector of integers, logicals or variables names indicating the position (column) of
 #' variables (integer case), logical yes or no (TRUE or FALSE) or the variable names of x which should be used for inference / as treatment variables.
-#' @param I3 logical vector with same length as the number of controls;
+#' @param I3 logical vector with the same length as the number of controls;
 #' indicates if variables (TRUE) should be included in any case.
 #' @param \dots parameters passed to the \code{\link{rlasso}} function.
 #' @return The function returns an object of class \code{rlassoLM} with the following entries: \item{coefficients}{vector with estimated
 #' values of the coefficients for each selected variable} \item{se}{standard error (vector)}
-#' \item{t}{t-statistic} \item{pval}{p-value} \item{samplesize}{sample size of the data set} \item{I}{index of variables of the union of the lasso regressions}
+#' \item{t}{t-statistic} \item{pval}{p-value} \item{samplesize}{sample size of the data set} \item{I}{union of the indices of variables selected in the lasso regressions}
 #' @references A. Belloni, V. Chernozhukov, C. Hansen (2014). Inference on
 #' treatment effects after selection among high-dimensional controls. The
 #' Review of Economic Studies 81(2), 608--650.
 #' @keywords Estimation Inference Treatment effect High-dimensional controls
 #' @export
 #' @rdname rlassoLM
-
+#' @examples
+#' library(hdm)
+#' ## DGP
+#' n <- 250
+#' p <- 100
+#' px <- 10
+#' X <- matrix(rnorm(n*p), ncol=p)
+#' beta <- c(rep(2,px), rep(0,p-px))
+#' intercept <- 1
+#' y <- intercept + X %*% beta + rnorm(n)
+#' ## fit rlassoLM object with inference on three variables
+#' rlassoLM.reg <- rlassoLM(x=X, y=y, index=c(1,7,20))
+#' ## methods
+#' summary(rlassoLM.reg)
+#' confint(rlassoLM.reg, level=0.9)
 rlassoLM <- function(x, ...)
   UseMethod("rlassoLM") # definition generic function
 
@@ -210,7 +225,7 @@ rlassoLMone <- function(x, y, d, I3=NULL,  ...) {
 #' \code{print.rlassoLM} prints and displays some information about fitted \code{rlassoLM} objects.
 #' \code{summary.rlassoLM} summarizes information of a fitted \code{rlassoLM} object.
 #' \code{confint.rlassoLM} extracts the confidence intervals.
-#' \code{plot.rlassoLM} plots the estimates.
+#' \code{plot.rlassoLM} plots the estimates with confidence intervals.
 #'
 #' @param object An object of class \code{rlassoLM}
 #' @param x An object of class \code{rlassoLM}
@@ -260,7 +275,7 @@ summary.rlassoLM <- function(object, digits = max(3L, getOption("digits") - 3L),
 #' @rdname methods.rlassoLM
 #' @param parm a specification of which parameters are to be given confidence intervals, either a vector of numbers or a vector of names. If missing, all parameters are considered.
 #' @param level	the confidence level required
-#' @param joint logical, if joint confidence intervals should be clalculated.
+#' @param joint logical, if \code{TRUE} joint confidence intervals are clalculated.
 #' @export
 
 confint.rlassoLM <- function(object, parm, level=0.95, joint=FALSE, ...) {
@@ -310,73 +325,115 @@ confint.rlassoLM <- function(object, parm, level=0.95, joint=FALSE, ...) {
 
 #' @rdname methods.rlassoLM
 #' @export
-
-plot.rlassoLM <- function(x, ..., var.names=T, col="black", xlim=NULL, xlab="", ylab="", main="", sub="",
-                          pch=19, cex=1.3, lwd=2, lty=1){
-#plot.rlassoLM <- function(x,  var.names=T, ...){
-
-    coefmatrix <- cbind(summary(x), confint(x))[,c(1,5,6)]
-    rownames(coefmatrix) <- names(x$coefficients)
-    #colnames(coefmatrixneu) <- c("estimate", "lower CI", "upper CI")
-   coefmatrix <- coefmatrix[order(abs(coefmatrix[,1])),]
-
-  p <- nrow(coefmatrix)
-
-  # arranging of plots
-
-  if(p<=20){
-    par(mfrow=c(1,1))
-    ngr <- p
-  }else{
-    if(p<=40){
-      par(mfrow=c(1,2))
-      ngr <- ceiling(p/2)
-    }else{
-      par(mfrow=c(2,2))
-      ngr <- 10
-    }
-  }
-
-  # Anzahl benötigter Fenster
-  nWin <- ceiling(p/ngr)
-
-  # noch nicht geplottete Parameter
-  puebrig <- p
-
-  # Festlegung des Wertebereichs
-  if(is.null(xlim)){
+#' @param main an overall title for the plot
+#' @param xlab a title for the x axis
+#' @param ylab a title for the y axis
+#' @param xlim vector of length two giving lower and upper bound of x axis
+#' @param col color of lines of the graph
+plot.rlassoLM <- function(x, main="", xlab="coef", ylab="", xlim=NULL, col="black",...){
+  
+  # generate ordered KI-matrix
+  coefmatrix <- cbind(summary(x), confint(x))[, c(1, 5, 6)]
+  rownames(coefmatrix) <- names(x$coefficients)
+  colnames(coefmatrix) <- c("coef","lower","upper")
+  coefmatrix <- coefmatrix[order(abs(coefmatrix[, 1])), ]
+  coefmatrix <- as.data.frame(coefmatrix)
+  
+  # scale
+  if(missing(xlim)){
     low <- min(coefmatrix)
-    high <- max(coefmatrix)
+    up <- max(coefmatrix)
   } else{
     low <- xlim[1]
-    high <- xlim[2]
+    up <- xlim[2]
   }
-
-  # Erzeugen der Grafikfenster
-  for(i in 1:nWin){
-
-    plot(1,xlim=c(low,high),ylim=c(0,ngr),yaxt="n",xlab=xlab,ylab=ylab,type="n",main=main,sub=sub)
-    abline(v=0)
-
-    # Achsenbeschriftung der y-Achse mit den Variablennamen? default: ja
-    if(var.names==T){
-      axis(side=2,at=c(ngr:(ngr-min(puebrig,ngr)+1)),labels=rownames(coefmatrix)[1:min(puebrig,ngr)],las=2)
-    }
-
-    # Punkte und Linien entsprechend der Koeffizientenwerte
-    for(j in 1:min(puebrig,ngr)){
-      points(coefmatrix[j,1],ngr+1-j,pch=pch,cex=cex,col=col)
-    }
-    for(j in 1:min(puebrig,ngr)){
-      lines(x=c(coefmatrix[j,2],coefmatrix[j,3]),y=c(ngr+1-j,ngr+1-j),lwd=lwd,col=col,lty=lty)
-      lines(x=c(coefmatrix[j,2],coefmatrix[j,2]),y=c(ngr+1-j+0.2,ngr+1-j-0.2),lwd=lwd,col=col,lty=lty)
-      lines(x=c(coefmatrix[j,3],coefmatrix[j,3]),y=c(ngr+1-j+0.2,ngr+1-j-0.2),lwd=lwd,col=col,lty=lty)
-    }
-
-    # Matrix und übrige Parameter anpassen
-    puebrig <- puebrig-min(puebrig,ngr)
-    coefmatrix <- coefmatrix[-(1:ngr),,drop=F]
-  }
-  par(mfrow=c(1,1))
-  return(NULL)
+  #coef <- coefmatrix[,1]
+  # generate points 
+  plotobject <- ggplot2::ggplot(data=coefmatrix, aes(y=coef,x=1:(length(coef)))) + ggplot2::geom_point(colour=col)+ggplot2::geom_hline(h=0)
+  
+  # generate errorbars (KIs)
+  plotobject <- plotobject + ggplot2::geom_errorbar(ymin=coefmatrix$lower,ymax=coefmatrix$upper,colour=col)
+  
+  # further graphic parameter
+  plotobject <- plotobject + ggplot2::xlim(0.5,nrow(coefmatrix)+0.5) + ggplot2::ggtitle(main) + ggplot2::ylim(low,up) + ggplot2::xlab(ylab) + ggplot2::ylab(xlab) 
+  
+  # var.names
+  plotobject <- plotobject + ggplot2::scale_x_discrete(limits=rownames(coefmatrix)[1:nrow(coefmatrix)])
+  
+  # invert x and y axis
+  plotobject <- plotobject + ggplot2::coord_flip()
+  
+  # plot
+  plotobject
+  
 }
+
+# #plot.rlassoLM <- function(x, ..., var.names=T, col="black", xlim=NULL, xlab="", ylab="", main="", sub="",
+# #                          pch=19, cex=1.3, lwd=2, lty=1){
+# plot.rlassoLM <- function(x,  var.names=T, ...){
+# 
+#     coefmatrix <- cbind(summary(x), confint(x))[,c(1,5,6)]
+#     rownames(coefmatrix) <- names(x$coefficients)
+#     #colnames(coefmatrixneu) <- c("estimate", "lower CI", "upper CI")
+#    coefmatrix <- coefmatrix[order(abs(coefmatrix[,1])),]
+# 
+#   p <- nrow(coefmatrix)
+# 
+#   # arranging of plots
+# 
+#   if(p<=20){
+#     par(mfrow=c(1,1))
+#     ngr <- p
+#   }else{
+#     if(p<=40){
+#       par(mfrow=c(1,2))
+#       ngr <- ceiling(p/2)
+#     }else{
+#       par(mfrow=c(2,2))
+#       ngr <- 10
+#     }
+#   }
+# 
+#   # Anzahl benötigter Fenster
+#   nWin <- ceiling(p/ngr)
+# 
+#   # noch nicht geplottete Parameter
+#   puebrig <- p
+# 
+#   # Festlegung des Wertebereichs
+#   if(is.null(xlim)){
+#     low <- min(coefmatrix)
+#     high <- max(coefmatrix)
+#   } else{
+#     low <- xlim[1]
+#     high <- xlim[2]
+#   }
+# 
+#   # Erzeugen der Grafikfenster
+#   for(i in 1:nWin){
+# 
+#     plot(1,xlim=c(low,high),ylim=c(0,ngr),yaxt="n",xlab=xlab,ylab=ylab,type="n",main=main,sub=sub)
+#     abline(v=0)
+# 
+#     # Achsenbeschriftung der y-Achse mit den Variablennamen? default: ja
+#     if(var.names==T){
+#       axis(side=2,at=c(ngr:(ngr-min(puebrig,ngr)+1)),labels=rownames(coefmatrix)[1:min(puebrig,ngr)],las=2)
+#     }
+# 
+#     # Punkte und Linien entsprechend der Koeffizientenwerte
+#     for(j in 1:min(puebrig,ngr)){
+#       points(coefmatrix[j,1],ngr+1-j,pch=pch,cex=cex,col=col)
+#     }
+#     for(j in 1:min(puebrig,ngr)){
+#       lines(x=c(coefmatrix[j,2],coefmatrix[j,3]),y=c(ngr+1-j,ngr+1-j),lwd=lwd,col=col,lty=lty)
+#       lines(x=c(coefmatrix[j,2],coefmatrix[j,2]),y=c(ngr+1-j+0.2,ngr+1-j-0.2),lwd=lwd,col=col,lty=lty)
+#       lines(x=c(coefmatrix[j,3],coefmatrix[j,3]),y=c(ngr+1-j+0.2,ngr+1-j-0.2),lwd=lwd,col=col,lty=lty)
+#     }
+# 
+#     # Matrix und übrige Parameter anpassen
+#     puebrig <- puebrig-min(puebrig,ngr)
+#     coefmatrix <- coefmatrix[-(1:ngr),,drop=F]
+#   }
+#   par(mfrow=c(1,1))
+#   return(NULL)
+# }

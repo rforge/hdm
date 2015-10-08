@@ -5,11 +5,7 @@
 #' The object which is returned is of the S3 class \code{rlogisticlasso}
 #'
 #' The function estimates the coefficients of a Logistic Lasso regression with
-#' data-driven penalty. The method of the data-driven penalty can be chosen
-#' ("X-dependent", "X-independent", "standard", "none"). The description of the
-#' methods is given in \code{\link{rlasso}}, with the minor difference that here
-#' also for the "X-dependent" and "X-independent" method data-driven loadings
-#' are employed (instead of an iteratively estimated variance factor). The
+#' data-driven penalty. The
 #' option \code{post=TRUE} conducts post-lasso estimation, i.e. a refit of the
 #' model with the selected variables.
 #' @param x regressors (matrix)
@@ -36,6 +32,31 @@
 #' @keywords logistic lasso lasso logistic regression
 #' @export
 #' @rdname rlogisticlasso
+#' @examples
+#'\dontrun{
+#' library(hdm)
+#' ## DGP
+#' set.seed(2)
+#' n <- 250
+#' p <- 100
+#' px <- 10
+#' X <- matrix(rnorm(n*p), ncol=p)
+#' beta <- c(rep(2,px), rep(0,p-px))
+#' intercept <- 1
+#' P <- exp(intercept + X %*% beta)/(1+exp(intercept + X %*% beta))
+#' y <- numeric(length=250)
+#' for(i in 1:n){
+#'   y[i] <- sample(x=c(1,0), size=1, prob=c(P[i],1-P[i]))
+#' }
+#' ## fit rlogisticlasso object
+#'  rlogisticlasso.reg <- rlogisticlasso(x=X, y=y)
+#'  ## methods
+#' summary(rlogisticlasso.reg, all=F)
+#' print(rlogisticlasso.reg)
+#' predict(rlogisticlasso.reg, type="response")
+#' X3 <- matrix(rnorm(n*p), ncol=p)
+#' predict(rlogisticlasso.reg, newdata=X3)
+#' }
 rlogisticlasso <- function(x, ...)
   UseMethod("rlogisticlasso") # definition generic function
 
@@ -129,7 +150,7 @@ rlogisticlasso.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TR
 #' @param formula an object of class "formula" (or one that can be coerced to
 #' that class): a symbolic description of the model to be fitted in the form
 #' \code{y~x}
-#' @param data an optional data frame, list or environment (or object coercible
+#' @param data an optional data frame, list or environment
 #' @export
 rlogisticlasso.formula <- function(formula, data, post = TRUE, intercept = TRUE,
                            normalize = TRUE, penalty = list(c = 1.1, gamma =  0.1/log(n)), control = list(threshold = NULL), ...) {
@@ -157,10 +178,10 @@ rlogisticlasso.formula <- function(formula, data, post = TRUE, intercept = TRUE,
 
 #' Methods for S3 object \code{rlogisticlasso}
 #'
-#' Objects of class \code{rlogisticlasso} are construced by \code{rlogisticlasso.formula} or \code{rlogistic.default}.
+#' Objects of class \code{rlogisticlasso} are constructed by \code{rlogisticlasso.formula} or \code{rlogisticlasso.default}.
 #' \code{print.rlogisticlasso} prints and displays some information about fitted \code{rlogisticlasso} objects.
-#' \code{summary.rlogisticlasso} summarizes information of a fitted \code{rlasso} object.
-#' \code{predict.rlogisticlasso} predicts values based on a lasso object.
+#' \code{summary.rlogisticlasso} summarizes information of a fitted \code{rlogisticlasso} object.
+#' \code{predict.rlogisticlasso} predicts values based on a \code{rlogisticlasso} object.
 #' \code{model.matrix.rlogisticlasso} constructs the model matrix of a lasso object.
 #' @param object an object of class \code{rlogisticlasso}
 #' @param x an object of class \code{rlogisticlasso}
@@ -310,7 +331,7 @@ summary.rlogisticlasso <- function(object, all=TRUE, digits = max(3L, getOption(
     coefm[,1] <- coefs
     colnames(coefm) <- "Estimate"
     rownames(coefm) <- names(coefs)
-    printCoefmat(coefm, digits = digits, na.print = "NA",  P.values=TRUE, has.Pvalue=TRUE)
+    printCoefmat(coefm, digits = digits, na.print = "NA") #,  P.values=TRUE, has.Pvalue=TRUE)
   }
   cat("\n")
   invisible(object)

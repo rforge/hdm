@@ -34,7 +34,7 @@ To Do:
 
 # Example
 ```{r echo=FALSE}
-library(hdm2)
+library(hdm)
 ```
 
 ## rlasso
