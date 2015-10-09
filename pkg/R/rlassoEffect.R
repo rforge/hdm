@@ -10,7 +10,7 @@
 #' the control variables. The final estimation is done by a regression of the
 #' outcome on the treatment effect and the union of the selected variables in
 #' the first two steps. The resulting estimator for \eqn{\alpha_0} is normal
-#' distributed which allows inference on the treatment effect. It presents a wrap function for \code{rlassoLMone} 
+#' distributed which allows inference on the treatment effect. It presents a wrap function for \code{rlassoEffectone} 
 #' which does inference for a single variable.
 #'
 #' @param x matrix of regressor variables serving as controls and potential
@@ -23,7 +23,7 @@
 #' @param I3 logical vector with the same length as the number of controls;
 #' indicates if variables (TRUE) should be included in any case.
 #' @param \dots parameters passed to the \code{\link{rlasso}} function.
-#' @return The function returns an object of class \code{rlassoLM} with the following entries: \item{coefficients}{vector with estimated
+#' @return The function returns an object of class \code{rlassoEffect} with the following entries: \item{coefficients}{vector with estimated
 #' values of the coefficients for each selected variable} \item{se}{standard error (vector)}
 #' \item{t}{t-statistic} \item{pval}{p-value} \item{samplesize}{sample size of the data set} \item{I}{union of the indices of variables selected in the lasso regressions}
 #' @references A. Belloni, V. Chernozhukov, C. Hansen (2014). Inference on
@@ -31,7 +31,7 @@
 #' Review of Economic Studies 81(2), 608--650.
 #' @keywords Estimation Inference Treatment effect High-dimensional controls
 #' @export
-#' @rdname rlassoLM
+#' @rdname rlassoEffect
 #' @examples
 #' library(hdm)
 #' ## DGP
@@ -42,18 +42,18 @@
 #' beta <- c(rep(2,px), rep(0,p-px))
 #' intercept <- 1
 #' y <- intercept + X %*% beta + rnorm(n)
-#' ## fit rlassoLM object with inference on three variables
-#' rlassoLM.reg <- rlassoLM(x=X, y=y, index=c(1,7,20))
+#' ## fit rlassoEffect object with inference on three variables
+#' rlassoEffect.reg <- rlassoEffect(x=X, y=y, index=c(1,7,20))
 #' ## methods
-#' summary(rlassoLM.reg)
-#' confint(rlassoLM.reg, level=0.9)
-rlassoLM <- function(x, ...)
-  UseMethod("rlassoLM") # definition generic function
+#' summary(rlassoEffect.reg)
+#' confint(rlassoEffect.reg, level=0.9)
+rlassoEffect <- function(x, ...)
+  UseMethod("rlassoEffect") # definition generic function
 
-#' @rdname rlassoLM
+#' @rdname rlassoEffect
 #' @export
 
-rlassoLM.default <- function(x, y, index=c(1:ncol(x)), I3=NULL, ...) {
+rlassoEffect.default <- function(x, y, index=c(1:ncol(x)), I3=NULL, ...) {
 
   if(is.logical(index)){
     k <- p1 <- sum(index)
@@ -100,7 +100,7 @@ rlassoLM.default <- function(x, y, index=c(1:ncol(x)), I3=NULL, ...) {
     d <- x[,index[i], drop=FALSE]
     Xt <- x[,-index[i], drop=FALSE]
 
-    lasso.regs[[i]] <- try(col <- rlassoLMone(Xt,y,d, I3=I3, ...))
+    lasso.regs[[i]] <- try(col <- rlassoEffectone(Xt,y,d, I3=I3, ...))
     if(class(lasso.regs[[i]]) == "try-error") {
       next
     }
@@ -115,23 +115,23 @@ rlassoLM.default <- function(x, y, index=c(1:ncol(x)), I3=NULL, ...) {
   }
   residuals <- list(e=reside, v=residv)
   res <- list(coefficients=coefficients, se=se, t=t, pval=pval, lasso.regs=lasso.regs, index=I, call=match.call(), samplesize=n, residuals=residuals)
-  class(res) <- "rlassoLM"
+  class(res) <- "rlassoEffect"
   return(res)
 }
 
-#' @rdname rlassoLM
+#' @rdname rlassoEffect
 #' @export
 
-rlassoLM.formula <- function(formula, data, index, I3=NULL, ...) {
+rlassoEffect.formula <- function(formula, data, index, I3=NULL, ...) {
   # TBD
 }
 
 
-#' @rdname rlassoLM
+#' @rdname rlassoEffect
 #' @param d variable for which inference is conducted (treatment variable)
 #' @export
 
-rlassoLMone <- function(x, y, d, I3=NULL,  ...) {
+rlassoEffectone <- function(x, y, d, I3=NULL,  ...) {
   d <- as.matrix(d, ncol=1)
   y <- as.matrix(y, ncol=1)
   kx <- dim(x)[2]
@@ -217,26 +217,26 @@ rlassoLMone <- function(x, y, d, I3=NULL,  ...) {
 # }
 
 
-################# Methods for rlassoLM
+################# Methods for rlassoEffect
 
-#' Methods for S3 object \code{rlassoLM}
+#' Methods for S3 object \code{rlassoEffect}
 #'
-#' Objects of class \code{rlassoLM} are constructed by \code{rlassoLM.formula} or \code{rlassoLM.default}.
-#' \code{print.rlassoLM} prints and displays some information about fitted \code{rlassoLM} objects.
-#' \code{summary.rlassoLM} summarizes information of a fitted \code{rlassoLM} object.
-#' \code{confint.rlassoLM} extracts the confidence intervals.
-#' \code{plot.rlassoLM} plots the estimates with confidence intervals.
+#' Objects of class \code{rlassoEffect} are constructed by \code{rlassoEffect.formula} or \code{rlassoEffect.default}.
+#' \code{print.rlassoEffect} prints and displays some information about fitted \code{rlassoEffect} objects.
+#' \code{summary.rlassoEffect} summarizes information of a fitted \code{rlassoEffect} object.
+#' \code{confint.rlassoEffect} extracts the confidence intervals.
+#' \code{plot.rlassoEffect} plots the estimates with confidence intervals.
 #'
-#' @param object An object of class \code{rlassoLM}
-#' @param x An object of class \code{rlassoLM}
+#' @param object An object of class \code{rlassoEffect}
+#' @param x An object of class \code{rlassoEffect}
 #' @param digits significant digits in printout
 #' @param ... arguments passed to the print function and other methods.
-#' @keywords methods rlassoLM
-#' @rdname methods.rlassoLM
-#' @aliases methods.rlassoLM print.rlassoLM summary.rlassoLM confint.rlassoLM plot.rlassoLM
+#' @keywords methods rlassoEffect
+#' @rdname methods.rlassoEffect
+#' @aliases methods.rlassoEffect print.rlassoEffect summary.rlassoEffect confint.rlassoEffect plot.rlassoEffect
 #' @export
 
-print.rlassoLM <- function(x, digits = max(3L, getOption("digits") - 3L), ...) {
+print.rlassoEffect <- function(x, digits = max(3L, getOption("digits") - 3L), ...) {
   cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), "\n\n", sep = "")
   if (length(coef(x))) {
       cat("Coefficients:\n")
@@ -249,10 +249,10 @@ print.rlassoLM <- function(x, digits = max(3L, getOption("digits") - 3L), ...) {
 }
 
 
-#' @rdname methods.rlassoLM
+#' @rdname methods.rlassoEffect
 #' @export
 
-summary.rlassoLM <- function(object, digits = max(3L, getOption("digits") - 3L), ...) {
+summary.rlassoEffect <- function(object, digits = max(3L, getOption("digits") - 3L), ...) {
   if (length(coef(object))) {
     k <- length(object$coefficients)
     table <- matrix(NA,ncol=4,nrow=k)
@@ -272,13 +272,13 @@ summary.rlassoLM <- function(object, digits = max(3L, getOption("digits") - 3L),
   invisible(table)
 }
 
-#' @rdname methods.rlassoLM
+#' @rdname methods.rlassoEffect
 #' @param parm a specification of which parameters are to be given confidence intervals, either a vector of numbers or a vector of names. If missing, all parameters are considered.
 #' @param level	the confidence level required
 #' @param joint logical, if \code{TRUE} joint confidence intervals are clalculated.
 #' @export
 
-confint.rlassoLM <- function(object, parm, level=0.95, joint=FALSE, ...) {
+confint.rlassoEffect <- function(object, parm, level=0.95, joint=FALSE, ...) {
   B <- 500 # number of bootstrap repitions
   n <- object$samplesize
   k <- p1 <- length(object$coefficient)
@@ -323,14 +323,14 @@ confint.rlassoLM <- function(object, parm, level=0.95, joint=FALSE, ...) {
   return(ci)
 }
 
-#' @rdname methods.rlassoLM
+#' @rdname methods.rlassoEffect
 #' @export
 #' @param main an overall title for the plot
 #' @param xlab a title for the x axis
 #' @param ylab a title for the y axis
 #' @param xlim vector of length two giving lower and upper bound of x axis
 #' @param col color of lines of the graph
-plot.rlassoLM <- function(x, main="", xlab="coef", ylab="", xlim=NULL, col="black",...){
+plot.rlassoEffect <- function(x, main="", xlab="coef", ylab="", xlim=NULL, col="black",...){
   
   # generate ordered KI-matrix
   coefmatrix <- cbind(summary(x), confint(x))[, c(1, 5, 6)]
@@ -368,9 +368,9 @@ plot.rlassoLM <- function(x, main="", xlab="coef", ylab="", xlim=NULL, col="blac
   
 }
 
-# #plot.rlassoLM <- function(x, ..., var.names=T, col="black", xlim=NULL, xlab="", ylab="", main="", sub="",
+# #plot.rlassoEffect <- function(x, ..., var.names=T, col="black", xlim=NULL, xlab="", ylab="", main="", sub="",
 # #                          pch=19, cex=1.3, lwd=2, lty=1){
-# plot.rlassoLM <- function(x,  var.names=T, ...){
+# plot.rlassoEffect <- function(x,  var.names=T, ...){
 # 
 #     coefmatrix <- cbind(summary(x), confint(x))[,c(1,5,6)]
 #     rownames(coefmatrix) <- names(x$coefficients)

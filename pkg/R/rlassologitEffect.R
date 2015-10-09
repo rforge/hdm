@@ -108,7 +108,7 @@ rlassologitEffectone <- function(x, y, d, I3=NULL) {
   # Step 1
   la1 <- 1.1/2*sqrt(n)*qnorm(1-0.05/(max(n,(p+1)*log(n))))
   dx <- cbind(d,x)
-  l1 <- rlogisticlasso(dx, y, post=TRUE, normalize=TRUE, intercept=TRUE, penalty=list(lambda.start=la1))
+  l1 <- rlassologit(dx, y, post=TRUE, normalize=TRUE, intercept=TRUE, penalty=list(lambda.start=la1))
   t <- predict(l1, type="link", newdata=dx)
   sigma2 <- exp(t)/(1+exp(t))
   w <-  exp(t)/(1+exp(t))^2
@@ -132,7 +132,7 @@ rlassologitEffectone <- function(x, y, d, I3=NULL) {
   xselect <- x[,I]
   p3 <- dim(xselect)[2]
   la3 <- 1.1/2*sqrt(n)*qnorm(1-0.05/(max(n,(p3+1)*log(n))))
-  l3 <-  rlogisticlasso(cbind(d,xselect), y, post=TRUE, normalize=TRUE, intercept=TRUE, penalty=list(lambda.start=la3))
+  l3 <-  rlassologit(cbind(d,xselect), y, post=TRUE, normalize=TRUE, intercept=TRUE, penalty=list(lambda.start=la3))
   alpha <- l3$coefficients[1]
   t3 <- predict(l3, type="link", newdata=cbind(d,xselect))
   G3 <- exp(t3)/(1+exp(t3))

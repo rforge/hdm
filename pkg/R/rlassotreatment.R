@@ -79,7 +79,7 @@ rlassoLATE <- function(x,d,y,z, bootstrap=NULL, nRep=500, post=TRUE, intercept=T
   lambda <- 2.2*sqrt(n)*qnorm(1-(1/log(n))/(2*(2*p)))
   penalty <- list(lambda.start = lambda, c = 1.1, gamma = 0.1)
   if (sum(d-z)!=0) {
-    b_d_z1xL <- rlogisticlasso(x[indz1,], d[indz1],  post=post, intercept=intercept, normalize=normalize, penalty=penalty)
+    b_d_z1xL <- rlassologit(x[indz1,], d[indz1],  post=post, intercept=intercept, normalize=normalize, penalty=penalty)
     md_z1x <- predict(b_d_z1xL, newdata=x)
   } else {
     md_z1x <- rep(1,n)
@@ -90,8 +90,8 @@ rlassoLATE <- function(x,d,y,z, bootstrap=NULL, nRep=500, post=TRUE, intercept=T
   # E[Z|X] = mz_x
   lambdaP <- 2.2*sqrt(n)*qnorm(1-(1/log(n))/(2*p))
   penalty <- list(lambda.start = lambdaP, c = 1.1, gamma = 0.1)
-  b_z_xL <- rlogisticlasso(x, z, post=post, intercept=intercept, normalize=normalize, penalty=penalty)
-  #b_z_xL <- rlogisticlasso(x, z, post=post, intercept=intercept, normalize=normalize)
+  b_z_xL <- rlassologit(x, z, post=post, intercept=intercept, normalize=normalize, penalty=penalty)
+  #b_z_xL <- rlassologit(x, z, post=post, intercept=intercept, normalize=normalize)
   mz_x <- predict(b_z_xL, newdata=x)
   mz_x <- mz_x*(mz_x > 1e-12 & mz_x < 1-1e-12) + (1-1e-12)*(mz_x > 1-1e-12) + 1e-12*(mz_x < 1e-12)
 
@@ -166,7 +166,7 @@ rlassoLATET <- function(x, d, y, z, bootstrap=NULL, nRep=500, post=TRUE, interce
   # E[Z|X] = mz_x
   lambdaP <- 2.2*sqrt(n)*qnorm(1-(1/log(n))/(2*p))
   penalty <- list(lambda.start = lambdaP, c = 1.1, gamma = 0.1)
-  b_z_xL <- rlogisticlasso(x, z, post=post, intercept=intercept, normalize=normalize, penalty=penalty)
+  b_z_xL <- rlassologit(x, z, post=post, intercept=intercept, normalize=normalize, penalty=penalty)
   mz_x <- predict(b_z_xL, newdata=x)
   mz_x <- mz_x*(mz_x > 1e-12 & mz_x < 1-1e-12) + (1-1e-12)*(mz_x > 1-1e-12) + 1e-12*(mz_x < 1e-12)
 

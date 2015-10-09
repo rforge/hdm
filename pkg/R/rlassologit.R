@@ -1,8 +1,8 @@
-#' rlogisticlasso: Function for logistic Lasso estimation
+#' rlassologit: Function for logistic Lasso estimation
 #'
 #' The function estimates the coefficients of a logistic Lasso regression with
 #' data-driven penalty. The method of the data-driven penalty can be chosen.
-#' The object which is returned is of the S3 class \code{rlogisticlasso}
+#' The object which is returned is of the S3 class \code{rlassologit}
 #'
 #' The function estimates the coefficients of a Logistic Lasso regression with
 #' data-driven penalty. The
@@ -19,8 +19,8 @@
 #' \code{threshold} is applied to the final estimated lasso
 #' coefficients. Absolute values below the threshold are set to zero.
 #' @param ... further parameters passed to glmnet
-#' @return \code{rlogisticlasso} returns an object of class
-#' \code{rlogisticlasso} An object of class \code{rlogisticlasso} is a list
+#' @return \code{rlassologit} returns an object of class
+#' \code{rlassologit} An object of class \code{rlassologit} is a list
 #' containing at least the following components: \item{coefficients}{parameter
 #' estimates (without intercept)} \item{a0}{value of intercept} \item{index}{index of selected variables (logicals)}
 #' \item{lambda0}{penalty term}
@@ -31,7 +31,7 @@
 #' @references TBD
 #' @keywords logistic lasso lasso logistic regression
 #' @export
-#' @rdname rlogisticlasso
+#' @rdname rlassologit
 #' @examples
 #'\dontrun{
 #' library(hdm)
@@ -48,23 +48,23 @@
 #' for(i in 1:n){
 #'   y[i] <- sample(x=c(1,0), size=1, prob=c(P[i],1-P[i]))
 #' }
-#' ## fit rlogisticlasso object
-#'  rlogisticlasso.reg <- rlogisticlasso(x=X, y=y)
+#' ## fit rlassologit object
+#'  rlassologit.reg <- rlassologit(x=X, y=y)
 #'  ## methods
-#' summary(rlogisticlasso.reg, all=F)
-#' print(rlogisticlasso.reg)
-#' predict(rlogisticlasso.reg, type="response")
+#' summary(rlassologit.reg, all=F)
+#' print(rlassologit.reg)
+#' predict(rlassologit.reg, type="response")
 #' X3 <- matrix(rnorm(n*p), ncol=p)
-#' predict(rlogisticlasso.reg, newdata=X3)
+#' predict(rlassologit.reg, newdata=X3)
 #' }
-rlogisticlasso <- function(x, ...)
-  UseMethod("rlogisticlasso") # definition generic function
+rlassologit <- function(x, ...)
+  UseMethod("rlassologit") # definition generic function
 
 
-#' @rdname rlogisticlasso
+#' @rdname rlassologit
 #' @export
 
-rlogisticlasso.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,  penalty = list(lambda= NULL, c = 1.1, gamma = 0.1/log(n)),
+rlassologit.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,  penalty = list(lambda= NULL, c = 1.1, gamma = 0.1/log(n)),
                            control = list(threshold = NULL),...) {
   n <- dim(x)[1]
   p <- dim(x)[2]
@@ -100,7 +100,7 @@ rlogisticlasso.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TR
       print("No variables selected!")
       est <- list(coefficients=rep(0,p), a0=mean(y), index=rep(FALSE,p), s0=s0, lambda=lambda, residuals=y - mean(y), sigma=var(y), call=match.call(),
                   options=list(post=post, intercept=intercept, normalize=normalize, control=control))
-      class(est) <- c("rlogisticlasso")
+      class(est) <- c("rlassologit")
       return(est)
     }
 
@@ -142,17 +142,17 @@ rlogisticlasso.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TR
     ind1 <- as.vector(ind1)
     names(coefTemp) <- names(ind1) <- colnames(x)
     est <- list(coefficients=coefTemp, a0=a0, index=ind1, lambda=lambda, residuals=e1, sigma=e1, call=match.call(), options=list(post=post, intercept=intercept, normalize=normalize, control=control))
-    class(est) <- c("rlogisticlasso")
+    class(est) <- c("rlassologit")
     return(est)
 }
 
-#' @rdname rlogisticlasso
+#' @rdname rlassologit
 #' @param formula an object of class "formula" (or one that can be coerced to
 #' that class): a symbolic description of the model to be fitted in the form
 #' \code{y~x}
 #' @param data an optional data frame, list or environment
 #' @export
-rlogisticlasso.formula <- function(formula, data, post = TRUE, intercept = TRUE,
+rlassologit.formula <- function(formula, data, post = TRUE, intercept = TRUE,
                            normalize = TRUE, penalty = list(c = 1.1, gamma =  0.1/log(n)), control = list(threshold = NULL), ...) {
   cl <- match.call()
   mf <- match.call(expand.dots = FALSE)
@@ -166,7 +166,7 @@ rlogisticlasso.formula <- function(formula, data, post = TRUE, intercept = TRUE,
   y <- model.response(mf, "numeric")
   x <- model.matrix(mt, mf)
 
-  est <- rlogisticlasso(x, y, post = post, intercept = intercept, normalize = normalize, penalty=penalty,
+  est <- rlassologit(x, y, post = post, intercept = intercept, normalize = normalize, penalty=penalty,
                 control = control)
   est$call <- cl
   return(est)
@@ -176,26 +176,26 @@ rlogisticlasso.formula <- function(formula, data, post = TRUE, intercept = TRUE,
 
 ################# Methods for logistic Lasso
 
-#' Methods for S3 object \code{rlogisticlasso}
+#' Methods for S3 object \code{rlassologit}
 #'
-#' Objects of class \code{rlogisticlasso} are constructed by \code{rlogisticlasso.formula} or \code{rlogisticlasso.default}.
-#' \code{print.rlogisticlasso} prints and displays some information about fitted \code{rlogisticlasso} objects.
-#' \code{summary.rlogisticlasso} summarizes information of a fitted \code{rlogisticlasso} object.
-#' \code{predict.rlogisticlasso} predicts values based on a \code{rlogisticlasso} object.
-#' \code{model.matrix.rlogisticlasso} constructs the model matrix of a lasso object.
-#' @param object an object of class \code{rlogisticlasso}
-#' @param x an object of class \code{rlogisticlasso}
+#' Objects of class \code{rlassologit} are constructed by \code{rlassologit.formula} or \code{rlassologit.default}.
+#' \code{print.rlassologit} prints and displays some information about fitted \code{rlassologit} objects.
+#' \code{summary.rlassologit} summarizes information of a fitted \code{rlassologit} object.
+#' \code{predict.rlassologit} predicts values based on a \code{rlassologit} object.
+#' \code{model.matrix.rlassologit} constructs the model matrix of a lasso object.
+#' @param object an object of class \code{rlassologit}
+#' @param x an object of class \code{rlassologit}
 #' @param all logical, indicates if coefficients of all variables (TRUE) should be displayed or only the non-zero ones (FALSE)
 #' @param digits significant digits in printout
 #' @param type the type of prediction required. The default ("response) is on the scale of the response variable; the alternative "link" is on the scale of the linear predictors.
 #' @param newdata new data set for prediction
 #' @param ... arguments passed to the print function and other methods
-#' @keywords methods rlogisticlasso
-#' @rdname methods.rlogisticlasso
-#' @aliases methods.rlogisticlasso print.rlogisticlasso summary.rlogisticlasso predict.rlogisticlasso model.matrix.rlogisticlasso
+#' @keywords methods rlassologit
+#' @rdname methods.rlassologit
+#' @aliases methods.rlassologit print.rlassologit summary.rlassologit predict.rlassologit model.matrix.rlassologit
 #' @export
 
-predict.rlogisticlasso <- function (object, newdata=NULL, type="response", ...) {
+predict.rlassologit <- function (object, newdata=NULL, type="response", ...) {
   if (missing(newdata) || is.null(newdata)) {
     X <- model.matrix(object)
   } else {
@@ -225,7 +225,7 @@ predict.rlogisticlasso <- function (object, newdata=NULL, type="response", ...) 
   return(yhat)
 }
 
-# predict.rlogisticlasso <- function (object, newdata=NULL, ...) {
+# predict.rlassologit <- function (object, newdata=NULL, ...) {
 #   if (missing(newdata) || is.null(newdata)) {
 #     X <- model.matrix(object)
 #   }
@@ -250,10 +250,10 @@ predict.rlogisticlasso <- function (object, newdata=NULL, type="response", ...) 
 # }
 
 
-#' @rdname methods.rlogisticlasso
+#' @rdname methods.rlassologit
 #' @export
 
-model.matrix.rlogisticlasso <- function(object, ...) {
+model.matrix.rlassologit <- function(object, ...) {
 
   # falls formula
   if (is.call(object$call[[2]])) {
@@ -276,10 +276,10 @@ model.matrix.rlogisticlasso <- function(object, ...) {
 }
 
 
-#' @rdname methods.rlogisticlasso
+#' @rdname methods.rlassologit
 #' @export
 
-print.rlogisticlasso <- function(x, all=TRUE ,digits = max(3L, getOption("digits") - 3L), ...) {
+print.rlassologit <- function(x, all=TRUE ,digits = max(3L, getOption("digits") - 3L), ...) {
   cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), "\n\n", sep = "")
   if (length(coef(x))) {
     coeffs <- coef(x)
@@ -302,10 +302,10 @@ print.rlogisticlasso <- function(x, all=TRUE ,digits = max(3L, getOption("digits
   invisible(x)
 }
 
-#' @rdname methods.rlogisticlasso
+#' @rdname methods.rlassologit
 #' @export
 
-summary.rlogisticlasso <- function(object, all=TRUE, digits = max(3L, getOption("digits") - 3L), ...) {
+summary.rlassologit <- function(object, all=TRUE, digits = max(3L, getOption("digits") - 3L), ...) {
   cat("\nCall:\n", paste(deparse(object$call), sep = "\n", collapse = "\n"), "\n", sep = "")
   cat("\nPost-Lasso Estimation: ",  paste(deparse(object$options$post), sep = "\n", collapse = "\n"), "\n", sep = " ")
   coefs <- object$coefficients
