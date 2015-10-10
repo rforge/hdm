@@ -10,6 +10,7 @@
 #' @param d endogenous variables
 #' @param x exogenous variables
 #' @param z instruments
+#' @param intercept logical, if intercept is included
 #' @return The function returns a list with the following elements \item{coefficients}{coefficients}
 #' \item{vcov}{variance-covariance matrix} \item{residuals}{outcome minus predicted values}
 #' @keywords Instrumental Variables
@@ -19,8 +20,10 @@
 #' @export
 
 
-tsls <- function(y, d, x, z) {
+tsls <- function(y, d, x, z, intercept=TRUE) {
   n <- length(y)
+  
+  if (intercept==TRUE) x <- cbind(1,x)
   a1 <- dim(d)[2]
   a2 <- dim(x)[2]
   if (is.null(x)) {
@@ -45,5 +48,5 @@ tsls <- function(y, d, x, z) {
   b2 <- solve(t(Dhat) %*% X) %*% (t(Dhat) %*% y)
   e <- y - X %*% b
   VC1 <- as.numeric((t(e) %*% e/(n - k))) * M
-  return(list(coefficients = b, vcov = VC1, residuals = e))
+  return(list(coefficients = b, vcov = VC1, se=sqrt(diag(VC1)), residuals = e, call=match.call(), samplesize=n))
 }

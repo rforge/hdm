@@ -291,7 +291,8 @@ confint.rlassoEffect <- function(object, parm, level=0.95, joint=FALSE, ...) {
   if (!joint) {
   a <- (1 - level)/2
   a <- c(a, 1 - a)
-  fac <- qt(a, n-k)
+  #fac <- qt(a, n-k)
+  fac <- qnorm(a)
   pct <- format.perc(a, 3)
   ci <- array(NA, dim = c(length(parm), 2L), dimnames = list(parm,
                                                              pct))
@@ -347,7 +348,7 @@ plot.rlassoEffect <- function(x, main="", xlab="coef", ylab="", xlim=NULL, col="
     low <- xlim[1]
     up <- xlim[2]
   }
-  #coef <- coefmatrix[,1]
+  coef <- coefmatrix[,1]
   # generate points 
   plotobject <- ggplot2::ggplot(data=coefmatrix, aes(y=coef,x=1:(length(coef)))) + ggplot2::geom_point(colour=col)+ggplot2::geom_hline(h=0)
   

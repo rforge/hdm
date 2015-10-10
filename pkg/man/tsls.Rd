@@ -4,7 +4,7 @@
 \alias{tsls}
 \title{Two-Stage Least Squares Estimation (TSLS)}
 \usage{
-tsls(y, d, x, z)
+tsls(y, d, x, z, intercept = TRUE)
 }
 \arguments{
 \item{y}{outcome variable}
@@ -14,6 +14,8 @@ tsls(y, d, x, z)
 \item{x}{exogenous variables}
 
 \item{z}{instruments}
+
+\item{intercept}{logical, if intercept is included}
 }
 \value{
 The function returns a list with the following elements \item{coefficients}{coefficients}

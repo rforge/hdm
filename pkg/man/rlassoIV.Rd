@@ -2,52 +2,55 @@
 % Please edit documentation in R/rlassoIV.R
 \name{rlassoIV}
 \alias{rlassoIV}
-\title{Instrumental Variable Estimation with Lasso}
+\alias{rlassoIVmult}
+\title{Post-Selection and Post-Regularization Inference in Linear Models with Many
+Controls and Instruments}
 \usage{
-rlassoIV(x, d, y, z, post = TRUE, ...)
+rlassoIV(x, d, y, z, select.Z = TRUE, select.X = TRUE, ...)
+
+rlassoIVmult(x, z, y, d, ...)
 }
 \arguments{
-\item{x}{exogenous variables in the structural equation (matrix)}
+\item{x}{matrix of exogenous variables}
 
-\item{d}{endogenous variables in the structural equation (vector or matrix)}
+\item{d}{endogenous variable}
 
-\item{y}{outcome or dependent variable in the structural equation (vector or matrix)}
+\item{y}{outcome / dependent variable (vector or matrix)}
 
-\item{z}{set of potential instruments for the endogenous variables.
-Exogenous variables serve as their own instruments.}
+\item{z}{matrix of instrumental variables}
 
-\item{post}{logical. If \code{TRUE}, post-lasso estimation is conducted.}
+\item{select.Z}{logical, indicating selection on the instruments}
+
+\item{select.X}{logical, indicating selection on the exogenous variables}
 
 \item{\dots}{arguments passed to the function \code{rlasso}}
 }
 \value{
 An object of class \code{rlassoIV} containing at least the following
-components: \item{coefficients}{estimated parameter vector}
-\item{vcov}{variance-covariance matrix} \item{residuals}{
-residuals} \item{samplesize}{sample size}
+components: \item{coefficients}{estimated parameter value}
+\item{se}{variance-covariance matrix}
 }
 \description{
-This function selects the instrumental variables in the first stage by
-Lasso. First stage predictions are then used in the second stage as optimal
-instruments to estimate the parameter vector. The function returns an element of class \code{rlassoIV}
+The function estimates a treatment effect in a setting with very many
+controls and very many instruments (even larger than the sample size).
 }
 \details{
-The implementation follows the procedure described in Belloni et al. (2012).
-option \code{post=TRUE} conducts post-lasso estimation, i.e. a refit of the
-model with the selected variables, to estimate the optimal instruments. The
-parameter vector of the structural equation is then fitted by two-stage
-least square (tsls) estimation. If variables of the exogenous variables in
-\code{x} should be used as instruments, they have to be added to the
-instrument set \code{z} explicitly.
+The implementation follows the procedure described in Chernozhukov et al.
+(2015) and is built on "triple selection" to achieve an orthogonal moment
+function. The function returns an object of S3 class \code{rlassoIV}.
+Moreover, it is wrap function for the case that selection should be done only with the instruments Z (\code{rlassoIVselectZ}) or with
+the control variables X (\code{rlassoIVselectX}) or without selection (\code{tsls}).
 }
 \references{
-D. Belloni, D. Chen, V. Chernozhukov and C. Hansen (2012).
-Sparse models and methods for optimal instruments with an application to
-eminent domain. \emph{Econometrica} 80 (6), 2369--2429.
+V. Chernozhukov, C. Hansen, M. Spindler (2015). Post-selection
+and post-regularization inference in linear models with many controls and
+instruments. American Economic Review: Paper & Proceedings 105(5), 1--7.
 }
-\keyword{Hig-dimensional}
 \keyword{Instrumental}
 \keyword{Lasso}
-\keyword{Variables}
-\keyword{setting}
+\keyword{Many}
+\keyword{Variable}
+\keyword{and}
+\keyword{controls}
+\keyword{instruments}
 

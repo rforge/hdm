@@ -15,20 +15,20 @@
 \method{confint}{rlassoIV}(object, parm, level = 0.95, ...)
 }
 \arguments{
-\item{x}{an object of class \code{rlassoIV}}
+\item{x}{An object of class \code{rlassoIV}}
 
 \item{digits}{significant digits in printout}
 
 \item{...}{arguments passed to the print function and other methods}
 
-\item{object}{an object of class \code{rlassoIV}}
+\item{object}{An object of class \code{rlassoIV}}
 
 \item{parm}{a specification of which parameters are to be given confidence intervals, either a vector of numbers or a vector of names. If missing, all parameters are considered.}
 
 \item{level}{the confidence level required.}
 }
 \description{
-Objects of class \code{rlassoIV} are constructed by \code{rlassoIV.formula} or \code{rlassoIV.default}.
+Objects of class \code{rlassoIV} are constructed by \code{rlassoIV}.
 \code{print.rlassoIV} prints and displays some information about fitted \code{rlassoIV} objects.
 \code{summary.rlassoIV} summarizes information of a fitted \code{rlassoIV} object.
 \code{confint.rlassoIV} extracts the confidence intervals.
