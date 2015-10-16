@@ -350,8 +350,7 @@ plot.rlassoEffect <- function(x, main="", xlab="coef", ylab="", xlim=NULL, col="
   }
   coef <- coefmatrix[,1]
   # generate points 
-  plotobject <- ggplot2::ggplot(data=coefmatrix, aes(y=coef,x=1:(length(coef)))) + ggplot2::geom_point(colour=col)+ggplot2::geom_hline(h=0)
-  
+  plotobject <- ggplot2::ggplot(data=coefmatrix, ggplot2::aes(y=coef,x=1:(length(coef)))) + ggplot2::geom_point(colour=col)+ggplot2::geom_hline(h=0)
   # generate errorbars (KIs)
   plotobject <- plotobject + ggplot2::geom_errorbar(ymin=coefmatrix$lower,ymax=coefmatrix$upper,colour=col)
   
@@ -363,8 +362,7 @@ plot.rlassoEffect <- function(x, main="", xlab="coef", ylab="", xlim=NULL, col="
   
   # invert x and y axis
   plotobject <- plotobject + ggplot2::coord_flip()
-  
-  # plot
+
   plotobject
   
 }

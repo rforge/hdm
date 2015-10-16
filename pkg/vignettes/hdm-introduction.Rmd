@@ -9,7 +9,19 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+
 # Overview
+
+function | methods                              | interface                     
+---------|--------------------------------------|-------------------------------
+rlasso   | summary, print, predict, model.matrix| default and formula interface 
+rlogisticlasso |  summary, print, predict, model.matrix | default and forumla interface 
+rlassoEffect | print, summary, confint, plot | default interface 
+rlassologitEffect | print, summary, confint| default  interface 
+rlassoIVselectX | print, summary, confint | default interface
+rlassoIVselectZ | print, summary, confint | default interface
+rlassoIV | print, summary, confint | default interface
+rlassoATE, rlassoLATE, rlassoATET, rlassoLATET | print, summary, confint |default
 
 # Example
 ```{r echo=FALSE}
@@ -61,23 +73,23 @@ ystar <-  X %*% beta + rnorm(n)
 y <- as.integer(ystar >=0)
 ```
 
-rlogisticlasso
+rrlassologit
 
 ```{r}
 l3 <- rlassologit(X,y, intercept=TRUE, normalize=TRUE, post=TRUE ) # default interface
 l4 <- rlassologit(y~X) # formula interface
 ```
 
-methods for rlogisticlasso
+methods for rlassologit
 
 ```{r}
 print(l3)
-#summary(l3, all=FALSE) # show only coefficient which are not zero ########################################
+summary(l3, all=FALSE)
 head(predict(l3))
 head(predict(l3, newdata=Xnew))
 ```
 
-## rlassoLM
+## rlassoEffect
 
 Generating data:
 ```{r}
@@ -94,18 +106,18 @@ y <- X %*% beta + rnorm(n)
 rlassoEffect
 
 ```{r}
-rLM <- rlassoEffect(X,y, index=c(1,2,9)) # I: selection of variables for inference
+rEffect <- rlassoEffect(X,y, index=c(1,2,9)) # I: selection of variables for inference
 ```
 
 methods
 ```{r}
-print(rLM)
-summary(rLM)
-confint(rLM)
+print(rEffect)
+summary(rEffect)
+confint(rEffect)
 ```
 
 ```{r fig.width=5}
-#plot(rLM, main="Estimated coefficients for selected variables")
+plot(rEffect, main="Effects of Selected Variables")
 ```
 
 

@@ -11,14 +11,16 @@ vignette: >
 
 # Overview
 
-function | methods                              | comment                       | TBD
----------|--------------------------------------|-------------------------------|-------------------------------
-rlasso   | summary, print, predict, model.matrix| default and formula interface |
-rlogisticlasso |  summary, print, predict, model.matrix | default and forumla interface | rename: rlassologit
-rlassoLM | print, summary, confint, plot | default and formula (TBD) interface | rename, polish plot, joint confint
-rlassoIV | print, summary, confint | default interface | rename, formula interface
-rlassoMany | print, summary, confint | default interface | rename, formula interface |
-rlassoATE, rlassoLATE, rlassoATET, rlassoLATET | print, summary, confint | | |
+function | methods                              | interface                     
+---------|--------------------------------------|-------------------------------
+rlasso   | summary, print, predict, model.matrix| default and formula interface 
+rlogisticlasso |  summary, print, predict, model.matrix | default and forumla interface 
+rlassoEffect | print, summary, confint, plot | default interface 
+rlassologitEffect | print, summary, confint| default  interface 
+rlassoIVselectX | print, summary, confint | default interface
+rlassoIVselectZ | print, summary, confint | default interface
+rlassoIV | print, summary, confint | default interface
+rlassoATE, rlassoLATE, rlassoATET, rlassoLATET | print, summary, confint |default
 
 To Do:
 

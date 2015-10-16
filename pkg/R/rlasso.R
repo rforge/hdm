@@ -1,4 +1,4 @@
-globalVariables(c("post", "intercept", "normalize", "penalty", "control", "error", "n", "select.Z" , "select.X"))
+globalVariables(c("post", "intercept", "normalize", "penalty", "control", "error", "n", "select.Z" , "select.X", "aes"))
 
 #' rlasso: Function for Lasso estimation under homoskedastic and heteroskeadstic non-Gaussian
 #' disturbances
