@@ -1,5 +1,6 @@
 # DGP
 set.seed(123456)
+library(AER)
 #library(hdm2)
 # data <- DGP.HCHIV()
 #
@@ -29,7 +30,7 @@ x <- matrix(rnorm(2*n), ncol=2) #x <- rep(1,n)
 y <- x%*%c(1,1) + beta*d +  eps
 
 ###
-ts <- hdm2::tsls(y,d,cbind(1,x),z)
+ts <- hdm::tsls(y,d,cbind(1,x),z)
 iv <- ivreg(y~d+x|z+x)
 #
 
@@ -84,3 +85,31 @@ output1a <- rlassoATE(x,d,y, bootstrap="wild", nRep=100)
 output2a <- rlassoATET(x,d,y, bootstrap="wild", nRep=100)
 output3a <- rlassoLATE(x,d,y,z, bootstrap="wild", nRep=100)
 output4a <- rlassoLATET(x,d,y,z, bootstrap="wild", nRep=100)
+
+
+
+######################################################################################
+library(R.matlab)
+data <- readMat("C:\\Users\\Martin\\Dropbox\\HDM\\Matlab Code\\ProgEvalExample\\ProgEvalspec2.mat")
+y <- data$y
+d <- data$d
+z <- data$z
+x <- data$x
+output1 <- rlassoLATE(x,d,y,z, bootstrap="wild", nRep=100)
+xs <- cbind(1,x)
+output2 <- rlassoLATE(xs,d,y,z, bootstrap="wild", nRep=100)
+data <- readMat("C:\\Users\\Martin\\Dropbox\\HDM\\Matlab Code\\ProgEvalExample\\ProgEval2.mat")
+y <- data$y
+d <- data$d
+z <- data$z
+x <- data$x
+
+
+data <- readMat("C:\\Users\\Martin\\Dropbox\\HDM\\Matlab Code\\ProgEvalExample\\ProgEvalspec2_intermediateresults.mat")
+data1 <- readMat("C:\\Users\\Martin\\Dropbox\\HDM\\Matlab Code\\ProgEvalExample\\ProgEvalspec2_intermediateresults_x.mat")
+
+y <- data$y
+d <- data$d
+z <- data$z
+x <- data1$x
+output1 <- rlassoLATE(x,d,y,z, bootstrap="none")

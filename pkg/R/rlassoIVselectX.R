@@ -1,16 +1,13 @@
-# TBD How does selection on X work??
-
-#' Instrumental Variable Estimation with Lasso
+#' Instrumental Variable Estimation with Selection on the exogenous Variables by Lasso   
 #'
-#' This function selects the instrumental variables in the first stage by
-#' Lasso. First stage predictions are then used in the second stage as optimal
-#' instruments to estimate the parameter vector. The function returns an element of class \code{rlassoIVselectX}
 #'
-#' The implementation follows the procedure described in Belloni et al. (2012).
-#' option \code{post=TRUE} conducts post-lasso estimation, i.e. a refit of the
-#' model with the selected variables, to estimate the optimal instruments. The
-#' parameter vector of the structural equation is then fitted by two-stage
-#' least square (tsls) estimation. If variables of the exogenous variables in
+#' This function estimates the coefficient of an endogenous variable by employing Instrument Variables in a setting where the exogenous variables are high-dimensional and hence
+#' selection on the exogenous variables is required.
+#' The function returns an element of class \code{rlassoIVselectX}
+#'
+#' The implementation is a special casof of Chernozhukov et al. (2015).
+#' The option \code{post=TRUE} conducts post-lasso estimation for the Lasso estimations, i.e. a refit of the
+#' model with the selected variables. If variables of the exogenous variables in
 #' \code{x} should be used as instruments, they have to be added to the
 #' instrument set \code{z} explicitly.
 #'
@@ -18,54 +15,40 @@
 #' @param d endogenous variables in the structural equation (vector or matrix)
 #' @param y outcome or dependent variable in the structural equation (vector or matrix)
 #' @param z set of potential instruments for the endogenous variables.
-#' Exogenous variables serve as their own instruments.
 #' @param post logical. If \code{TRUE}, post-lasso estimation is conducted.
 #' @param \dots arguments passed to the function \code{rlasso}
 #' @return An object of class \code{rlassoIVselectX} containing at least the following
 #' components: \item{coefficients}{estimated parameter vector}
 #' \item{vcov}{variance-covariance matrix} \item{residuals}{
 #' residuals} \item{samplesize}{sample size}
-#' @references D. Belloni, D. Chen, V. Chernozhukov and C. Hansen (2012).
-#' Sparse models and methods for optimal instruments with an application to
-#' eminent domain. \emph{Econometrica} 80 (6), 2369--2429.
+#' @references Chernozhukov, V., Hansen, C. and M. Spindler (2015). Post-Selection and Post-Regularization Inference in Linear
+#' Models with Many Controls and Instruments
+#'\emph{American Economic Review, Papers and Proceedings} 105(5), 486–490.
 #' @keywords Instrumental Variables Lasso Hig-dimensional setting
 #' @export
 #' @rdname rlassoIVselectX
 rlassoIVselectX <- function(x,d,y,z, post=TRUE, ...) {
-
   d <- as.matrix(d)
-  if(is.vector(x)) x <-  as.matrix(x)
+  if (is.null(colnames(d))) colnames(d) <- paste("d", 1:ncol(d), sep="")
+  if (is.null(colnames(x)) & !is.null(x)) colnames(x) <- paste("x", 1:ncol(x), sep="")
+  if (is.null(colnames(z)) & !is.null(z)) colnames(z) <- paste("z", 1:ncol(z), sep="")
   n <- length(y)
-  kex <- dim(x)[2]
-  ke <- dim(d)[2]
-  kiv <- dim(z)[2]
-
-  if (is.null(colnames(d))) colnames(d) <- paste("d", 1:ke, sep="")
-  if (is.null(colnames(x)) & !is.null(x)) colnames(x) <- paste("x", 1:kex, sep="")
-  # first stage regression
-  Dhat <- NULL
-  for (i in 1:ke) {
-    di <- d[,i]
-    lasso.fit <- rlasso(z, di, post=post, ...)
-    if (sum(lasso.fit$ind)==0) {
-      dihat <- rep(mean(di),n) #dihat <- mean(di)
-    } else {
-      dihat <- z%*%lasso.fit$coefficients
-    }
-    Dhat <- cbind(Dhat, dihat)
-  }
-  Dhat <- cbind(Dhat, x)
-  d <- cbind(d,x)
-  # calculation coefficients
-  alpha.hat <- MASS::ginv(t(Dhat)%*%d)%*%(t(Dhat)%*%y)
-  # calcualtion of the variance-covariance matrix
-  residuals <- y - d%*%alpha.hat
-  Omega.hat <- t(Dhat)%*%diag(as.vector(residuals^2))%*%Dhat #  Dhat.e <- Dhat*as.vector(residuals);  Omega.hat <- t(Dhat.e)%*%Dhat.e
-  Q.hat.inv <- MASS::ginv(t(d)%*%Dhat) #solve(t(d)%*%Dhat)
-  vcov <- Q.hat.inv%*%Omega.hat%*%t(Q.hat.inv)
-  rownames(alpha.hat) <- c(colnames(d))
-  colnames(vcov) <- rownames(vcov) <- rownames(alpha.hat)
-  res <- list(coefficients=alpha.hat[,1], vcov=vcov, residuals=residuals, samplesize=n, call=match.call())
+  
+  Z <- cbind(z,x)
+  lm.d.z <- lm(d~z)
+  lasso.y.x <- rlasso(x,y,...)
+  lasso.d.x <- rlasso(x,d,...)
+  PZ <- predict(lm.d.z)
+  lasso.PZ.x <- rlasso(x,PZ,...)
+  ind.PZx <- lasso.PZ.x$index
+  Dr <- d- x[,ind.PZx]%*%MASS::ginv(t(x[,ind.PZx])%*%x[,ind.PZx])%*%t(x[,ind.PZx])%*%PZ
+  Yr <- lasso.y.x$residuals
+  Zr <- lasso.PZ.x$residuals
+  result <- tsls(Yr,Dr,x=NULL,Zr, intercept=FALSE)
+  coef <- as.vector(result$coefficient)
+  se <- diag(sqrt(result$vcov))
+  names(coef) <- names(se) <- colnames(d)
+  res <- list(coefficients=coef, se=se, vcov=vcov, call=match.call(), samplesize=n)
   class(res) <- "rlassoIVselectX"
   return(res)
 }
