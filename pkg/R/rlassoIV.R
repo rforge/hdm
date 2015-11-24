@@ -35,22 +35,22 @@ rlassoIV <- function(x,d,y,z, select.Z=TRUE, select.X=TRUE, ...) {
   if (is.null(colnames(z)) & !is.null(z)) colnames(z) <- paste("z", 1:ncol(z), sep="")
   n <- length(y)
   
-  if (select.Z==FALSE & select.X==FALSE) {
+  if (select.Z==FALSE && select.X==FALSE) {
     res <- tsls(y, d, x, z, ...)
     return(res)
   }
   
-  if (select.Z==TRUE & select.X==FALSE) {
+  if (select.Z==TRUE && select.X==FALSE) {
     res <- rlassoIVselectZ(x, d, y, z, ...)
     return(res)
   }
   
-  if (select.Z==FALSE & select.X==TRUE) {
+  if (select.Z==FALSE && select.X==TRUE) {
     res <- rlassoIVselectX(x, d, y, z, ...)
     return(res)
   }
   
-  if (select.Z==TRUE & select.X==TRUE) {
+  if (select.Z==TRUE && select.X==TRUE) {
   Z <- cbind(z,x)
   lasso.d.zx <- rlasso(Z,d,...)
   lasso.y.x <- rlasso(x,y,...)
@@ -60,7 +60,11 @@ rlassoIV <- function(x,d,y,z, select.Z=TRUE, select.X=TRUE, ...) {
   PZ <- Z[,ind.dzx]%*%MASS::ginv(t(Z[,ind.dzx])%*%Z[,ind.dzx])%*%t(Z[,ind.dzx])%*%d
   lasso.PZ.x <- rlasso(x,PZ,...)
   ind.PZx <- lasso.PZ.x$index
+  if (sum(ind.PZx)==0) {
+    Dr <- d
+  } else {
   Dr <- d- x[,ind.PZx]%*%MASS::ginv(t(x[,ind.PZx])%*%x[,ind.PZx])%*%t(x[,ind.PZx])%*%PZ
+  }
   Yr <- lasso.y.x$residuals
   Zr <- lasso.PZ.x$residuals
   result <- tsls(Yr,Dr,x=NULL,Zr, intercept=FALSE)

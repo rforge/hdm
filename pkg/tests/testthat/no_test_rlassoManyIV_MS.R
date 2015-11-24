@@ -19,7 +19,7 @@ print(output2a)
 summary(output2a)
 confint(output2a)
 
-output2aa <- rlassoIVselectX(X,d,y,Z, select.X=TRUE, select.Z=FALSE)
+output2aa <- rlassoIVselectX(X,d,y,Z)
 coef(output2aa)
 print(output2aa)
 summary(output2aa)
@@ -30,6 +30,13 @@ coef(output2b)
 print(output2b)
 summary(output2b)
 confint(output2b)
+
+data <- DGP.IV()
+
+y <- data$y
+d <- data$X
+Z <- data$Z
+X <- matrix(rnorm(3*250), ncol=3)
 
 output3 <- rlassoIV(X,d,y,Z, select.X=FALSE, select.Z=TRUE)
 coef(output3)

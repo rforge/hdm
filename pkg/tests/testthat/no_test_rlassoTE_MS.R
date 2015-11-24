@@ -90,6 +90,7 @@ output4a <- rlassoLATET(x,d,y,z, bootstrap="wild", nRep=100)
 
 ######################################################################################
 library(R.matlab)
+library(hdm)
 data <- readMat("C:\\Users\\Martin\\Dropbox\\HDM\\Matlab Code\\ProgEvalExample\\ProgEvalspec2.mat")
 y <- data$y
 d <- data$d
@@ -113,3 +114,44 @@ d <- data$d
 z <- data$z
 x <- data1$x
 output1 <- rlassoLATE(x,d,y,z, bootstrap="none")
+
+
+#############################
+
+library(R.matlab)
+library(hdm)
+data <- readMat("E:\\R Package hdm\\hdm\\LATE_spec2.mat")
+y <- data$y
+d <- data$d
+z <- data$z
+x <- as.matrix(data$x)
+debug(rlassoLATE)
+#debug(lambdaCalculation)
+output1 <- rlassoLATE(x,d,y,z, bootstrap=NULL, post=TRUE, intercept=TRUE, normalize=FALSE)
+output2 <- rlassoLATE(x,d,y,z, bootstrap=NULL, post=TRUE, intercept=TRUE, normalize=TRUE)
+output3 <- rlassoLATET(x,d,y,z, bootstrap=NULL, post=TRUE, intercept=TRUE, normalize=FALSE)
+output4 <- rlassoLATET(x,d,y,z, bootstrap=NULL, post=TRUE, intercept=TRUE, normalize=TRUE)
+output5 <- rlassoATE(x,d,y,z, bootstrap=NULL, post=TRUE, intercept=TRUE, normalize=FALSE)
+output6 <- rlassoATE(x,d,y,z, bootstrap=NULL, post=TRUE, intercept=TRUE, normalize=TRUE)
+output7 <- rlassoATET(x,d,y,z, bootstrap=NULL, post=TRUE, intercept=TRUE, normalize=FALSE)
+output8 <- rlassoATET(x,d,y,z, bootstrap=NULL, post=TRUE, intercept=TRUE, normalize=TRUE)
+
+########################### Analysis simulation
+
+library(R.matlab)
+rm(list=ls())
+data <- readMat("E:\\R Package hdm\\hdm\\sim.mat")
+data_int <- readMat("E:\\R Package hdm\\hdm\\sim_inter.mat")
+
+y <- data$y
+d <- data$d
+z <- data$z
+x <- as.matrix(data$xS)
+debug(rlassoLATE)
+output1 <- rlassoLATE(x,d,y,z, bootstrap=NULL, post=TRUE, intercept=FALSE, normalize=FALSE)
+output2 <- rlassoLATE(x,d,y,z, bootstrap=NULL, post=TRUE, intercept=TRUE, normalize=TRUE)
+output3 <- rlassoLATE(x,d,y,z, bootstrap=NULL, post=TRUE, intercept=FALSE, normalize=TRUE)
+output4 <- rlassoLATE(x,d,y,z, bootstrap=NULL, post=TRUE, intercept=TRUE, normalize=FALSE)
+
+debug(rlassoATE)
+output1 <- rlassoATE(x,d,y, bootstrap=NULL, post=TRUE, intercept=FALSE, normalize=FALSE)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/rlassoIVselectX.R
 \name{rlassoIVselectX}
 \alias{rlassoIVselectX}
-\title{Instrumental Variable Estimation with Lasso}
+\title{Instrumental Variable Estimation with Selection on the exogenous Variables by Lasso}
 \usage{
 rlassoIVselectX(x, d, y, z, post = TRUE, ...)
 }
@@ -13,8 +13,7 @@ rlassoIVselectX(x, d, y, z, post = TRUE, ...)
 
 \item{y}{outcome or dependent variable in the structural equation (vector or matrix)}
 
-\item{z}{set of potential instruments for the endogenous variables.
-Exogenous variables serve as their own instruments.}
+\item{z}{set of potential instruments for the endogenous variables.}
 
 \item{post}{logical. If \code{TRUE}, post-lasso estimation is conducted.}
 
@@ -27,23 +26,21 @@ components: \item{coefficients}{estimated parameter vector}
 residuals} \item{samplesize}{sample size}
 }
 \description{
-This function selects the instrumental variables in the first stage by
-Lasso. First stage predictions are then used in the second stage as optimal
-instruments to estimate the parameter vector. The function returns an element of class \code{rlassoIVselectX}
+This function estimates the coefficient of an endogenous variable by employing Instrument Variables in a setting where the exogenous variables are high-dimensional and hence
+selection on the exogenous variables is required.
+The function returns an element of class \code{rlassoIVselectX}
 }
 \details{
-The implementation follows the procedure described in Belloni et al. (2012).
-option \code{post=TRUE} conducts post-lasso estimation, i.e. a refit of the
-model with the selected variables, to estimate the optimal instruments. The
-parameter vector of the structural equation is then fitted by two-stage
-least square (tsls) estimation. If variables of the exogenous variables in
+The implementation is a special casof of Chernozhukov et al. (2015).
+The option \code{post=TRUE} conducts post-lasso estimation for the Lasso estimations, i.e. a refit of the
+model with the selected variables. If variables of the exogenous variables in
 \code{x} should be used as instruments, they have to be added to the
 instrument set \code{z} explicitly.
 }
 \references{
-D. Belloni, D. Chen, V. Chernozhukov and C. Hansen (2012).
-Sparse models and methods for optimal instruments with an application to
-eminent domain. \emph{Econometrica} 80 (6), 2369--2429.
+Chernozhukov, V., Hansen, C. and M. Spindler (2015). Post-Selection and Post-Regularization Inference in Linear
+Models with Many Controls and Instruments
+\emph{American Economic Review, Papers and Proceedings} 105(5), 486--490.
 }
 \keyword{Hig-dimensional}
 \keyword{Instrumental}

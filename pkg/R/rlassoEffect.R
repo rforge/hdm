@@ -25,7 +25,7 @@
 #' @param \dots parameters passed to the \code{\link{rlasso}} function.
 #' @return The function returns an object of class \code{rlassoEffect} with the following entries: \item{coefficients}{vector with estimated
 #' values of the coefficients for each selected variable} \item{se}{standard error (vector)}
-#' \item{t}{t-statistic} \item{pval}{p-value} \item{samplesize}{sample size of the data set} \item{I}{union of the indices of variables selected in the lasso regressions}
+#' \item{t}{t-statistic} \item{pval}{p-value} \item{samplesize}{sample size of the data set} \item{index}{index of the variables for which inference is performed}
 #' @references A. Belloni, V. Chernozhukov, C. Hansen (2014). Inference on
 #' treatment effects after selection among high-dimensional controls. The
 #' Review of Economic Studies 81(2), 608--650.
@@ -114,7 +114,7 @@ rlassoEffect.default <- function(x, y, index=c(1:ncol(x)), I3=NULL, ...) {
     }
   }
   residuals <- list(e=reside, v=residv)
-  res <- list(coefficients=coefficients, se=se, t=t, pval=pval, lasso.regs=lasso.regs, index=I, call=match.call(), samplesize=n, residuals=residuals)
+  res <- list(coefficients=coefficients, se=se, t=t, pval=pval, lasso.regs=lasso.regs, index=index, call=match.call(), samplesize=n, residuals=residuals)
   class(res) <- "rlassoEffect"
   return(res)
 }
@@ -358,7 +358,7 @@ plot.rlassoEffect <- function(x, main="", xlab="coef", ylab="", xlim=NULL, col="
   plotobject <- plotobject + ggplot2::xlim(0.5,nrow(coefmatrix)+0.5) + ggplot2::ggtitle(main) + ggplot2::ylim(low,up) + ggplot2::xlab(ylab) + ggplot2::ylab(xlab) 
   
   # var.names
-  plotobject <- plotobject + ggplot2::scale_x_discrete(limits=rownames(coefmatrix)[1:nrow(coefmatrix)])
+  #plotobject <- plotobject + ggplot2::scale_x_discrete(limits=rownames(coefmatrix)[1:nrow(coefmatrix)])
   
   # invert x and y axis
   plotobject <- plotobject + ggplot2::coord_flip()

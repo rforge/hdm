@@ -38,7 +38,7 @@ indicates if variables (TRUE) should be included in any case.}
 \value{
 The function returns an object of class \code{rlassoEffect} with the following entries: \item{coefficients}{vector with estimated
 values of the coefficients for each selected variable} \item{se}{standard error (vector)}
-\item{t}{t-statistic} \item{pval}{p-value} \item{samplesize}{sample size of the data set} \item{I}{union of the indices of variables selected in the lasso regressions}
+\item{t}{t-statistic} \item{pval}{p-value} \item{samplesize}{sample size of the data set} \item{index}{index of the variables for which inference is performed}
 }
 \description{
 Estimation and inference of selected (low-dimensional) coefficients in a high-dimensional linear model.

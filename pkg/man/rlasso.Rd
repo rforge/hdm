@@ -10,14 +10,14 @@ disturbances}
 rlasso(x, ...)
 
 \method{rlasso}{default}(x, y, post = TRUE, intercept = TRUE,
-  normalize = TRUE, penalty = list(method = "standard", lambda.start = NULL,
-  c = 1.1, gamma = 0.1), control = list(numIter = 15, tol = 10^-5, threshold =
-  NULL), ...)
+  normalize = TRUE, penalty = list(homoscedastic = FALSE, X.design =
+  "independent", lambda.start = NULL, c = 1.1, gamma = 0.1),
+  control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...)
 
 \method{rlasso}{formula}(formula, data, post = TRUE, intercept = TRUE,
-  normalize = TRUE, penalty = list(method = "standard", lambda.start = NULL,
-  c = 1.1, gamma = 0.1), control = list(numIter = 15, tol = 10^-5, threshold =
-  NULL), ...)
+  normalize = TRUE, penalty = list(homoscedastic = FALSE, X.design =
+  "independent", lambda.start = NULL, c = 1.1, gamma = 0.1),
+  control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...)
 }
 \arguments{
 \item{x}{regressors (matrix or data.frame)}
@@ -33,10 +33,14 @@ penalized.}
 
 \item{normalize}{logical. If \code{TRUE}, design matrix \code{x} is scaled.}
 
-\item{penalty}{list with options for the calculation of the penalty.  \code{c} and \code{gamma} constants for the penalty (for all methods except "CV") with default \code{c=1} and \code{gamma=0.1}, \code{method} method for penalty choice ("X-dependent",
-"X-independent", "standard", "none", "CV"), \code{numfolds} number of folds
-for the "cross validation" method, \code{numSim} number of simulations for
-the "X-dependent" method, \code{lambda.start} initial penalization value, compulsory for method "none"}
+\item{penalty}{list with options for the calculation of the penalty.
+\itemize{
+\item{\code{c} and \code{gama}}{constants for the penalty with default \code{c=1.1} and \code{gamma=0.1}}
+\item{\code{homoscedastic}}{logical, if homoscedastic errors are considered (default \code{FALSE}). Option \code{none} is described below.}
+\item{\code{X.design}}{if \code{independent} or \code{dependent} design matrix \code{X}}
+\item{\code{numSim}} number of simulations for the dependent methods
+\item{\code{lambda.start}}{initial penalization value, compulsory for method "none"}
+}}
 
 \item{control}{list with control values.
 \code{numIter} number of iterations for the algorithm for
@@ -75,44 +79,21 @@ returned is of the S3 class \code{rlasso}.
 }
 \details{
 The function estimates the coefficients of a Lasso regression with
-data-driven penalty under heteroskedasticity and non-Gaussian noise. The
-method of the data-driven penalty can be chosen ("X-dependent",
-"X-independent", "standard", "none", "cv"). For details of the
+data-driven penalty under homoskedasticity / heteroskedasticity and non-Gaussian noise. The options \code{homoscedatic} is a logical with \code{FALSE} by default.
+Moreover, for the calculation of the penalty parameter it can be chosen, if the design matrix (\code{X.design}) is \code{independent} (default option) or \code{dependent}.
+A \emph{special} option is to set \code{homoscedastic} to \code{none} and to supply a values \code{lambda.start}. Then this values is used as penalty parameter with independet design to weight the regressors.
+For details of the
 implementation of the Algorithm for estimation of the data-driven penalty,
-in particular the regressor-dependent loadings, we refer to Appendix A in
+in particular the regressor-independent loadings, we refer to Appendix A in
 Belloni et al.~(2012). When the option "none" is chosen (together with
 \code{lambda.start}), lambda is set to \code{lambda.start} and the
-regressor-dependent loadings are used. The options "X-dependent" and
-"X-independent" are described in Belloni et al.~(2013). The method "cv" does
-cross validation to determine the "optimal" value for lambda (with
-regressor-dependent loadings). The option \code{nfolds} gives the number of
-folds used for cross validation. The method "standard", which is recommended
-and the default option, employs data-dependent loadings and sets
-\eqn{\lambda = 2*c*\sqrt{n}*\sqrt{2*\log(2*p*\log(n)/\gamma)}}.
+regressor-independent loadings are used. The options "X-dependent" and
+"X-independent" under homoscedasticity are described in Belloni et al.~(2013).
 \code{lambda.start} can be component-specific. When used with one of the
 other option, the values are used as starting values.
 
 The option \code{post=TRUE} conducts post-lasso estimation, i.e. a refit of
 the model with the selected variables.
-}
-\examples{
-## DGP
-library(hdm)
-library(MASS)
-n <- 250
-p <- 100
-px <- 10
-X <- matrix(rnorm(n*p), ncol=p)
-beta <- c(rep(2,px), rep(0,p-px))
-y <- 1 + X\%*\%beta + rnorm(n)
-## Lasso estimation
-lasso.reg <- rlasso(x=X, y=y, post=TRUE, intercept=TRUE)
-# Methods for Lasso
-print(lasso.reg, all=FALSE)
-summary(lasso.reg, all=FALSE)
-yhat <- predict(lasso.reg)
-Xnew <- matrix(rnorm(n*p), ncol=p)
-yhat.new <- predict(lasso.reg, newdata=Xnew)
 }
 \references{
 A. Belloni, D. Chen, V. Chernozhukov and C. Hansen (2012).

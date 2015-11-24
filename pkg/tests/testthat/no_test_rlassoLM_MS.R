@@ -7,7 +7,7 @@ y <- X%*%rep(c(1,0), c(5,5)) + rnorm(n)
 
 
 
-output1 <- rlassoLM(X,y, index=1:10)
+output1 <- rlassoEffect(X,y, index=1:10)
 print(output1)
 summary(output1)
 confint(output1, joint=FALSE)

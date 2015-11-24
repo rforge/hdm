@@ -15,7 +15,7 @@
 #' @docType package
 #' @author Victor Chernozhukov, Christian Hansen, Martin Spindler\cr
 #'
-#' Maintainer: Martin Spindler <spindler@@mea.mpisoc.mpg.de>
+#' Maintainer: Martin Spindler <spindler@mea.mpisoc.mpg.de>
 #' @references TBD
 #' @keywords package Lasso Instrumental Variables Endogeneity Microeconometrics
 #' Program Evaluation treatment effects
@@ -29,12 +29,12 @@ NULL
 #' of a panel of 138 countries for the period 1960 to 1985. The depenent
 #' variable is national growth rates in GDP per capita for the periods
 #' 1965-1975 and 1975-1985. The growth rate in GDP over a period from t1 to t2
-#' is commonly defined as log(GDP_t1/GDP_t2). The number of covariates is p=62.
+#' is commonly defined as \eqn{\log(GDP_{t_1}/GDP_{t_2})}. The number of covariates is p=62.
 #' The number of complete observations is 90.
 #'
 #' @source The full data set and further details can be found at
-#' \url{http://www.nber.org/pub/barro.lee, http://www.barrolee.com}, and,
-#' \url{http://www.bristol.ac.uk/Depts/Economics/Growth/barlee.htm}.
+#' \url{http://www.nber.org/pub/barro.lee}, \url{http://www.barrolee.com}, and,
+#' \url{http://www.bristol.ac.uk//Depts//Economics//Growth//barlee.htm}.
 #'
 #' @name Growth Data
 #' @aliases Growth Example GrowthData GDP
@@ -126,5 +126,55 @@ NULL
 #' data(riboflavin)
 NULL
 
+#' AJR data set
+#'
+#' Dataset on settler mortality
+#'
+#' Data set was analyzed in Acemoglu et al. (2001). A detailed decription of the data can be found at \url{http://economics.mit.edu/faculty/acemoglu/data/ajr2001} 
+#'
+#' @name AJR
+#' @docType data
+#' @format \describe{ 
+#' \item{Mort}{Settler mortality}
+#' \item{logMort}{logarithm of Mort}
+#' \item{Latitude}{Latitude}
+#' \item{Latitude2}{Latitude^2}
+#' \item{Africa}{Africa}
+#' \item{Asia}{Asia}
+#' \item{Namer}{North America}
+#' \item{Samer}{South America}
+#' \item{Neo}{Neo-Europes}
+#' \item{GDP}{GDP}
+#' \item{Exprop}{Average protection against expropriation risk} 
+#' }
+#' @references D. Acemoglu, S. Johnson, J. A. Robinson  (2001). Colonial Origins of Comparative Development: An Empirical Investigation.
+#' American Economic Review, 91, 1369--1401.
+#' @keywords datasets
+#' @examples
+#' data(AJR)
+NULL
 
+#' Eminent Domain data set
+#'
+#' Dataset on judicial eminent domain decisions.
+#'
+#' Data set was analyzed in Belloni et al. (2012).  They estimate the effect of judicial eminent domain decisions on economic outcomes with instrumental variable (IV) in a setting high a large set of potential IVs. 
+#' A detailed decription of the data can be found at 
+#' \url{https://www.econometricsociety.org/publications/econometrica/2012/11/01/sparse-models-and-methods-optimal-instruments-application} 
+#'
+#' @name Eminent Domain
+#' @docType data
+#' @format \describe{ 
+#' \item{y}{economic outcome variable, here the CS Home Price Index}
+#' \item{x}{set of exogenous variables}
+#' \item{d}{eminent domain decisions}
+#' \item{z}{set of potential instruments}
+#' }
+#' @references D. Belloni, D. Chen, V. Chernozhukov and C. Hansen (2012).
+#' Sparse models and methods for optimal instruments with an application to
+#' eminent domain. \emph{Econometrica} 80 (6), 2369--2429.
+#' @keywords datasets
+#' @examples
+#' data(EminentDomain)
+NULL
 

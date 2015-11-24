@@ -15,9 +15,9 @@
 \alias{rlassoLATET}
 \title{Functions for estimation of treatment effects}
 \usage{
-rlassoATE(x, d, y, bootstrap = NULL, nRep = 500)
+rlassoATE(x, d, y, bootstrap = NULL, nRep = 500, ...)
 
-rlassoATET(x, d, y, bootstrap = NULL, nRep = 500)
+rlassoATET(x, d, y, bootstrap = NULL, nRep = 500, ...)
 
 rlassoLATE(x, d, y, z, bootstrap = NULL, nRep = 500, post = TRUE,
   intercept = TRUE, normalize = TRUE)
@@ -36,6 +36,8 @@ rlassoLATET(x, d, y, z, bootstrap = NULL, nRep = 500, post = TRUE,
 "normal", "wild"}
 
 \item{nRep}{number of replications for the bootstrap}
+
+\item{...}{arguments passed}
 
 \item{z}{instrumental variables (binary)}
 

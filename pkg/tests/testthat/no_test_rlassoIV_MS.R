@@ -19,7 +19,7 @@ output4 <- rlasso(as.data.frame(X),y)
 
 output5 <- rlasso(X,y)
 output6 <- rlasso(X,y, penalty=list(method = "standard", lambda.start = NULL, c = 1.1, gamma = 0.1))
-uoutput7 <- rlasso(X,y, penalty=list(method = "standard"))
+output7 <- rlasso(X,y, penalty=list(method = "standard"))
 output8 <- rlasso(X,y, penalty=list(method = "X-dependent", numSim=5000))
 output9 <- rlasso(X,y, penalty=list(method = "X-dependent", c=1.2))
 output10 <- rlasso(X,y, penalty=list(method = "X-independent", c=1.2))

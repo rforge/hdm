@@ -28,6 +28,7 @@
 #' @param bootstrap boostrap method which should be employed: "none", "Bayes",
 #' "normal", "wild"
 #' @param nRep number of replications for the bootstrap
+#' @param ... arguments passed 
 #' @return Functions return an object of class \code{rlassoTE} with estimated effects, standard errors and
 #' individual effects in the form of a \code{list}.
 #' @references A. Belloni, V. Chernozhukov, I. Fernandez-Val, and C. Hansen
@@ -37,18 +38,18 @@
 #' @rdname TE
 #' @export
 
-rlassoATE <- function(x,d,y, bootstrap=NULL, nRep=500) {
+rlassoATE <- function(x,d,y, bootstrap=NULL, nRep=500, ...) {
   z <- d
-  res <- rlassoLATE(x,d,y,z, bootstrap=bootstrap, nRep=nRep)
+  res <- rlassoLATE(x,d,y,z, bootstrap=bootstrap, nRep=nRep, ...)
   res$type <- "ATE"
   return(res)
 }
 
 #' @export
 #' @rdname TE
-rlassoATET <- function(x,d,y, bootstrap=NULL, nRep=500) {
+rlassoATET <- function(x,d,y, bootstrap=NULL, nRep=500, ...) {
   z <- d
-  res <- rlassoLATET(x,d,y,z, bootstrap=bootstrap, nRep=nRep)
+  res <- rlassoLATET(x,d,y,z, bootstrap=bootstrap, nRep=nRep, ...)
   res$type <- "ATET"
   return(res)
 }
@@ -66,20 +67,21 @@ rlassoLATE <- function(x,d,y,z, bootstrap=NULL, nRep=500, post=TRUE, intercept=T
 
   lambda <- 2.2*sqrt(n)*qnorm(1-(1/log(n))/(2*(2*p)))
   control <- list(numIter = 15, tol = 10^-5)
-  penalty <- list(method = "none",   lambda.start = rep(lambda, p), c = 1.1, gamma = 0.1)
+  #penalty <- list(method = "none",   lambda.start = rep(lambda, p), c = 1.1, gamma = 0.1)
+  penalty <- list(homoscedastic = "none",   lambda.start = rep(lambda, p), c = 1.1, gamma = 0.1)
   indz1 <- (z==1)
   indz0 <- (z==0)
   # E[Y|Z = 1,X] = my_z1x
   b_y_z1xL <- rlasso(x[indz1,,drop=FALSE], y[indz1], post=post, intercept=intercept, normalize=normalize, control=control, penalty=penalty)
   my_z1x <- predict(b_y_z1xL, newdata=x)
   # E[Y|Z = 0,X] = my_z0x
-  b_y_z0xL <- rlasso(x[indz0,], y[indz0],  post=post, intercept=intercept, normalize=normalize, control=control, penalty=penalty)
+  b_y_z0xL <- rlasso(x[indz0,,drop=FALSE], y[indz0],  post=post, intercept=intercept, normalize=normalize, control=control, penalty=penalty)
   my_z0x <- predict(b_y_z0xL, newdata=x)
   # E[D|Z = 1,X] = md_z1x
   lambda <- 2.2*sqrt(n)*qnorm(1-(1/log(n))/(2*(2*p)))
   penalty <- list(lambda.start = lambda, c = 1.1, gamma = 0.1)
   if (sum(d-z)!=0) {
-    b_d_z1xL <- rlassologit(x[indz1,], d[indz1],  post=post, intercept=intercept, normalize=normalize, penalty=penalty)
+    b_d_z1xL <- rlassologit(x[indz1,,drop=FALSE], d[indz1],  post=post, intercept=intercept, normalize=normalize, penalty=penalty)
     md_z1x <- predict(b_d_z1xL, newdata=x)
   } else {
     md_z1x <- rep(1,n)
@@ -104,24 +106,24 @@ rlassoLATE <- function(x,d,y,z, bootstrap=NULL, nRep=500, post=TRUE, intercept=T
 
   object <- list(se = se, te=late, individual = individual, type="LATE", call=match.call(), samplesize=n)
 
-  # alternative method
-  # late
-  alpha11 <- 1/n*sum((z==1)*(d==1)*(y-my_z1x)/mz_x + my_z1x)
-  alpha12 <- 1/n*sum((z==0)*(d==1)*(y-my_z0x)/(1-mz_x) + my_z0x)
-  alpha13 <- 1/n*sum((z==1)*(d==1)*(1-md_z1x)/mz_x + md_z1x)
-  alpha14 <- 1/n*sum((z==0)*(d==1)*(1-md_z0x)/(1-mz_x) + md_z0x)
-  alpha01 <- 1/n*sum((z==1)*(d==0)*(y-my_z1x)/mz_x + my_z1x)
-  alpha02 <- 1/n*sum((z==0)*(d==0)*(y-my_z0x)/(1-mz_x) + my_z0x)
-  alpha03 <- 1/n*sum((z==1)*(d==0)*(1-md_z1x)/mz_x + md_z1x)
-  alpha04 <- 1/n*sum((z==0)*(d==0)*(1-md_z0x)/(1-mz_x) + md_z0x)
-  object$theta1 <- (alpha11- alpha12)/((alpha13- alpha14))
-  object$theta0 <- (alpha01- alpha02)/((alpha03- alpha04))
-  object$late <- object$theta1 - object$theta0
-  # ate
-  alpha1 <- 1/n*sum((z==1)*(y-my_z1x)/mz_x + my_z1x)
-  alpha0 <- 1/n*sum((z==0)*(y-my_z0x)/(1-mz_x) + my_z0x)
-  object$ate <- alpha1 - alpha0
-  # end alternative method
+#   # alternative method
+#   # late
+#   alpha11 <- 1/n*sum((z==1)*(d==1)*(y-my_z1x)/mz_x + my_z1x)
+#   alpha12 <- 1/n*sum((z==0)*(d==1)*(y-my_z0x)/(1-mz_x) + my_z0x)
+#   alpha13 <- 1/n*sum((z==1)*(d==1)*(1-md_z1x)/mz_x + md_z1x)
+#   alpha14 <- 1/n*sum((z==0)*(d==1)*(1-md_z0x)/(1-mz_x) + md_z0x)
+#   alpha01 <- 1/n*sum((z==1)*(d==0)*(y-my_z1x)/mz_x + my_z1x)
+#   alpha02 <- 1/n*sum((z==0)*(d==0)*(y-my_z0x)/(1-mz_x) + my_z0x)
+#   alpha03 <- 1/n*sum((z==1)*(d==0)*(1-md_z1x)/mz_x + md_z1x)
+#   alpha04 <- 1/n*sum((z==0)*(d==0)*(1-md_z0x)/(1-mz_x) + md_z0x)
+#   object$theta1 <- (alpha11- alpha12)/((alpha13- alpha14))
+#   object$theta0 <- (alpha01- alpha02)/((alpha03- alpha04))
+#   object$late <- object$theta1 - object$theta0
+#   # ate
+#   alpha1 <- 1/n*sum((z==1)*(y-my_z1x)/mz_x + my_z1x)
+#   alpha0 <- 1/n*sum((z==0)*(y-my_z0x)/(1-mz_x) + my_z0x)
+#   object$ate <- alpha1 - alpha0
+#   # end alternative method
 
   if (!is.null(bootstrap)) {
     boot <- rep(NA,nRep)
@@ -155,7 +157,8 @@ rlassoLATET <- function(x, d, y, z, bootstrap=NULL, nRep=500, post=TRUE, interce
   p <- dim(x)[2]
   lambda <- 2.2*sqrt(n)*qnorm(1-(1/log(n))/(2*(2*p)))
   control <- list(numIter = 15, tol = 10^-5)
-  penalty <- list(method = "none",   lambda.start = rep(lambda, p), c = 1.1, gamma = 0.1)
+  #penalty <- list(method = "none",   lambda.start = rep(lambda, p), c = 1.1, gamma = 0.1)
+  penalty <- list(homoscedastic = "none",   lambda.start = rep(lambda, p), c = 1.1, gamma = 0.1)
   indz1 <- (z==1)
   indz0 <- (z==0)
   # E[Y|Z = 0,X] = my_z0x
@@ -165,7 +168,8 @@ rlassoLATET <- function(x, d, y, z, bootstrap=NULL, nRep=500, post=TRUE, interce
   md_z0x <- rep(0,n)
   # E[Z|X] = mz_x
   lambdaP <- 2.2*sqrt(n)*qnorm(1-(1/log(n))/(2*p))
-  penalty <- list(lambda.start = lambdaP, c = 1.1, gamma = 0.1)
+  #penalty <- list(lambda.start = lambdaP, c = 1.1, gamma = 0.1)
+  penalty <- list(homoscedastic = "none",   lambda.start = p, c = 1.1, gamma = 0.1)
   b_z_xL <- rlassologit(x, z, post=post, intercept=intercept, normalize=normalize, penalty=penalty)
   mz_x <- predict(b_z_xL, newdata=x)
   mz_x <- mz_x*(mz_x > 1e-12 & mz_x < 1-1e-12) + (1-1e-12)*(mz_x > 1-1e-12) + 1e-12*(mz_x < 1e-12)

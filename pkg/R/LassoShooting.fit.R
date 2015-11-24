@@ -38,8 +38,9 @@ LassoShooting.fit <- function(x, y, lambda, control = list(maxIter = 1000,
     (Xy <- crossprod(x, y))
   # Start from the LS solution for beta if no beta.start is provided
   if (is.null(beta.start)) {
-    beta <- MASS::ginv(XX + diag(as.vector(lambda), p) %*% diag(1, p)) %*% Xy  # solve(XX+diag(as.vector(lambda))%*%diag(1,p))%*%Xy
-    beta[is.nan(beta)] <- 0
+    #beta <- MASS::ginv(XX + diag(as.vector(lambda), p) %*% diag(1, p)) %*% Xy  # solve(XX+diag(as.vector(lambda))%*%diag(1,p))%*%Xy
+    #beta[is.nan(beta)] <- 0
+    beta <- rep(0,p)
   } else {
     beta <- beta.start
   }

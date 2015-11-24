@@ -23,7 +23,7 @@
 #' residuals} \item{samplesize}{sample size}
 #' @references Chernozhukov, V., Hansen, C. and M. Spindler (2015). Post-Selection and Post-Regularization Inference in Linear
 #' Models with Many Controls and Instruments
-#'\emph{American Economic Review, Papers and Proceedings} 105(5), 486–490.
+#' \emph{American Economic Review, Papers and Proceedings} 105(5), 486--490.
 #' @keywords Instrumental Variables Lasso Hig-dimensional setting
 #' @export
 #' @rdname rlassoIVselectX
@@ -33,20 +33,21 @@ rlassoIVselectX <- function(x,d,y,z, post=TRUE, ...) {
   if (is.null(colnames(x)) & !is.null(x)) colnames(x) <- paste("x", 1:ncol(x), sep="")
   if (is.null(colnames(z)) & !is.null(z)) colnames(z) <- paste("z", 1:ncol(z), sep="")
   n <- length(y)
-  
+  numIV <- dim(z)[2]
   Z <- cbind(z,x)
-  lm.d.z <- lm(d~z)
-  lasso.y.x <- rlasso(x,y,...)
   lasso.d.x <- rlasso(x,d,...)
-  PZ <- predict(lm.d.z)
-  lasso.PZ.x <- rlasso(x,PZ,...)
-  ind.PZx <- lasso.PZ.x$index
-  Dr <- d- x[,ind.PZx]%*%MASS::ginv(t(x[,ind.PZx])%*%x[,ind.PZx])%*%t(x[,ind.PZx])%*%PZ
-  Yr <- lasso.y.x$residuals
-  Zr <- lasso.PZ.x$residuals
+  Dr <- d - predict(lasso.d.x, newdata=x)
+  lasso.y.x <- rlasso(x,y,...)
+  Yr <- y - predict(lasso.y.x, newdata=x)
+  Zr <- matrix(NA, nrow=n, ncol=numIV)
+  for (i in seq(length.out=numIV)) {
+  lasso.z.x <- rlasso(x,z[,i],...)
+  Zr[,i] <- predict(lasso.z.x, newdata=x)
+  }
   result <- tsls(Yr,Dr,x=NULL,Zr, intercept=FALSE)
   coef <- as.vector(result$coefficient)
   se <- diag(sqrt(result$vcov))
+  vcov <- result$vcov
   names(coef) <- names(se) <- colnames(d)
   res <- list(coefficients=coef, se=se, vcov=vcov, call=match.call(), samplesize=n)
   class(res) <- "rlassoIVselectX"

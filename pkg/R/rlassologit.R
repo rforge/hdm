@@ -83,6 +83,7 @@ rlassologit.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
 
   if (!is.null(penalty$lambda)) {
     lambda <- penalty$lambda/(2*n)
+    lambda0 <- lambda*(2*n)
   } else {
     lambda0 <-  penalty$c/2*sqrt(n)*qnorm(1-penalty$gamma/(2*p))
     lambda <- lambda0/(2*n)
@@ -90,7 +91,7 @@ rlassologit.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
 
   s0 <- sqrt(var(y))
     # calculation parameters
-    log.lasso <- glmnet::glmnet(x, y, family=c("binomial"), alpha = 1, lambda = lambda,
+    log.lasso <- glmnet::glmnet(x, y, family=c("binomial"), alpha = 1, lambda = lambda[1],
                         standardize = normalize, intercept = intercept)
     coefTemp <- as.vector(log.lasso$beta)
     coefTemp[is.na(coefTemp)] <- 0
@@ -141,7 +142,7 @@ rlassologit.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
     coefTemp[abs(coefTemp)<control$threshold] <- 0
     ind1 <- as.vector(ind1)
     names(coefTemp) <- names(ind1) <- colnames(x)
-    est <- list(coefficients=coefTemp, a0=a0, index=ind1, lambda=lambda, residuals=e1, sigma=e1, call=match.call(), options=list(post=post, intercept=intercept, normalize=normalize, control=control))
+    est <- list(coefficients=coefTemp, a0=a0, index=ind1, lambda=lambda0, residuals=e1, sigma=e1, call=match.call(), options=list(post=post, intercept=intercept, normalize=normalize, control=control))
     class(est) <- c("rlassologit")
     return(est)
 }

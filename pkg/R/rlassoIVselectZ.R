@@ -63,7 +63,7 @@ rlassoIVselectZ <- function(x,d,y,z, post=TRUE, ...) {
   vcov <- Q.hat.inv%*%Omega.hat%*%t(Q.hat.inv)
   rownames(alpha.hat) <- c(colnames(d))
   colnames(vcov) <- rownames(vcov) <- rownames(alpha.hat)
-  res <- list(coefficients=alpha.hat[,1], vcov=vcov, residuals=residuals, samplesize=n, call=match.call())
+  res <- list(coefficients=alpha.hat[1:ke,], vcov=vcov[1:ke, 1:ke, drop=FALSE], residuals=residuals, samplesize=n, call=match.call())
   class(res) <- "rlassoIVselectZ"
   return(res)
 }
@@ -142,7 +142,7 @@ confint.rlassoIVselectZ <- function(object, parm, level=0.95, ...) {
   pct <- format.perc(a, 3)
   ci <- array(NA, dim = c(length(parm), 2L), dimnames = list(parm,
                                                              pct))
-  ses <- sqrt(diag(object$vcov))[parm]
+  ses <- sqrt(diag(as.matrix(object$vcov)))[parm]
   ci[] <- cf[parm] + ses %o% fac
   print(ci)
   invisible(ci)

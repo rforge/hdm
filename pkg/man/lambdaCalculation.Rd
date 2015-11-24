@@ -4,14 +4,19 @@
 \alias{lambdaCalculation}
 \title{Function for Calculation of the penalty parameter}
 \usage{
-lambdaCalculation(penalty = list(method = "standard", lambda.start = NULL, c =
-  1.1, gamma = 0.1), y = NULL, x = NULL)
+lambdaCalculation(penalty = list(homoscedastic = FALSE, X.design =
+  "independent", lambda.start = NULL, c = 1.1, gamma = 0.1), y = NULL,
+  x = NULL)
 }
 \arguments{
-\item{penalty}{list with options for the calculation of the penalty.  \code{c} and \code{gamma} constants for the penalty (all methods except "CV"), \code{method} method for penalty choice ("X-dependent",
-"X-independent", "standard", "none", "CV"), \code{numfolds} number of folds
-for the "cross validation" method, \code{numSim} number of simulations for
-the "X-dependent" method, \code{lambda.start} initial penalization value, compulsory for method "none"}
+\item{penalty}{list with options for the calculation of the penalty.
+\itemize{
+\item{\code{c} and \code{gama}}{constants for the penalty with default \code{c=1.1} and \code{gamma=0.1}}
+\item{\code{homoscedastic}}{logical, if homoscedastic errors are considered (default \code{FALSE}). Option \code{none} is described below.}
+\item{\code{X.design}}{if \code{independent} or \code{dependent} design matrix \code{X}}
+\item{\code{numSim}} number of simulations for the dependent methods
+\item{\code{lambda.start}}{initial penalization value, compulsory for method "none"}
+}}
 
 \item{y}{residual which is used for calculation of the variance or the data-dependent loadings}
 
@@ -19,7 +24,7 @@ the "X-dependent" method, \code{lambda.start} initial penalization value, compul
 }
 \value{
 The functions returns a list with the penalty \code{lambda} which is the product of \code{lambda0} and \code{Ups0}. \code{Ups0}
-denotes either the variance or the data-dependent loadings for the regressors. \code{method} gives the selected method for the calculation.
+denotes either the variance or the data-dependent loadings for the regressors or is the variance in the \code{independent} case. \code{method} gives the selected method for the calculation.
 }
 \description{
 This function implements different methods for calculation of the parameter lambda. Further details can be found under \link{rlasso}.
