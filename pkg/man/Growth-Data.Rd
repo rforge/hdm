@@ -14,8 +14,8 @@ for the periods 1965-1975 and 1975-1985} \item{x}{covariates which might
 influence growth} }}
 \source{
 The full data set and further details can be found at
-\url{http://www.nber.org/pub/barro.lee, http://www.barrolee.com}, and,
-\url{http://www.bristol.ac.uk/Depts/Economics/Growth/barlee.htm}.
+\url{http://www.nber.org/pub/barro.lee}, \url{http://www.barrolee.com}, and,
+\url{http://www.bristol.ac.uk//Depts//Economics//Growth//barlee.htm}.
 }
 \description{
 Data set of growth compiled by Barro Lee.
@@ -25,7 +25,7 @@ The data set contains growth data of Barro-Lee. The Barro Lee data consists
 of a panel of 138 countries for the period 1960 to 1985. The depenent
 variable is national growth rates in GDP per capita for the periods
 1965-1975 and 1975-1985. The growth rate in GDP over a period from t1 to t2
-is commonly defined as log(GDP_t1/GDP_t2). The number of covariates is p=62.
+is commonly defined as \eqn{\log(GDP_{t_1}/GDP_{t_2})}. The number of covariates is p=62.
 The number of complete observations is 90.
 }
 \examples{

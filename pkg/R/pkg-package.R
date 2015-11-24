@@ -15,7 +15,7 @@
 #' @docType package
 #' @author Victor Chernozhukov, Christian Hansen, Martin Spindler\cr
 #'
-#' Maintainer: Martin Spindler <spindler@mea.mpisoc.mpg.de>
+#' Maintainer: Martin Spindler <spindler@@mea.mpisoc.mpg.de>
 #' @references TBD
 #' @keywords package Lasso Instrumental Variables Endogeneity Microeconometrics
 #' Program Evaluation treatment effects
@@ -162,7 +162,7 @@ NULL
 #' A detailed decription of the data can be found at 
 #' \url{https://www.econometricsociety.org/publications/econometrica/2012/11/01/sparse-models-and-methods-optimal-instruments-application} 
 #'
-#' @name Eminent Domain
+#' @name EminentDomain
 #' @docType data
 #' @format \describe{ 
 #' \item{y}{economic outcome variable, here the CS Home Price Index}
