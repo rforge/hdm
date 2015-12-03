@@ -41,12 +41,12 @@ tsls <- function(y, d, x, z, intercept=TRUE) {
   Z <- cbind(z, x)
 
   Mxz <- t(X) %*% Z
-  Mzz <- MASS::ginv(t(Z) %*% Z)
-  M <- MASS::ginv(Mxz %*% Mzz %*% t(Mxz))
+  Mzz <- solve(t(Z) %*% Z)
+  M <- solve(Mxz %*% Mzz %*% t(Mxz))
 
   b <- M %*% Mxz %*% Mzz %*% (t(Z) %*% y)
-  Dhat <- Z %*% MASS::ginv(t(Z) %*% Z) %*% t(Z) %*% X
-  b2 <- MASS::ginv(t(Dhat) %*% X) %*% (t(Dhat) %*% y)
+  Dhat <- Z %*% solve(t(Z) %*% Z) %*% t(Z) %*% X
+  b2 <- solve(t(Dhat) %*% X) %*% (t(Dhat) %*% y)
   e <- y - X %*% b
   VC1 <- as.numeric((t(e) %*% e/(n - k))) * M
   return(list(coefficients = b, vcov = VC1, se=sqrt(diag(VC1)), residuals = e, call=match.call(), samplesize=n))

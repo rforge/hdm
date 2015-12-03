@@ -29,6 +29,7 @@
 #' @rdname rlassoIVselectX
 rlassoIVselectX <- function(x,d,y,z, post=TRUE, ...) {
   d <- as.matrix(d)
+  z <- as.matrix(z)
   if (is.null(colnames(d))) colnames(d) <- paste("d", 1:ncol(d), sep="")
   if (is.null(colnames(x)) & !is.null(x)) colnames(x) <- paste("x", 1:ncol(x), sep="")
   if (is.null(colnames(z)) & !is.null(z)) colnames(z) <- paste("z", 1:ncol(z), sep="")
@@ -42,7 +43,7 @@ rlassoIVselectX <- function(x,d,y,z, post=TRUE, ...) {
   Zr <- matrix(NA, nrow=n, ncol=numIV)
   for (i in seq(length.out=numIV)) {
   lasso.z.x <- rlasso(x,z[,i],...)
-  Zr[,i] <- predict(lasso.z.x, newdata=x)
+  Zr[,i] <- z - predict(lasso.z.x, newdata=x)
   }
   result <- tsls(Yr,Dr,x=NULL,Zr, intercept=FALSE)
   coef <- as.vector(result$coefficient)

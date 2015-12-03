@@ -55,7 +55,7 @@ rlassoIVselectZ <- function(x,d,y,z, post=TRUE, ...) {
   Dhat <- cbind(Dhat, x)
   d <- cbind(d,x)
   # calculation coefficients
-  alpha.hat <- MASS::ginv(t(Dhat)%*%d)%*%(t(Dhat)%*%y)
+  alpha.hat <- solve(t(Dhat)%*%d)%*%(t(Dhat)%*%y)
   # calcualtion of the variance-covariance matrix
   residuals <- y - d%*%alpha.hat
   Omega.hat <- t(Dhat)%*%diag(as.vector(residuals^2))%*%Dhat #  Dhat.e <- Dhat*as.vector(residuals);  Omega.hat <- t(Dhat.e)%*%Dhat.e
@@ -63,7 +63,7 @@ rlassoIVselectZ <- function(x,d,y,z, post=TRUE, ...) {
   vcov <- Q.hat.inv%*%Omega.hat%*%t(Q.hat.inv)
   rownames(alpha.hat) <- c(colnames(d))
   colnames(vcov) <- rownames(vcov) <- rownames(alpha.hat)
-  res <- list(coefficients=alpha.hat[1:ke,], vcov=vcov[1:ke, 1:ke, drop=FALSE], residuals=residuals, samplesize=n, call=match.call())
+  res <- list(coefficients=alpha.hat[1:ke,], se= sqrt(diag(vcov))[1:ke], vcov=vcov[1:ke, 1:ke, drop=FALSE], residuals=residuals, samplesize=n, call=match.call())
   class(res) <- "rlassoIVselectZ"
   return(res)
 }

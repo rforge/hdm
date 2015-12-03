@@ -125,10 +125,10 @@ rlassoIVmult <- function(x,z,y,d,...) {
     next
   }
   ind.dzx <- lasso.d.zx$index
-  PZ <- Z[,ind.dzx,drop=FALSE]%*%solve(t(Z[,ind.dzx,drop=FALSE])%*%Z[,ind.dzx,drop=FALSE])%*%t(Z[,ind.dzx,drop=FALSE])%*%d[,i,drop=FALSE]
+  PZ <- Z[,ind.dzx,drop=FALSE]%*%MASS::ginv(t(Z[,ind.dzx,drop=FALSE])%*%Z[,ind.dzx,drop=FALSE])%*%t(Z[,ind.dzx,drop=FALSE])%*%d[,i,drop=FALSE]
   lasso.PZ.x <- rlasso(x,PZ,...)
   ind.PZx <- lasso.PZ.x$index
-  Dr <- d[,i]- x[,ind.PZx,drop=FALSE]%*%solve(t(x[,ind.PZx,drop=FALSE])%*%x[,ind.PZx,drop=FALSE])%*%t(x[,ind.PZx,drop=FALSE])%*%PZ
+  Dr <- d[,i]- x[,ind.PZx,drop=FALSE]%*%MASS::ginv(t(x[,ind.PZx,drop=FALSE])%*%x[,ind.PZx,drop=FALSE])%*%t(x[,ind.PZx,drop=FALSE])%*%PZ
   Zr <- lasso.PZ.x$residuals
   Drhat <- cbind(Drhat, Dr)
   Zrhat <- cbind(Zrhat, Zr)
@@ -188,7 +188,7 @@ summary.rlassoIV <- function(object, digits = max(3L, getOption("digits") - 3L),
     table[,2] <- object$se
     table[,3] <- table[,1]/table[,2]
     table[,4] <- 2*pnorm(-abs(table[,3]))
-    cat("Estimation of the effect of selected variables in a high-dimensional regression", "\n")
+    cat("Estimation of the effect of selected variables in a high-dimensional IV regression", "\n")
     printCoefmat(table, digits=digits,  P.values=TRUE, has.Pvalue=TRUE)
     cat("\n")
   } else {

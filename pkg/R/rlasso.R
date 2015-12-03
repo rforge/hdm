@@ -88,8 +88,6 @@ UseMethod("rlasso") # definition generic function
 
 #' @rdname rlasso
 #' @export
-
-
 rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, normalize = TRUE,
                           penalty = list(homoscedastic = FALSE, X.design = "independent", lambda.start = NULL, c = 1.1, gamma = 0.1),
                           control = list(numIter = 15, tol = 10^-5, threshold = NULL),...) {
@@ -250,7 +248,6 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, normalize = TRUE
 
 #' @rdname rlasso
 #' @export
-
 rlasso.formula <- function(formula, data, post = TRUE, intercept = TRUE, normalize = TRUE,  
                            penalty = list(homoscedastic = FALSE, X.design = "independent", lambda.start = NULL, c = 1.1, gamma = 0.1),
                           control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...) {
@@ -341,9 +338,9 @@ lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.design = "
   if (penalty$homoscedastic==FALSE && penalty$X.design == "independent") {
     p <- dim(x)[2]
     n <- dim(x)[1]
-    # lambda0 <- 2*penalty$c*sqrt(n)*sqrt(2*log(2*p*log(n)/penalty$gamma))
-    lambda0 <- 2 * penalty$c * sqrt(n) * qnorm(1 - penalty$gamma/(2 *
-                                                                    p * 1))  # 1=num endogenous variables
+    lambda0 <- 2*penalty$c*sqrt(n)*sqrt(2*log(2*p*log(n)/penalty$gamma))
+    #lambda0 <- 2 * penalty$c * sqrt(n) * qnorm(1 - penalty$gamma/(2 *
+    #                                                                p * 1))  # 1=num endogenous variables
     Ups0 <- 1/sqrt(n) * sqrt(t(t(y^2) %*% (x^2)))
     lambda <- lambda0 * Ups0
   }

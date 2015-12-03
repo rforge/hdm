@@ -23,7 +23,7 @@
 #' \code{rlassologit} An object of class \code{rlassologit} is a list
 #' containing at least the following components: \item{coefficients}{parameter
 #' estimates (without intercept)} \item{a0}{value of intercept} \item{index}{index of selected variables (logicals)}
-#' \item{lambda0}{penalty term}
+#' \item{lambda}{penalty term}
 #' \item{residuals}{residuals}
 #' \item{sigma}{root of the variance of the residuals}
 #' \item{call}{function call}
@@ -99,7 +99,17 @@ rlassologit.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
     x1 <- as.matrix(x[,ind1, drop=FALSE])
     if (dim(x1)[2]==0) {
       print("No variables selected!")
-      est <- list(coefficients=rep(0,p), a0=mean(y), index=rep(FALSE,p), s0=s0, lambda=lambda, residuals=y - mean(y), sigma=var(y), call=match.call(),
+      if (intercept==TRUE) {
+        a0 <- log(mean(y)/(1-mean(y)))
+        res <- y - mean(y)
+      }
+      
+      if (intercept==FALSE) {
+        a0 <- 0 # or NA?
+        res <- rep(0.5,n)
+        message("Residuals not defined, set to 0.5")
+      }
+      est <- list(coefficients=rep(0,p), a0=mean(y), index=rep(FALSE,p), s0=s0, lambda=lambda0, residuals=res, sigma=sqrt(var(y)), call=match.call(),
                   options=list(post=post, intercept=intercept, normalize=normalize, control=control))
       class(est) <- c("rlassologit")
       return(est)
@@ -135,14 +145,14 @@ rlassologit.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
     }
 
   if (intercept==FALSE) {
-    a0 <- NA
+    a0 <- 0 # or NA?
   }
 
     coefTemp <- as.vector(coefTemp)
     coefTemp[abs(coefTemp)<control$threshold] <- 0
     ind1 <- as.vector(ind1)
     names(coefTemp) <- names(ind1) <- colnames(x)
-    est <- list(coefficients=coefTemp, a0=a0, index=ind1, lambda=lambda0, residuals=e1, sigma=e1, call=match.call(), options=list(post=post, intercept=intercept, normalize=normalize, control=control))
+    est <- list(coefficients=coefTemp, a0=a0, index=ind1, lambda=lambda0, residuals=e1, sigma=sqrt(var(e1)), call=match.call(), options=list(post=post, intercept=intercept, normalize=normalize, control=control))
     class(est) <- c("rlassologit")
     return(est)
 }
