@@ -14,13 +14,13 @@ one-dimensional response (riboflavin production).
 }
 \details{
 Data was made available by DSM (Switzerland). The data set was introduced in
-B\"uhlmann et al. (2014).
+Buehlmann et al. (2014).
 }
 \examples{
 data(riboflavin)
 }
 \references{
-P. B\"uhlmann, M. Kalisch, L- Meier (2014). High-dimensional
+P. Buehlmann, M. Kalisch, L- Meier (2014). High-dimensional
 statistics with a view towards applications in biology. Annual Review of
 Statistics and its Applications Vol. 1, 255--278.
 }

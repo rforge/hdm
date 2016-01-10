@@ -1,23 +1,23 @@
 globalVariables(c("post", "intercept", "normalize", "penalty", "control", "error", "n", "select.Z" , "select.X", "aes"))
 
-#' rlasso: Function for Lasso estimation under homoskedastic and heteroskeadstic non-Gaussian
+#' rlasso: Function for Lasso estimation under homoscedastic and heteroskeadstic non-Gaussian
 #' disturbances
 #'
 #' The function estimates the coefficients of a Lasso regression with
-#' data-driven penalty under homoskedasticity and heteroskedasticity with non-Gaussian noise. The
+#' data-driven penalty under homoscedasticity and heteroscedasticity with non-Gaussian noise and X-dependent or X-independent design. The
 #' method of the data-driven penalty can be chosen. The object which is
 #' returned is of the S3 class \code{rlasso}.
 #'
 #' The function estimates the coefficients of a Lasso regression with
-#' data-driven penalty under homoskedasticity / heteroskedasticity and non-Gaussian noise. The options \code{homoscedatic} is a logical with \code{FALSE} by default.
+#' data-driven penalty under homoscedasticity / heteroscedasticity and non-Gaussian noise. The options \code{homoscedastic} is a logical with \code{FALSE} by default.
 #' Moreover, for the calculation of the penalty parameter it can be chosen, if the design matrix (\code{X.design}) is \code{independent} (default option) or \code{dependent}.
-#' A \emph{special} option is to set \code{homoscedastic} to \code{none} and to supply a values \code{lambda.start}. Then this values is used as penalty parameter with independet design to weight the regressors.
+#' A \emph{special} option is to set \code{homoscedastic} to \code{none} and to supply a values \code{lambda.start}. Then this value is used as penalty parameter with independent design and heteroscedastic errors to weight the regressors.
 #' For details of the
 #' implementation of the Algorithm for estimation of the data-driven penalty,
 #' in particular the regressor-independent loadings, we refer to Appendix A in
 #' Belloni et al.~(2012). When the option "none" is chosen (together with
 #' \code{lambda.start}), lambda is set to \code{lambda.start} and the
-#' regressor-independent loadings are used. The options "X-dependent" and
+#' regressor-independent loadings und heteroscedasticity are used. The options "X-dependent" and
 #' "X-independent" under homoscedasticity are described in Belloni et al.~(2013). 
 #' \code{lambda.start} can be component-specific. When used with one of the
 #' other option, the values are used as starting values.
@@ -27,7 +27,7 @@ globalVariables(c("post", "intercept", "normalize", "penalty", "control", "error
 #'
 #' @aliases rlasso rlasso.default rlasso.formula
 #' @param y dependent variable (vector or matrix)
-#' @param x regressors (matrix or data.frame)
+#' @param x regressors (vector, matrix or data.frame)
 #' @param formula an object of class "formula" (or one that can be coerced to
 #' that class): a symbolic description of the model to be fitted in the form
 #' \code{y~x}
@@ -44,7 +44,7 @@ globalVariables(c("post", "intercept", "normalize", "penalty", "control", "error
 #' \item{\code{c} and \code{gama}}{constants for the penalty with default \code{c=1.1} and \code{gamma=0.1}}
 #' \item{\code{homoscedastic}}{logical, if homoscedastic errors are considered (default \code{FALSE}). Option \code{none} is described below.}
 #' \item{\code{X.design}}{if \code{independent} or \code{dependent} design matrix \code{X}}
-#' \item{\code{numSim}} number of simulations for the dependent methods
+#' \item{\code{numSim}}{number of simulations for the dependent methods, default=5000}
 #' \item{\code{lambda.start}}{initial penalization value, compulsory for method "none"}
 #' }
 #' @param control list with control values.
@@ -93,6 +93,10 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, normalize = TRUE
                           control = list(numIter = 15, tol = 10^-5, threshold = NULL),...) {
   n <- dim(x)[1]
   p <- dim(x)[2]
+  
+  x <- as.matrix(x)
+  y <- as.matrix(y)
+  
   if (is.null(colnames(x)))
     colnames(x) <- paste("V", 1:p, sep = "")
   ind.names <- 1:p
@@ -146,7 +150,7 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, normalize = TRUE
 
   mm <- 1
   s0 <- sqrt(var(y))
-  while (mm < control$numIter) {
+  while (mm <= control$numIter) {
     # calculation parameters
     coefTemp <- LassoShooting.fit(x, y, lambda, XX = XX, Xy = Xy)$coefficients
     coefTemp[is.na(coefTemp)] <- 0
@@ -154,7 +158,12 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, normalize = TRUE
     x1 <- as.matrix(x[, ind1, drop = FALSE])
     if (dim(x1)[2] == 0) {
       message("No variables selected!")
-      est <- list(coefficients = rep(0, p), intercept.value=mean(y), index = rep(FALSE, p),
+      if (intercept) {
+        intercept.value <- mean(y + mu)
+      } else {
+        intercept.value <- mean(y)
+      }
+      est <- list(coefficients = rep(0, p), intercept.value=intercept.value, index = rep(FALSE, p),
                   lambda = lambda, lambda0 = lambda0, loadings = Ups0, residuals = y -
                     mean(y), sigma = var(y), iter = mm, call = match.call(),
                   options = list(post = post, intercept = intercept, normalize = normalize,
@@ -204,6 +213,7 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, normalize = TRUE
     
     # none
     if (penalty$homoscedastic == "none") {
+      if (is.null(penalty$lambda.start)) stop("Argument lambda.start required!")
       Ups1 <- 1/sqrt(n) * sqrt(t(t(e1^2) %*% (x^2)))
       lambda <- pen$lambda0 * Ups1
     }
@@ -223,6 +233,7 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, normalize = TRUE
   coefTemp <- as.vector(coefTemp)
   coefTemp[abs(coefTemp) < control$threshold] <- 0
   ind1 <- as.vector(ind1)
+  coefTemp <- as.vector(as.vector(coefTemp))
   names(coefTemp) <- names(ind1) <- colnames(x)
   if (intercept) {
     if (is.null(mu)) mu <-0
@@ -236,7 +247,7 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, normalize = TRUE
     intercept.value <- NA
   }
   est <- list(coefficients = coefTemp, intercept.value=intercept.value, index = ind1, lambda = lambda,
-              lambda0 = lambda0, loadings = Ups1, residuals = e1, sigma = s1,
+              lambda0 = lambda0, loadings = Ups1, residuals = as.vector(e1), sigma = s1,
               iter = mm, call = match.call(), options = list(post = post, intercept = intercept,
                                                              normalize = normalize, control = control, penalty = penalty,
                                                              mu = mu, meanx = meanx, scalex = normx, ind.scaled = ind))
@@ -278,16 +289,16 @@ rlasso.formula <- function(formula, data, post = TRUE, intercept = TRUE, normali
 #'
 #' @param penalty list with options for the calculation of the penalty. 
 #' \itemize{
-#' \item{\code{c} and \code{gama}}{constants for the penalty with default \code{c=1.1} and \code{gamma=0.1}}
-#' \item{\code{homoscedastic}}{logical, if homoscedastic errors are considered (default \code{FALSE}). Option \code{none} is described below.}
-#' \item{\code{X.design}}{if \code{independent} or \code{dependent} design matrix \code{X}}
-#' \item{\code{numSim}} number of simulations for the dependent methods
-#' \item{\code{lambda.start}}{initial penalization value, compulsory for method "none"}
+#' \item{\code{c} and \code{gamma}}{ constants for the penalty with default \code{c=1.1} and \code{gamma=0.1}}
+#' \item{\code{homoscedastic}}{ logical, if homoscedastic errors are considered (default \code{FALSE}). Option \code{none} is described below.}
+#' \item{\code{X.design}}{ if \code{independent} or \code{dependent} design matrix \code{X}}
+#' \item{\code{numSim}}{ number of simulations for the dependent methods}
+#' \item{\code{lambda.start}}{ initial penalization value, compulsory for method "none"}
 #' }
 #' @param x matrix of regressor variables
 #' @param y residual which is used for calculation of the variance or the data-dependent loadings
 #' @return The functions returns a list with the penalty \code{lambda} which is the product of \code{lambda0} and \code{Ups0}. \code{Ups0}
-#' denotes either the variance or the data-dependent loadings for the regressors or is the variance in the \code{independent} case. \code{method} gives the selected method for the calculation.
+#' denotes either the variance (\code{independent} case) or the data-dependent loadings for the regressors. \code{method} gives the selected method for the calculation.
 #' @export
 
 

@@ -9,9 +9,11 @@
 \alias{wealth}
 \title{Pension 401(k) data set}
 \format{\describe{Dataframe with the following variables (amongst others):
-\item{p401}{participation in 401(k)} \item{e401}{eligibility for 401(k)}
+\item{p401}{participation in 401(k)}
+\item{e401}{eligibility for 401(k)}
 \item{a401}{401(k) assets}
-\item{tw}{total wealth (in US $)} \item{tfa}{financial assets (in US $)}
+\item{tw}{total wealth (in US $)}
+\item{tfa}{financial assets (in US $)}
 \item{net_tfa}{net financial assets (in US $)}
 \item{nifa}{non-401k financial assets (in US $)}
 \item{net_nifa}{net non-401k financial assets}

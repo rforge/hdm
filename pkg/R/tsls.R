@@ -12,7 +12,8 @@
 #' @param z instruments
 #' @param intercept logical, if intercept is included
 #' @return The function returns a list with the following elements \item{coefficients}{coefficients}
-#' \item{vcov}{variance-covariance matrix} \item{residuals}{outcome minus predicted values}
+#' \item{vcov}{variance-covariance matrix} \item{residuals}{outcome minus predicted values} \item{call}{function call} \item{samplesize}{sample size}
+#' \item{se}{standard error}
 #' @keywords Instrumental Variables
 #' @keywords Endogeneity
 #' @keywords 2SLS
@@ -22,6 +23,11 @@
 
 tsls <- function(y, d, x, z, intercept=TRUE) {
   n <- length(y)
+  
+  
+  #if (is.null(colnames(d))  & is.matrix(d)) colnames(d) <- paste("d", 1:ncol(d), sep="")
+  #if (is.null(colnames(x)) & !is.null(x) & is.matrix(x)) colnames(x) <- paste("x", 1:ncol(x), sep="")
+  #if (is.null(colnames(z)) & !is.null(z) & is.matrix(z)) colnames(z) <- paste("z", 1:ncol(z), sep="")
   
   if (intercept==TRUE && is.null(x)) x <- rep(1,n)
   if (intercept==TRUE && !is.null(x)) x <- cbind(1,x)
@@ -46,7 +52,7 @@ tsls <- function(y, d, x, z, intercept=TRUE) {
 
   b <- M %*% Mxz %*% Mzz %*% (t(Z) %*% y)
   Dhat <- Z %*% solve(t(Z) %*% Z) %*% t(Z) %*% X
-  b2 <- solve(t(Dhat) %*% X) %*% (t(Dhat) %*% y)
+  b2 <- MASS::ginv(t(Dhat) %*% X) %*% (t(Dhat) %*% y)
   e <- y - X %*% b
   VC1 <- as.numeric((t(e) %*% e/(n - k))) * M
   return(list(coefficients = b, vcov = VC1, se=sqrt(diag(VC1)), residuals = e, call=match.call(), samplesize=n))

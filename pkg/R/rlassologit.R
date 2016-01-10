@@ -98,7 +98,7 @@ rlassologit.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
     ind1 <- (abs(coefTemp) > 0)
     x1 <- as.matrix(x[,ind1, drop=FALSE])
     if (dim(x1)[2]==0) {
-      print("No variables selected!")
+      message("No variables selected!")
       if (intercept==TRUE) {
         a0 <- log(mean(y)/(1-mean(y)))
         res <- y - mean(y)
@@ -106,10 +106,10 @@ rlassologit.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
       
       if (intercept==FALSE) {
         a0 <- 0 # or NA?
-        res <- rep(0.5,n)
+        res <- rep(y-0.5,n)
         message("Residuals not defined, set to 0.5")
       }
-      est <- list(coefficients=rep(0,p), a0=mean(y), index=rep(FALSE,p), s0=s0, lambda=lambda0, residuals=res, sigma=sqrt(var(y)), call=match.call(),
+      est <- list(coefficients=rep(0,p), a0=a0, index=rep(FALSE,p), s0=s0, lambda0=lambda0, residuals=res, sigma=sqrt(var(res)), call=match.call(),
                   options=list(post=post, intercept=intercept, normalize=normalize, control=control))
       class(est) <- c("rlassologit")
       return(est)
@@ -152,7 +152,7 @@ rlassologit.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
     coefTemp[abs(coefTemp)<control$threshold] <- 0
     ind1 <- as.vector(ind1)
     names(coefTemp) <- names(ind1) <- colnames(x)
-    est <- list(coefficients=coefTemp, a0=a0, index=ind1, lambda=lambda0, residuals=e1, sigma=sqrt(var(e1)), call=match.call(), options=list(post=post, intercept=intercept, normalize=normalize, control=control))
+    est <- list(coefficients=coefTemp, a0=a0, index=ind1, lambda0=lambda0, residuals=e1, sigma=sqrt(var(e1)), call=match.call(), options=list(post=post, intercept=intercept, normalize=normalize, control=control))
     class(est) <- c("rlassologit")
     return(est)
 }

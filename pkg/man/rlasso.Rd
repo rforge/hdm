@@ -4,7 +4,7 @@
 \alias{rlasso}
 \alias{rlasso.default}
 \alias{rlasso.formula}
-\title{rlasso: Function for Lasso estimation under homoskedastic and heteroskeadstic non-Gaussian
+\title{rlasso: Function for Lasso estimation under homoscedastic and heteroskeadstic non-Gaussian
 disturbances}
 \usage{
 rlasso(x, ...)
@@ -20,7 +20,7 @@ rlasso(x, ...)
   control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...)
 }
 \arguments{
-\item{x}{regressors (matrix or data.frame)}
+\item{x}{regressors (vector, matrix or data.frame)}
 
 \item{...}{further arguments (only for consistent defintion of methods)}
 
@@ -38,7 +38,7 @@ penalized.}
 \item{\code{c} and \code{gama}}{constants for the penalty with default \code{c=1.1} and \code{gamma=0.1}}
 \item{\code{homoscedastic}}{logical, if homoscedastic errors are considered (default \code{FALSE}). Option \code{none} is described below.}
 \item{\code{X.design}}{if \code{independent} or \code{dependent} design matrix \code{X}}
-\item{\code{numSim}} number of simulations for the dependent methods
+\item{\code{numSim}}{number of simulations for the dependent methods, default=5000}
 \item{\code{lambda.start}}{initial penalization value, compulsory for method "none"}
 }}
 
@@ -73,21 +73,21 @@ the residuals} \item{iter}{number of iterations} \item{call}{function call}
 }
 \description{
 The function estimates the coefficients of a Lasso regression with
-data-driven penalty under homoskedasticity and heteroskedasticity with non-Gaussian noise. The
+data-driven penalty under homoscedasticity and heteroscedasticity with non-Gaussian noise and X-dependent or X-independent design. The
 method of the data-driven penalty can be chosen. The object which is
 returned is of the S3 class \code{rlasso}.
 }
 \details{
 The function estimates the coefficients of a Lasso regression with
-data-driven penalty under homoskedasticity / heteroskedasticity and non-Gaussian noise. The options \code{homoscedatic} is a logical with \code{FALSE} by default.
+data-driven penalty under homoscedasticity / heteroscedasticity and non-Gaussian noise. The options \code{homoscedastic} is a logical with \code{FALSE} by default.
 Moreover, for the calculation of the penalty parameter it can be chosen, if the design matrix (\code{X.design}) is \code{independent} (default option) or \code{dependent}.
-A \emph{special} option is to set \code{homoscedastic} to \code{none} and to supply a values \code{lambda.start}. Then this values is used as penalty parameter with independet design to weight the regressors.
+A \emph{special} option is to set \code{homoscedastic} to \code{none} and to supply a values \code{lambda.start}. Then this value is used as penalty parameter with independent design and heteroscedastic errors to weight the regressors.
 For details of the
 implementation of the Algorithm for estimation of the data-driven penalty,
 in particular the regressor-independent loadings, we refer to Appendix A in
 Belloni et al.~(2012). When the option "none" is chosen (together with
 \code{lambda.start}), lambda is set to \code{lambda.start} and the
-regressor-independent loadings are used. The options "X-dependent" and
+regressor-independent loadings und heteroscedasticity are used. The options "X-dependent" and
 "X-independent" under homoscedasticity are described in Belloni et al.~(2013).
 \code{lambda.start} can be component-specific. When used with one of the
 other option, the values are used as starting values.

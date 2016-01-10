@@ -28,7 +28,7 @@ NULL
 #' The data set contains growth data of Barro-Lee. The Barro Lee data consists
 #' of a panel of 138 countries for the period 1960 to 1985. The depenent
 #' variable is national growth rates in GDP per capita for the periods
-#' 1965-1975 and 1975-1985. The growth rate in GDP over a period from t1 to t2
+#' 1965-1975 and 1975-1985. The growth rate in GDP over a period from \eqn{t_1} to \eqn{t_2}
 #' is commonly defined as \eqn{\log(GDP_{t_1}/GDP_{t_2})}. The number of covariates is p=62.
 #' The number of complete observations is 90.
 #'
@@ -43,7 +43,7 @@ NULL
 #' \item{outcome}{dependent variable: national growth rates in GDP per capita
 #' for the periods 1965-1975 and 1975-1985} \item{x}{covariates which might
 #' influence growth} }
-#' @references R.J. Barro, J.W. Lee (1994). Data set for a oanel of 139
+#' @references R.J. Barro, J.W. Lee (1994). Data set for a panel of 139
 #' countries. NBER.
 #'
 #' @references R.J. Barro, X. Sala-i-Martin (1995). Economic Growth. McGrwa-Hill, New York.
@@ -70,10 +70,12 @@ NULL
 #' @name pension
 #' @aliases 401(k) plans wealth data pension
 #' @docType data
-#' @format \describe{Dataframe with the following variables (amongst others): 
-#' \item{p401}{participation in 401(k)} \item{e401}{eligibility for 401(k)}
+#' @format \describe{Dataframe with the following variables (amongst others):
+#' \item{p401}{participation in 401(k)}
+#' \item{e401}{eligibility for 401(k)}
 #' \item{a401}{401(k) assets}
-#' \item{tw}{total wealth (in US $)} \item{tfa}{financial assets (in US $)}
+#' \item{tw}{total wealth (in US $)}
+#' \item{tfa}{financial assets (in US $)}
 #' \item{net_tfa}{net financial assets (in US $)}
 #' \item{nifa}{non-401k financial assets (in US $)}
 #' \item{net_nifa}{net non-401k financial assets}
@@ -111,14 +113,14 @@ NULL
 #' one-dimensional response (riboflavin production).
 #'
 #' Data was made available by DSM (Switzerland). The data set was introduced in
-#' B\"uhlmann et al. (2014).
+#' Buehlmann et al. (2014).
 #'
 #' @name riboflavin
 #' @docType data
 #' @format \describe{ \item{y}{Log-transformed riboflavin production rate
 #' (original name: q_RIBFLV).} \item{x}{(Co-)variables measuring the logarithm
 #' of the expression level of 4088 genes.} }
-#' @references P. B\"uhlmann, M. Kalisch, L- Meier (2014). High-dimensional
+#' @references P. Buehlmann, M. Kalisch, L- Meier (2014). High-dimensional
 #' statistics with a view towards applications in biology. Annual Review of
 #' Statistics and its Applications Vol. 1, 255--278.
 #' @keywords datasets
@@ -128,7 +130,7 @@ NULL
 
 #' AJR data set
 #'
-#' Dataset on settler mortality
+#' Dataset on settler mortality.
 #'
 #' Data set was analyzed in Acemoglu et al. (2001). A detailed decription of the data can be found at \url{http://economics.mit.edu/faculty/acemoglu/data/ajr2001} 
 #'

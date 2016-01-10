@@ -1,5 +1,5 @@
 # DGP
-set.seed(123456)
+set.seed(12345)
 library(AER)
 library(hdm)
 #library(hdm2)
@@ -212,17 +212,17 @@ confint(output4)
 # 
 # ########################### Analysis simulation
 # 
-# library(R.matlab)
-# rm(list=ls())
-# data <- readMat("E:\\R Package hdm\\hdm\\sim.mat")
-# data_int <- readMat("E:\\R Package hdm\\hdm\\sim_inter.mat")
-# 
-# y <- data$y
-# d <- data$d
-# z <- data$z
-# x <- as.matrix(data$xS)
-# debug(rlassoLATE)
-# output1 <- rlassoLATE(x,d,y,z, bootstrap=NULL, post=TRUE, intercept=FALSE, normalize=FALSE)
+library(R.matlab)
+rm(list=ls())
+data <- readMat("E:\\R Package hdm\\Misc\\sim.mat")
+data_int <- readMat("E:\\R Package hdm\\Misc\\sim_inter.mat")
+
+y <- data$y
+d <- data$d
+z <- data$z
+x <- as.matrix(data$xS)
+debug(rlassoLATE)
+output1 <- rlassoLATE(x,d,y,z, bootstrap=NULL, post=TRUE, intercept=TRUE, normalize=FALSE)
 # output2 <- rlassoLATE(x,d,y,z, bootstrap=NULL, post=TRUE, intercept=TRUE, normalize=TRUE)
 # output3 <- rlassoLATE(x,d,y,z, bootstrap=NULL, post=TRUE, intercept=FALSE, normalize=TRUE)
 # output4 <- rlassoLATE(x,d,y,z, bootstrap=NULL, post=TRUE, intercept=TRUE, normalize=FALSE)

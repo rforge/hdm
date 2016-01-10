@@ -29,7 +29,7 @@
 
 \item{object}{An object of class \code{rlassoEffect}}
 
-\item{parm}{a specification of which parameters are to be given confidence intervals, either a vector of numbers or a vector of names. If missing, all parameters are considered.}
+\item{parm}{a specification of which parameters are to be given confidence intervals among the variables for which inference was done, either a vector of numbers or a vector of names. If missing, all parameters are considered.}
 
 \item{level}{the confidence level required}
 

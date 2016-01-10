@@ -28,7 +28,7 @@
 #' @rdname rlassoIV
 #' @export
 
-rlassoIV <- function(x,d,y,z, select.Z=TRUE, select.X=TRUE, ...) {
+rlassoIV <- function(x, d, y, z, select.Z=TRUE, select.X=TRUE, ...) {
   d <- as.matrix(d)
   if (is.null(colnames(d))) colnames(d) <- paste("d", 1:ncol(d), sep="")
   if (is.null(colnames(x)) & !is.null(x)) colnames(x) <- paste("x", 1:ncol(x), sep="")
@@ -82,7 +82,7 @@ rlassoIV <- function(x,d,y,z, select.Z=TRUE, select.X=TRUE, ...) {
 #' @rdname rlassoIV
 #' @export
 
-rlassoIVmult <- function(x,z,y,d,...) {
+rlassoIVmult <- function(x, d, y, z, select.Z=TRUE, select.X=TRUE, ...) {
   #browser()
   d <- as.matrix(d)
   if (is.null(colnames(d))) colnames(d) <- paste("d", 1:ncol(d), sep="")
@@ -95,12 +95,12 @@ rlassoIVmult <- function(x,z,y,d,...) {
   }
   
   if (select.Z==TRUE & select.X==FALSE) {
-    res <- rlassoIVselectZ(y, d, x, z, ...)
+    res <- rlassoIVselectZ(x, d, y, z, ...)
     return(res)
   }
   
   if (select.Z==FALSE & select.X==TRUE) {
-    res <- rlassoIVselectX(y, d, x, z, ...)
+    res <- rlassoIVselectX(x, d, y, z, ...)
     return(res)
   }
   

@@ -20,7 +20,7 @@
 #' @param Xy optional, precalculated matrix \eqn{t(X)*y}
 #' @param beta.start start value for beta
 #' @return \item{coefficients}{estimated coefficients by the Shooting Lasso
-#' Algorithm} \item{coef.list}{list of coefficients from each iteration}
+#' Algorithm} \item{coef.list}{matrix of coefficients from each iteration}
 #' \item{num.it}{number of iterations run}
 #' @references Fu, W. (1998). Penalized regressions: the bridge vs the lasso.
 #' \emph{Journal of Computational and Graphical Software} 7, 397-416.

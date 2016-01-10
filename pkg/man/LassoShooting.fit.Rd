@@ -31,7 +31,7 @@ for numerical issues.}
 }
 \value{
 \item{coefficients}{estimated coefficients by the Shooting Lasso
-Algorithm} \item{coef.list}{list of coefficients from each iteration}
+Algorithm} \item{coef.list}{matrix of coefficients from each iteration}
 \item{num.it}{number of iterations run}
 }
 \description{

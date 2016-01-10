@@ -22,10 +22,10 @@ treatments}
 \item{y}{outcome variable (vector or matrix)}
 
 \item{index}{vector of integers, logicals or variables names indicating the position (column) of
-variables (integer case), logical yes or no (TRUE or FALSE) or the variable names of x which should be used for inference / as treatment variables.}
+variables (integer case), logical vector of length of the variables (TRUE or FALSE) or the variable names of \code{x} which should be used for inference / as treatment variables.}
 
-\item{I3}{logical vector with the same length as the number of controls;
-indicates if variables (TRUE) should be included in any case.}
+\item{I3}{logical vector with the same length as the number of variables in \code{x};
+indicates if variables (TRUE) should be included in any case to the model and they are exempt from selection. These variables should not be included in the \code{index}; hence the intersection with \code{index} must be the empty set.}
 
 \item{formula}{an element of class \code{formula}}
 
@@ -47,7 +47,7 @@ Estimation and inference of selected (low-dimensional) coefficients in a high-di
 The functions estimates selected (low-dimensional) coefficients in a high-dimensional linear model.
 An application is e.g. estimation of a treatment effect \eqn{\alpha_0} in a
 setting of high-dimensional controls. The so-called post-double-selection
-estimator is implemented. The idea is to select variable by regression of
+estimator is implemented. The idea is to select variables by regression of
 the outcome variable on the control variables and the treatment variable on
 the control variables. The final estimation is done by a regression of the
 outcome on the treatment effect and the union of the selected variables in
@@ -74,7 +74,7 @@ confint(rlassoEffect.reg, level=0.9)
 \references{
 A. Belloni, V. Chernozhukov, C. Hansen (2014). Inference on
 treatment effects after selection among high-dimensional controls. The
-Review of Economic Studies 81(2), 608--650.
+Review of Economic Studies 81(2), 608-650.
 }
 \keyword{Estimation}
 \keyword{High-dimensional}

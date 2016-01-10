@@ -8,7 +8,7 @@ Controls and Instruments}
 \usage{
 rlassoIV(x, d, y, z, select.Z = TRUE, select.X = TRUE, ...)
 
-rlassoIVmult(x, z, y, d, ...)
+rlassoIVmult(x, d, y, z, select.Z = TRUE, select.X = TRUE, ...)
 }
 \arguments{
 \item{x}{matrix of exogenous variables}

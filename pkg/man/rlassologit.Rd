@@ -47,7 +47,7 @@ that class): a symbolic description of the model to be fitted in the form
 \code{rlassologit} An object of class \code{rlassologit} is a list
 containing at least the following components: \item{coefficients}{parameter
 estimates (without intercept)} \item{a0}{value of intercept} \item{index}{index of selected variables (logicals)}
-\item{lambda0}{penalty term}
+\item{lambda}{penalty term}
 \item{residuals}{residuals}
 \item{sigma}{root of the variance of the residuals}
 \item{call}{function call}

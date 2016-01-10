@@ -5,7 +5,7 @@
 #' The functions estimates selected (low-dimensional) coefficients in a high-dimensional linear model.
 #' An application is e.g. estimation of a treatment effect \eqn{\alpha_0} in a
 #' setting of high-dimensional controls. The so-called post-double-selection
-#' estimator is implemented. The idea is to select variable by regression of
+#' estimator is implemented. The idea is to select variables by regression of
 #' the outcome variable on the control variables and the treatment variable on
 #' the control variables. The final estimation is done by a regression of the
 #' outcome on the treatment effect and the union of the selected variables in
@@ -19,16 +19,16 @@
 #' @param formula an element of class \code{formula}
 #' @param data data.frame in connection with \code{formula}
 #' @param index vector of integers, logicals or variables names indicating the position (column) of
-#' variables (integer case), logical yes or no (TRUE or FALSE) or the variable names of x which should be used for inference / as treatment variables.
-#' @param I3 logical vector with the same length as the number of controls;
-#' indicates if variables (TRUE) should be included in any case.
+#' variables (integer case), logical vector of length of the variables (TRUE or FALSE) or the variable names of \code{x} which should be used for inference / as treatment variables.
+#' @param I3 logical vector with the same length as the number of variables in \code{x};
+#' indicates if variables (TRUE) should be included in any case to the model and they are exempt from selection. These variables should not be included in the \code{index}; hence the intersection with \code{index} must be the empty set.
 #' @param \dots parameters passed to the \code{\link{rlasso}} function.
 #' @return The function returns an object of class \code{rlassoEffect} with the following entries: \item{coefficients}{vector with estimated
 #' values of the coefficients for each selected variable} \item{se}{standard error (vector)}
 #' \item{t}{t-statistic} \item{pval}{p-value} \item{samplesize}{sample size of the data set} \item{index}{index of the variables for which inference is performed}
 #' @references A. Belloni, V. Chernozhukov, C. Hansen (2014). Inference on
 #' treatment effects after selection among high-dimensional controls. The
-#' Review of Economic Studies 81(2), 608--650.
+#' Review of Economic Studies 81(2), 608-650.
 #' @keywords Estimation Inference Treatment effect High-dimensional controls
 #' @export
 #' @rdname rlassoEffect
@@ -61,6 +61,7 @@ rlassoEffect.default <- function(x, y, index=c(1:ncol(x)), I3=NULL, ...) {
     k <- p1 <- length(index)
   }
   n <- dim(x)[1]
+  x <- as.matrix(x)
   # preprocessing index
   # numerischer Vektor
   if (is.numeric(index)){
@@ -166,8 +167,10 @@ rlassoEffectone <- function(x, y, d, I3=NULL,  ...) {
     no.selected <- 0
   }
   res <- list(epsilon = xi, v=v)
-  return(list(alpha=unname(alpha), se=drop(se), t=unname(tval), pval=unname(pval), no.selected=no.selected, coefficients=coef(reg1), residuals=res))
-}
+  results <- list(alpha=unname(alpha), se=drop(se), t=unname(tval), pval=unname(pval), no.selected=no.selected, coefficients=coef(reg1),  coefficients.reg=coef(reg1), residuals=res, call=match.call(), samplesize=n)
+  class(results) <- "rlassoEffect"
+  return(results)
+  }
 
 
 # HC.lasso.mult <- function(x, y, d, I3=NULL,  ...) {
@@ -273,7 +276,7 @@ summary.rlassoEffect <- function(object, digits = max(3L, getOption("digits") - 
 }
 
 #' @rdname methods.rlassoEffect
-#' @param parm a specification of which parameters are to be given confidence intervals, either a vector of numbers or a vector of names. If missing, all parameters are considered.
+#' @param parm a specification of which parameters are to be given confidence intervals among the variables for which inference was done, either a vector of numbers or a vector of names. If missing, all parameters are considered.
 #' @param level	the confidence level required
 #' @param joint logical, if \code{TRUE} joint confidence intervals are clalculated.
 #' @export
@@ -336,36 +339,78 @@ plot.rlassoEffect <- function(x, main="", xlab="coef", ylab="", xlim=NULL, col="
   # generate ordered KI-matrix
   coefmatrix <- cbind(summary(x), confint(x))[, c(1, 5, 6)]
   rownames(coefmatrix) <- names(x$coefficients)
-  colnames(coefmatrix) <- c("coef","lower","upper")
-  coefmatrix <- coefmatrix[order(abs(coefmatrix[, 1])), ]
   coefmatrix <- as.data.frame(coefmatrix)
+  coefmatrix <- cbind(rownames(coefmatrix),coefmatrix)
+  colnames(coefmatrix) <- c("names","coef","lower","upper")
+  coefmatrix <- coefmatrix[order(abs(coefmatrix[, 2])), ]
+  
   
   # scale
   if(missing(xlim)){
-    low <- min(coefmatrix)
-    up <- max(coefmatrix)
+    low <- min(coefmatrix[,-1])
+    up <- max(coefmatrix[,-1])
   } else{
     low <- xlim[1]
     up <- xlim[2]
   }
-  coef <- coefmatrix[,1]
+  
   # generate points 
-  plotobject <- ggplot2::ggplot(data=coefmatrix, ggplot2::aes(y=coef,x=1:(length(coef)))) + ggplot2::geom_point(colour=col)+ggplot2::geom_hline(h=0)
+  plotobject <- ggplot(coefmatrix,aes(y=coef,x=factor(names,level=names))) + geom_point(colour=col)+geom_hline(h=0)
+  
   # generate errorbars (KIs)
-  plotobject <- plotobject + ggplot2::geom_errorbar(ymin=coefmatrix$lower,ymax=coefmatrix$upper,colour=col)
+  plotobject <- plotobject + geom_errorbar(ymin=coefmatrix$lower,ymax=coefmatrix$upper,colour=col)
   
   # further graphic parameter
-  plotobject <- plotobject + ggplot2::xlim(0.5,nrow(coefmatrix)+0.5) + ggplot2::ggtitle(main) + ggplot2::ylim(low,up) + ggplot2::xlab(ylab) + ggplot2::ylab(xlab) 
+  plotobject <- plotobject + ggtitle(main) + ylim(low,up) + xlab(ylab) + ylab(xlab) 
   
-  # var.names
-  #plotobject <- plotobject + ggplot2::scale_x_discrete(limits=rownames(coefmatrix)[1:nrow(coefmatrix)])
+  # var.names xlim(0.5,nrow(coefmatrix)+0.5)
+  #plotobject <- plotobject + scale_x_discrete(limits=rownames(coefmatrix)[1:nrow(coefmatrix)])
   
   # invert x and y axis
-  plotobject <- plotobject + ggplot2::coord_flip()
-
+  plotobject <- plotobject + coord_flip()
+  
+  # plot
   plotobject
   
 }
+
+
+
+# plot.rlassoEffect <- function(x, main="", xlab="coef", ylab="", xlim=NULL, col="black",...){
+#   
+#   # generate ordered KI-matrix
+#   coefmatrix <- cbind(summary(x), confint(x))[, c(1, 5, 6)]
+#   rownames(coefmatrix) <- names(x$coefficients)
+#   colnames(coefmatrix) <- c("coef","lower","upper")
+#   coefmatrix <- coefmatrix[order(abs(coefmatrix[, 1])), ]
+#   coefmatrix <- as.data.frame(coefmatrix)
+#   
+#   # scale
+#   if(missing(xlim)){
+#     low <- min(coefmatrix)
+#     up <- max(coefmatrix)
+#   } else{
+#     low <- xlim[1]
+#     up <- xlim[2]
+#   }
+#   coef <- coefmatrix[,1]
+#   # generate points 
+#   plotobject <- ggplot2::ggplot(data=coefmatrix, ggplot2::aes(y=coef,x=1:(length(coef)))) + ggplot2::geom_point(colour=col)+ggplot2::geom_hline(h=0) 
+#   # generate errorbars (KIs)
+#   plotobject <- plotobject + ggplot2::geom_errorbar(ymin=coefmatrix$lower,ymax=coefmatrix$upper,colour=col)
+#   
+#   # further graphic parameter
+#   plotobject <- plotobject + ggplot2::xlim(0.5,nrow(coefmatrix)+0.5) + ggplot2::ggtitle(main) + ggplot2::ylim(low,up) + ggplot2::xlab(ylab) + ggplot2::ylab(xlab)
+#   
+#   # var.names
+#   plotobject <- plotobject + ggplot2::scale_x_discrete(limits=rownames(coefmatrix)[1:nrow(coefmatrix)])
+#   
+#   # invert x and y axis
+#   plotobject <- plotobject + ggplot2::coord_flip()
+# 
+#   plotobject
+#   
+# }
 
 # #plot.rlassoEffect <- function(x, ..., var.names=T, col="black", xlim=NULL, xlab="", ylab="", main="", sub="",
 # #                          pch=19, cex=1.3, lwd=2, lty=1){

@@ -29,7 +29,7 @@
 #' @keywords Instrumental Variables Lasso Hig-dimensional setting
 #' @export
 #' @rdname rlassoIVselectZ
-rlassoIVselectZ <- function(x,d,y,z, post=TRUE, ...) {
+rlassoIVselectZ <- function(x, d, y, z, post=TRUE, ...) {
 
   d <- as.matrix(d)
   if(is.vector(x)) x <-  as.matrix(x)
@@ -48,7 +48,8 @@ rlassoIVselectZ <- function(x,d,y,z, post=TRUE, ...) {
     if (sum(lasso.fit$ind)==0) {
       dihat <- rep(mean(di),n) #dihat <- mean(di)
     } else {
-      dihat <- z%*%lasso.fit$coefficients
+      #dihat <- z%*%lasso.fit$coefficients
+      dihat <- predict(lasso.fit)
     }
     Dhat <- cbind(Dhat, dihat)
   }
@@ -56,6 +57,7 @@ rlassoIVselectZ <- function(x,d,y,z, post=TRUE, ...) {
   d <- cbind(d,x)
   # calculation coefficients
   alpha.hat <- solve(t(Dhat)%*%d)%*%(t(Dhat)%*%y)
+  #alpha.hat <- MASS::ginv(t(Dhat)%*%d)%*%(t(Dhat)%*%y)
   # calcualtion of the variance-covariance matrix
   residuals <- y - d%*%alpha.hat
   Omega.hat <- t(Dhat)%*%diag(as.vector(residuals^2))%*%Dhat #  Dhat.e <- Dhat*as.vector(residuals);  Omega.hat <- t(Dhat.e)%*%Dhat.e

@@ -18,7 +18,7 @@
 \item{Exprop}{Average protection against expropriation risk}
 }}
 \description{
-Dataset on settler mortality
+Dataset on settler mortality.
 }
 \details{
 Data set was analyzed in Acemoglu et al. (2001). A detailed decription of the data can be found at \url{http://economics.mit.edu/faculty/acemoglu/data/ajr2001}

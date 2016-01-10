@@ -24,7 +24,7 @@ Data set of growth compiled by Barro Lee.
 The data set contains growth data of Barro-Lee. The Barro Lee data consists
 of a panel of 138 countries for the period 1960 to 1985. The depenent
 variable is national growth rates in GDP per capita for the periods
-1965-1975 and 1975-1985. The growth rate in GDP over a period from t1 to t2
+1965-1975 and 1975-1985. The growth rate in GDP over a period from \eqn{t_1} to \eqn{t_2}
 is commonly defined as \eqn{\log(GDP_{t_1}/GDP_{t_2})}. The number of covariates is p=62.
 The number of complete observations is 90.
 }
@@ -32,7 +32,7 @@ The number of complete observations is 90.
 data(GrwothData)
 }
 \references{
-R.J. Barro, J.W. Lee (1994). Data set for a oanel of 139
+R.J. Barro, J.W. Lee (1994). Data set for a panel of 139
 countries. NBER.
 
 R.J. Barro, X. Sala-i-Martin (1995). Economic Growth. McGrwa-Hill, New York.
