@@ -175,7 +175,7 @@ rlassoEffect <- function(x, y, d, method="double selection", I3=NULL,  post=TRUE
     no.selected <- 0
   }
   res <- list(epsilon = xi, v=v)
-  results <- list(alpha=unname(alpha), se=drop(se), t=unname(tval), pval=unname(pval), no.selected=no.selected, coefficients=coef(reg1),  coefficients.reg=coef(reg1), residuals=res, call=match.call(), samplesize=n)
+  results <- list(alpha=unname(alpha), se=drop(se), t=unname(tval), pval=unname(pval), no.selected=no.selected, coefficients=unname(alpha),  coefficient=unname(alpha), coefficients.reg=coef(reg1), residuals=res, call=match.call(), samplesize=n)
   }
   
   if (method=="partialling out") {
@@ -188,7 +188,7 @@ rlassoEffect <- function(x, y, d, method="double selection", I3=NULL,  post=TRUE
     tval <- alpha/sqrt(var)
     pval <- 2*pnorm(-abs(tval))
     res <- list(epsilon = reg1$residuals, v=dr)
-    results <- list(alpha=unname(alpha), se=drop(se), t=unname(tval), pval=unname(pval), coefficients.reg=coef(reg1), residuals=res, call=match.call(), samplesize=n)
+    results <- list(alpha=unname(alpha), se=drop(se), t=unname(tval), pval=unname(pval), coefficients=unname(alpha), coefficient=unname(alpha), coefficients.reg=coef(reg1), residuals=res, call=match.call(), samplesize=n)
     }
   class(results) <- "rlassoEffects"
   return(results)
@@ -242,7 +242,7 @@ rlassoEffect <- function(x, y, d, method="double selection", I3=NULL,  post=TRUE
 # }
 
 
-################# Methods for rlassoEffect
+################# Methods for rlassoEffects
 
 #' Methods for S3 object \code{rlassoEffects}
 #'
