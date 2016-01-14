@@ -315,11 +315,31 @@ The methods \code{print} and \code{summarize} have the option \code{all}, which 
 
 \section{Inference on Target Regression Coefficients in Regression, Using Approximate Sparsity}
 
-\subsection{Intuition via Partialling Out}
-An important concept which underlies some of the methods applied later is the so--called \textquotedblleft partialling out\textquotedblright, an application of the Frisch-Waugh-Lovell Theorem. The idea is to take out the effect of (conditioning) variables which are not the target of analysis. Suppose we are interested in the effect (=parameter estimate) of a single variable in a regression setting. One could either run an ols regression of the dependent variable on all independent variables and the focus on the parameter estimates of interest. An alternative approach leading to the same result is to partial out the effect of all variables which are not of interest from both the independent variable and the variable under consideration. Partialling out means to project on the space spanned by these variables and taking the residuals. Finally, the residuals of the depedent variable are regressed on the residuals of the variable under consideration and this gives the desired parameter estimates. We illsutrate this procedure with an simulation:  
+Here we consider inference on the target coefficient $\alpha$ in the model:
+$$
+y_i = d_i \alpha_0 + x_i'\beta_0 + \epsilon_i,   \quad \mathbb{E} \epsilon_i (x_i', d_i')' =0.
+$$
+We assume approximate sparsity for the part of the regression function $x_i'\beta$, with the sufficient speed of decay of the sorted components of $\beta_0$, namely $a_\beta >1$. This translated into the effective sparsity index $s = o(n)$. In general $d_i$ is correlated to $x_i$, so $\alpha_0$ can not be consistently estimated by the regression of $y_i$ on $d_i$.  Write
+$$
+d_i = x_i'\gamma_0 + v_i,  \quad \mathbb{E} v_i x_i = 0.
+$$
+To estimate $\alpha_0$, we also impose approximate sparsity on the regression function $x_i'\gamma_0$,  with the sufficent speed of decay of sorted coefficients of $\gamma$, namely $a_\gamma > 1$.
+
+Note that we can not use naive estimates of $\alpha$ based simply on applying Lasso and Post-Lasso to the first equations. Such strategy in general does not produce root-$n$ consistent and asymptotically normal estimators of $\alpha$, because there is too much omitted variable bias resulting from estimating the nuisance function $x_i'\beta_0$ in high-dimensional setting. In order to overcome the ommitted variable bias we need to use orthogonalized estimating equations for $\alpha_0$.  These equations in turn rely on the classical ideas of partialling out.
+
+\subsection{Intuition to Partialling Out}  One way to think about estimation of
+$\alpha$ is to think of the equation
+$$
+u_i = \alpha v_i + \epsilon_i,  
+$$
+where $u_i$ is the residual that is left after partialling out the linear effect of $x_i$ from $y_i$ and $v_i$ is the residual that is left after partialling out the linear effect of $x_i$ from $d_i$, both done in the population.  Note that we have
+$\mathbb{E} u_i  x_i =0$, i.e. $u_i = y_i - x_i'\delta_0$ where $x_i'\delta_0$ is the linar projection of $y_i$ on $x_i$.  After partialling out,  $\alpha$ is the regression coefficient in the bivariate regression of $u_i$ on $v_i$.  This is the Frisch-Waugh-Lovell theorem. 
+
+
+In low-dimensional settings the empirical version of the partialling out approach is simply another way to do the least squares.  Let's verify this in an example.
 First, we generate some data
 <<simulation_partialling_out>>=
-set.seed(1234)
+set.seed(1)
 n =5000
 p = 20
 X = matrix(rnorm(n*p), ncol=p)
@@ -329,14 +349,12 @@ beta = rep(1,20)
 y = X%*%beta + rnorm(n)
 dat = data.frame(y=y, X)
 @
-
-We are interest in the effect of the variable $d$.
-
-One way is to conduct a full fit and then concentrate on the parameter of interest
+One way is to conduct a full OLS fit and then report the parameter of interest
 <<simulation_partialling_out_full_fit>>=
 # full fit
 fmla = as.formula(paste("y ~ ", paste(colnames(X), collapse= "+")))
 full.fit= lm(fmla, data=dat)
+summary(full.fit)$coef["d",1:2]
 @
 
 An alternative is first to partial out the influence of the x-variables and then do a regression of the corresponding residuals
@@ -347,41 +365,60 @@ fmla.d = as.formula(paste("d ~ ", paste(xnames, collapse= "+")))
 rY = lm(fmla.y, data = dat)$res
 rD = lm(fmla.d, data = dat)$res
 partial.fit.ls= lm(rY~rD)
+summary(partial.fit.ls)$coef["rD",1:2]
 @
 
-Instead of OLS the partialling out might also be done with a different estimation method, e.g. Lasso, which is in particular attractive in high-dimensional settings. An alternative is using the function \code{rlassoEffect} resp. \code{rlassoEffectone} which implements the partialling out in a slightly different way.
+One can see that the estimates are identical, while standard errors are nearly identical, in fact they are asymptotically equivalent due to asymptotically negligible effect from estimating projection parameters on the first-order asymptotics of the partial least squares estimator $\alpha$.
+
+We can also try Lasso and Post-Lasso for partialling out.  Let's see how this strategy would work in our low-dimensional example:
 
 <<simulation_partialling_out_partial_fit_lasso>>=
-# partial fit via lasso
+# partial fit via post-lasso
 rY = rlasso(fmla.y, data =dat)$res
 rD = rlasso(fmla.d, data =dat)$res
-partial.fit.lasso= lm(rY~rD)
-# directly via rlassoEffect
-lasso.Effect = rlassoEffectone(x=X[,-1], d=X[,1], y=y)
-alpha = lasso.Effect$alpha
-se = lasso.Effect$se
+partial.fit.postlasso= lm(rY~rD)
+summary(partial.fit.postlasso)$coef["rD",1:2]
+@
+We see that this estimate and standard errors are nearly identical to those given above. In fact they are asymptotically equivalent to those reported above in the low-dimensional settings.  
+
+
+In low-dimensional settings this is entirely expected, as any sensible way of approximately partialling out will work to produce first-order equivalent estimators of $\alpha_0$. In the high-dimensional settings, we can no longer rely on the least-squares and have to rely on lasso and post-lasso for estimating the projection parameters.   This results in estimators of $\alpha_0$ that are root-$n$ consistent and asymptotically normal, in fact achieving the semi-parametric efficiency bounds.
+
+
+Let us note that  the above strategy, based on partialling out via lasso or post-lasso is implemented in the package by the function \texttt{rlassoEffect}.
+<<simulation_partialling_out_rlassoEffectone>>=
+Eff= rlassoEffect(X[,-1],y,X[,1], method="partialling out")
+cbind(Eff$coef, Eff$se)
 @
 
-<<summary results, echo=FALSE>>=
-library(xtable)
-table= matrix(0, 4, 2)
-table[1,]= summary(full.fit)$coef["d",1:2]
-table[2,]= summary(partial.fit.ls)$coef["rD",1:2]
-table[3,]= summary(partial.fit.lasso)$coef["rD",1:2]
-table[4,]= c(alpha,se)
-colnames(table)= names(summary(full.fit)$coef["d",])[1:2]
-rownames(table)= c("full reg", "partial reg", "partial reg via lasso 1", "partial reg via lasso 2")
-# adjust partial ls standard error by sqrt{n/(n-p)}
-n= dim(dat)[1]; p= dim(dat)[2]
-table[2,2]= table[2,2]*sqrt(n/(n-p))
-tab= xtable(table, digits=c(2, 2,7))
+Another first-order equivalent strategy implemented relies on the double-selection method, which uses the union of $x_{i,j}$'s selected in two projection equations for partialling out.  This is equivalent to doing OLS of $y_i$ on $d_i$ and the union of controls selected in the two projection equations.
+<<simulation_doubleselection_rlassoEffectone>>=
+Eff= rlassoEffect(X[,-1],y,X[,1], method="double selection")
+cbind(Eff$coef, Eff$se)
 @
 
-We see in the table which summarizes the results that full regression and the partial regression give the same results. As in the simulation the number of observations is much larger than the parameters to estimate lasso gives -- not surprisingly -- comparable results.
-<<results="asis", echo=TRUE>>=
-tab
-@
 
+
+
+%<<summary results, echo=FALSE>>=
+%library(xtable)
+%table= matrix(0, 4, 2)
+%table[1,]= summary(full.fit)$coef["d",1:2]
+%table[2,]= summary(partial.fit.ls)$coef["rD",1:2]
+%table[3,]= summary(partial.fit.lasso)$coef["rD",1:2]
+%table[4,]= c(alpha,se)
+%colnames(table)= names(summary(full.fit)$coef["d",])[1:2]
+%rownames(table)= c("full reg", "partial reg", "partial reg via lasso 1", "partial %reg via lasso 2")
+%# adjust partial ls standard error by sqrt{n/(n-p)}
+%n= dim(dat)[1]; p= dim(dat)[2]
+%table[2,2]= table[2,2]*sqrt(n/(n-p))
+%tab= xtable(table, digits=c(2, 2,7))
+%@
+%
+%We see in the table which summarizes the results that full regression and the %partial regression give the same results. As in the simulation the number of %observations is much larger than the parameters to estimate lasso gives -- not %surprisingly -- comparable results.
+%<<results="asis", echo=TRUE>>=
+%tab
+%@
 
 
 \subsection{Inference}
@@ -441,17 +478,10 @@ Finally, we can also plot the estimated effects with their confidence intervals:
 <<Lasso_plot, fig.width=3, fig.height=2.5, out.width='.49\\linewidth'>>=
 plot(lasso.effect, main="Confidence Interval of Selected Variables")
 @
-\subsection{Estimation of the treatment effect in the case of many controls}
+\subsection{Application: Estimation of the treatment effect in a linear model
+with many confounding factors}
 
-\subsubsection{Application: Determinants of Growth}
-the empirical growth literature is estimating the effect of an initial (lagged) level of
-GDP (Gross Domestic Product) per capita on the growth rates of GDP per capita. In
-particular, a key prediction from the classical Solow-Swan-Ramsey growth model
-is the hypothesis of convergence,which states that poorer countries should typically
-grow faster and therefore should tend to catch up with the richer countries. Such
-a hypothesis implies that the effect of the initial level of GDP on the growth rate
-should be negative. As pointed out in Barro and Sala-i-Martin, this hypothesis
-is rejected using a simple bivariate regression of growth rates on the initial level of
+A part of empirical growth literature has focused on estimating the effect of an initial (lagged) level of GDP (Gross Domestic Product) per capita on the growth rates of GDP per capita. In particular, a key prediction from the classical Solow-Swan-Ramsey growth model is the hypothesis of convergence, which states that poorer countries should typically grow faster and therefore should tend to catch up with the richer countries. Such a hypothesis implies that the effect of the initial level of GDP on the growth rate should be negative. As pointed out in Barro and Sala-i-Martin, this hypothesis is rejected using a simple bivariate regression of growth rates on the initial level of
 GDP. (In this data set, linear regression yields an insignificant positive coefficient
 of 0.0013.) In order to reconcile the data and the theory, the literature has focused
 on estimating the effect conditional on the pertinent characteristics of countries. Covariates
