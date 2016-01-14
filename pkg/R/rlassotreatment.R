@@ -72,16 +72,16 @@ rlassoLATE <- function(x,d,y,z, bootstrap=NULL, nRep=500, post=TRUE, intercept=T
   indz1 <- (z==1)
   indz0 <- (z==0)
   # E[Y|Z = 1,X] = my_z1x
-  b_y_z1xL <- rlasso(x[indz1,,drop=FALSE], y[indz1], post=post, intercept=intercept, normalize=normalize, control=control, penalty=penalty)
+  b_y_z1xL <- rlasso(y[indz1] ~ x[indz1,,drop=FALSE], post=post, intercept=intercept, normalize=normalize, control=control, penalty=penalty)
   my_z1x <- predict(b_y_z1xL, newdata=x)
   # E[Y|Z = 0,X] = my_z0x
-  b_y_z0xL <- rlasso(x[indz0,,drop=FALSE], y[indz0],  post=post, intercept=intercept, normalize=normalize, control=control, penalty=penalty)
+  b_y_z0xL <- rlasso(y[indz0] ~ x[indz0,,drop=FALSE],  post=post, intercept=intercept, normalize=normalize, control=control, penalty=penalty)
   my_z0x <- predict(b_y_z0xL, newdata=x)
   # E[D|Z = 1,X] = md_z1x
   lambda <- 2.2*sqrt(n)*qnorm(1-(1/log(n))/(2*(2*p)))
   penalty <- list(lambda.start = lambda, c = 1.1, gamma = 0.1)
   if (sum(d-z)!=0) {
-    b_d_z1xL <- rlassologit(x[indz1,,drop=FALSE], d[indz1],  post=post, intercept=intercept, normalize=normalize, penalty=penalty)
+    b_d_z1xL <- rlassologit(d[indz1] ~ x[indz1,,drop=FALSE],  post=post, intercept=intercept, normalize=normalize, penalty=penalty)
     md_z1x <- predict(b_d_z1xL, newdata=x)
   } else {
     md_z1x <- rep(1,n)
@@ -90,10 +90,10 @@ rlassoLATE <- function(x,d,y,z, bootstrap=NULL, nRep=500, post=TRUE, intercept=T
   md_z0x <- rep(0,n)
 
   # E[Z|X] = mz_x
-  lambdaP <- 2.2*sqrt(n)*qnorm(1-(1/log(n))/(2*p))
-  penalty <- list(lambda.start = lambdaP, c = 1.1, gamma = 0.1)
-  b_z_xL <- rlassologit(x, z, post=post, intercept=intercept, normalize=normalize, penalty=penalty)
-  #b_z_xL <- rlassologit(x, z, post=post, intercept=intercept, normalize=normalize)
+  #lambdaP <- 2.2*sqrt(n)*qnorm(1-(1/log(n))/(2*p))
+  #penalty <- list(lambda.start = lambdaP, c = 1.1, gamma = 0.1)
+  #b_z_xL <- rlassologit(x, z, post=post, intercept=intercept, normalize=normalize, penalty=penalty)
+  b_z_xL <- rlassologit(z ~ x, post=post, intercept=intercept, normalize=normalize)
   mz_x <- predict(b_z_xL, newdata=x)
   mz_x <- mz_x*(mz_x > 1e-12 & mz_x < 1-1e-12) + (1-1e-12)*(mz_x > 1-1e-12) + 1e-12*(mz_x < 1e-12)
 
@@ -162,7 +162,7 @@ rlassoLATET <- function(x, d, y, z, bootstrap=NULL, nRep=500, post=TRUE, interce
   indz1 <- (z==1)
   indz0 <- (z==0)
   # E[Y|Z = 0,X] = my_z0x
-  b_y_z0xL <- rlasso(x[indz0,], y[indz0],  post=post, intercept=intercept, normalize=normalize, control=control, penalty=penalty)
+  b_y_z0xL <- rlasso(y[indz0] ~ x[indz0,],  post=post, intercept=intercept, normalize=normalize, control=control, penalty=penalty)
   my_z0x <- predict(b_y_z0xL, newdata=x)
   # E[D|Z = 0,X] = md_z0x
   md_z0x <- rep(0,n)
@@ -170,7 +170,7 @@ rlassoLATET <- function(x, d, y, z, bootstrap=NULL, nRep=500, post=TRUE, interce
   lambdaP <- 2.2*sqrt(n)*qnorm(1-(1/log(n))/(2*p))
   #penalty <- list(lambda.start = lambdaP, c = 1.1, gamma = 0.1)
   penalty <- list(homoscedastic = "none",   lambda.start = p, c = 1.1, gamma = 0.1)
-  b_z_xL <- rlassologit(x, z, post=post, intercept=intercept, normalize=normalize, penalty=penalty)
+  b_z_xL <- rlassologit(z ~ x, post=post, intercept=intercept, normalize=normalize, penalty=penalty)
   mz_x <- predict(b_z_xL, newdata=x)
   mz_x <- mz_x*(mz_x > 1e-12 & mz_x < 1-1e-12) + (1-1e-12)*(mz_x > 1-1e-12) + 1e-12*(mz_x < 1e-12)
 

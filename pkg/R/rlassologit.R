@@ -8,12 +8,15 @@
 #' data-driven penalty. The
 #' option \code{post=TRUE} conducts post-lasso estimation, i.e. a refit of the
 #' model with the selected variables.
+#' @param formula an object of class "formula" (or one that can be coerced to
+#' that class): a symbolic description of the model to be fitted in the form
+#' \code{y~x}
+#' @param data an optional data frame, list or environment
 #' @param x regressors (matrix)
 #' @param y dependent variable (vector or matrix)
 #' @param post logical. If \code{TRUE}, post-lasso estimation is conducted.
 #' @param intercept logical. If \code{TRUE}, intercept is included which is not
 #' penalized.
-#' @param normalize logical. If \code{TRUE}, design matrix \code{x} is scaled.
 #' @param penalty list with options for the calculation of the penalty.  \code{c} and \code{gamma} constants for the penalty.
 #' @param control list with control values.
 #' \code{threshold} is applied to the final estimated lasso
@@ -49,7 +52,7 @@
 #'   y[i] <- sample(x=c(1,0), size=1, prob=c(P[i],1-P[i]))
 #' }
 #' ## fit rlassologit object
-#'  rlassologit.reg <- rlassologit(x=X, y=y)
+#'  rlassologit.reg <- rlassologit(y~X)
 #'  ## methods
 #' summary(rlassologit.reg, all=F)
 #' print(rlassologit.reg)
@@ -57,14 +60,32 @@
 #' X3 <- matrix(rnorm(n*p), ncol=p)
 #' predict(rlassologit.reg, newdata=X3)
 #' }
-rlassologit <- function(x, ...)
-  UseMethod("rlassologit") # definition generic function
+#' @export
+rlassologit <- function(formula, data, post = TRUE, intercept = TRUE,
+                        penalty = list(c = 1.1, gamma =  0.1/log(n)), control = list(threshold = NULL), ...) {
+  cl <- match.call()
+  mf <- match.call(expand.dots = FALSE)
+  m <- match(c("formula", "data"), names(mf), 0L)
+  mf <- mf[c(1L, m)]
+  mf$drop.unused.levels <- TRUE
+  mf[[1L]] <- quote(stats::model.frame)
+  mf <- eval(mf, parent.frame())
+  mt <- attr(mf, "terms")
+  attr(mt, "intercept") <- 0
+  y <- model.response(mf, "numeric")
+  x <- model.matrix(mt, mf)
+  
+  est <- rlassologit.fit(x, y, post = post, intercept = intercept, penalty=penalty,
+                     control = control)
+  est$call <- cl
+  return(est)
+}
 
 
 #' @rdname rlassologit
 #' @export
 
-rlassologit.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,  penalty = list(lambda= NULL, c = 1.1, gamma = 0.1/log(n)),
+rlassologit.fit <- function(x, y, post=TRUE, intercept=TRUE,  penalty = list(lambda= NULL, c = 1.1, gamma = 0.1/log(n)),
                            control = list(threshold = NULL),...) {
   n <- dim(x)[1]
   p <- dim(x)[2]
@@ -91,14 +112,14 @@ rlassologit.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
 
   s0 <- sqrt(var(y))
     # calculation parameters
-    log.lasso <- glmnet::glmnet(x, y, family=c("binomial"), alpha = 1, lambda = lambda[1],
+    xs <- scale(x, center=FALSE, scale=TRUE)
+    log.lasso <- glmnet::glmnet(xs, y, family=c("binomial"), alpha = 1, lambda = lambda[1],
                         standardize = normalize, intercept = intercept)
     coefTemp <- as.vector(log.lasso$beta)
     coefTemp[is.na(coefTemp)] <- 0
     ind1 <- (abs(coefTemp) > 0)
     x1 <- as.matrix(x[,ind1, drop=FALSE])
     if (dim(x1)[2]==0) {
-      message("No variables selected!")
       if (intercept==TRUE) {
         a0 <- log(mean(y)/(1-mean(y)))
         res <- y - mean(y)
@@ -110,7 +131,7 @@ rlassologit.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
         message("Residuals not defined, set to 0.5")
       }
       est <- list(coefficients=rep(0,p), a0=a0, index=rep(FALSE,p), s0=s0, lambda0=lambda0, residuals=res, sigma=sqrt(var(res)), call=match.call(),
-                  options=list(post=post, intercept=intercept, normalize=normalize, control=control))
+                  options=list(post=post, intercept=intercept, control=control))
       class(est) <- c("rlassologit")
       return(est)
     }
@@ -157,31 +178,6 @@ rlassologit.default <- function(x, y, post=TRUE, intercept=TRUE, normalize=TRUE,
     return(est)
 }
 
-#' @rdname rlassologit
-#' @param formula an object of class "formula" (or one that can be coerced to
-#' that class): a symbolic description of the model to be fitted in the form
-#' \code{y~x}
-#' @param data an optional data frame, list or environment
-#' @export
-rlassologit.formula <- function(formula, data, post = TRUE, intercept = TRUE,
-                           normalize = TRUE, penalty = list(c = 1.1, gamma =  0.1/log(n)), control = list(threshold = NULL), ...) {
-  cl <- match.call()
-  mf <- match.call(expand.dots = FALSE)
-  m <- match(c("formula", "data"), names(mf), 0L)
-  mf <- mf[c(1L, m)]
-  mf$drop.unused.levels <- TRUE
-  mf[[1L]] <- quote(stats::model.frame)
-  mf <- eval(mf, parent.frame())
-  mt <- attr(mf, "terms")
-  attr(mt, "intercept") <- 0
-  y <- model.response(mf, "numeric")
-  x <- model.matrix(mt, mf)
-
-  est <- rlassologit(x, y, post = post, intercept = intercept, normalize = normalize, penalty=penalty,
-                control = control)
-  est$call <- cl
-  return(est)
-}
 
 ###############################################################################################################################
 
@@ -189,7 +185,7 @@ rlassologit.formula <- function(formula, data, post = TRUE, intercept = TRUE,
 
 #' Methods for S3 object \code{rlassologit}
 #'
-#' Objects of class \code{rlassologit} are constructed by \code{rlassologit.formula} or \code{rlassologit.default}.
+#' Objects of class \code{rlassologit} are constructed by \code{rlassologit} or \code{rlassologit.fit}.
 #' \code{print.rlassologit} prints and displays some information about fitted \code{rlassologit} objects.
 #' \code{summary.rlassologit} summarizes information of a fitted \code{rlassologit} object.
 #' \code{predict.rlassologit} predicts values based on a \code{rlassologit} object.

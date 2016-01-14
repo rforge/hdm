@@ -9,11 +9,14 @@
 \usage{
 rlassoEffect(x, ...)
 
-\method{rlassoEffect}{default}(x, y, index = c(1:ncol(x)), I3 = NULL, ...)
+\method{rlassoEffect}{default}(x, y, index = c(1:ncol(x)),
+  method = "double selection", I3 = NULL, post = TRUE, ...)
 
-\method{rlassoEffect}{formula}(formula, data, index, I3 = NULL, ...)
+\method{rlassoEffect}{formula}(formula, data, index,
+  method = "double selection", I3 = NULL, post = TRUE, ...)
 
-rlassoEffectone(x, y, d, I3 = NULL, ...)
+rlassoEffectone(x, y, d, method = "double selection", I3 = NULL,
+  post = TRUE, ...)
 }
 \arguments{
 \item{x}{matrix of regressor variables serving as controls and potential
@@ -24,14 +27,19 @@ treatments}
 \item{index}{vector of integers, logicals or variables names indicating the position (column) of
 variables (integer case), logical vector of length of the variables (TRUE or FALSE) or the variable names of \code{x} which should be used for inference / as treatment variables.}
 
-\item{I3}{logical vector with the same length as the number of variables in \code{x};
-indicates if variables (TRUE) should be included in any case to the model and they are exempt from selection. These variables should not be included in the \code{index}; hence the intersection with \code{index} must be the empty set.}
+\item{method}{for inference, either "partialling out" or "double selection".}
+
+\item{post}{logical, if post Lasso is conducted with default \code{TRUE}.}
 
 \item{formula}{an element of class \code{formula}}
 
 \item{data}{data.frame in connection with \code{formula}}
 
 \item{d}{variable for which inference is conducted (treatment variable)}
+
+\item{For}{the "double selection"-method the logical vector \code{I3} has same length as the number of variables in \code{x};
+indicates if variables (TRUE) should be included in any case to the model and they are exempt from selection. These variables should not be included in the \code{index}; hence the intersection with \code{index} must be the empty set.
+In the case of partialling out it is ignored.}
 
 \item{\dots}{parameters passed to the \code{\link{rlasso}} function.}
 }

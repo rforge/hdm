@@ -2,33 +2,26 @@
 % Please edit documentation in R/rlassologit.R
 \name{rlassologit}
 \alias{rlassologit}
-\alias{rlassologit.default}
-\alias{rlassologit.formula}
+\alias{rlassologit.fit}
 \title{rlassologit: Function for logistic Lasso estimation}
 \usage{
-rlassologit(x, ...)
+rlassologit(formula, data, post = TRUE, intercept = TRUE, penalty = list(c
+  = 1.1, gamma = 0.1/log(n)), control = list(threshold = NULL), ...)
 
-\method{rlassologit}{default}(x, y, post = TRUE, intercept = TRUE,
-  normalize = TRUE, penalty = list(lambda = NULL, c = 1.1, gamma =
-  0.1/log(n)), control = list(threshold = NULL), ...)
-
-\method{rlassologit}{formula}(formula, data, post = TRUE, intercept = TRUE,
-  normalize = TRUE, penalty = list(c = 1.1, gamma = 0.1/log(n)),
-  control = list(threshold = NULL), ...)
+rlassologit.fit(x, y, post = TRUE, intercept = TRUE, penalty = list(lambda
+  = NULL, c = 1.1, gamma = 0.1/log(n)), control = list(threshold = NULL), ...)
 }
 \arguments{
-\item{x}{regressors (matrix)}
+\item{formula}{an object of class "formula" (or one that can be coerced to
+that class): a symbolic description of the model to be fitted in the form
+\code{y~x}}
 
-\item{...}{further parameters passed to glmnet}
-
-\item{y}{dependent variable (vector or matrix)}
+\item{data}{an optional data frame, list or environment}
 
 \item{post}{logical. If \code{TRUE}, post-lasso estimation is conducted.}
 
 \item{intercept}{logical. If \code{TRUE}, intercept is included which is not
 penalized.}
-
-\item{normalize}{logical. If \code{TRUE}, design matrix \code{x} is scaled.}
 
 \item{penalty}{list with options for the calculation of the penalty.  \code{c} and \code{gamma} constants for the penalty.}
 
@@ -36,11 +29,11 @@ penalized.}
 \code{threshold} is applied to the final estimated lasso
 coefficients. Absolute values below the threshold are set to zero.}
 
-\item{formula}{an object of class "formula" (or one that can be coerced to
-that class): a symbolic description of the model to be fitted in the form
-\code{y~x}}
+\item{...}{further parameters passed to glmnet}
 
-\item{data}{an optional data frame, list or environment}
+\item{x}{regressors (matrix)}
+
+\item{y}{dependent variable (vector or matrix)}
 }
 \value{
 \code{rlassologit} returns an object of class
@@ -81,7 +74,7 @@ for(i in 1:n){
   y[i] <- sample(x=c(1,0), size=1, prob=c(P[i],1-P[i]))
 }
 ## fit rlassologit object
- rlassologit.reg <- rlassologit(x=X, y=y)
+ rlassologit.reg <- rlassologit(y~X)
  ## methods
 summary(rlassologit.reg, all=F)
 print(rlassologit.reg)

@@ -108,17 +108,17 @@ rlassologitEffectone <- function(x, y, d, I3=NULL) {
   # Step 1
   la1 <- 1.1/2*sqrt(n)*qnorm(1-0.05/(max(n,(p+1)*log(n))))
   dx <- cbind(d,x)
-  l1 <- rlassologit(dx, y, post=TRUE, normalize=TRUE, intercept=TRUE, penalty=list(lambda.start=la1))
+  l1 <- rlassologit(y ~ dx, post=TRUE, intercept=TRUE, penalty=list(lambda.start=la1))
   t <- predict(l1, type="link", newdata=dx)
-  sigma2 <- exp(t)/(1+exp(t))
-  w <-  exp(t)/(1+exp(t))^2
+  sigma2 <- exp(t)/(1+exp(t))^2
+  w <-  sigma2 #exp(t)/(1+exp(t))^2
   f <- w/sigma2
   I1 <- l1$index[-1]
   # Step 2
   la2 <- rep(2.2*sqrt(n)*qnorm(1-0.05/(max(n,p*log(n)))),p)
   xf <- x*as.vector(f)
   df <- d*f
-  l2 <- rlasso(xf, df, post=TRUE, normalize=TRUE, intercept=TRUE, penalty=list(method="none", lambda.start=la2, c=1.1, gamma=0.1))
+  l2 <- rlasso(xf, df, post=TRUE, intercept=TRUE, penalty=list(method="none", lambda.start=la2, c=1.1, gamma=0.1))
   I2 <- l2$index
   z <- l2$residual/sigma2
   # Step 3

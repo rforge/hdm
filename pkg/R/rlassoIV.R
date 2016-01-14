@@ -52,21 +52,33 @@ rlassoIV <- function(x, d, y, z, select.Z=TRUE, select.X=TRUE, ...) {
   
   if (select.Z==TRUE && select.X==TRUE) {
   Z <- cbind(z,x)
-  lasso.d.zx <- rlasso(Z,d,...)
-  lasso.y.x <- rlasso(x,y,...)
-  lasso.d.x <- rlasso(x,d,...)
+  lasso.d.zx <- rlasso(d ~ Z,...)
+  lasso.y.x <- rlasso(y ~ x,...)
+  lasso.d.x <- rlasso(d ~ x,...)
   if (sum(lasso.d.zx$index)==0) return(list(alpha=NA, se=NA))
   ind.dzx <- lasso.d.zx$index
   PZ <- Z[,ind.dzx]%*%MASS::ginv(t(Z[,ind.dzx])%*%Z[,ind.dzx])%*%t(Z[,ind.dzx])%*%d
   lasso.PZ.x <- rlasso(x,PZ,...)
   ind.PZx <- lasso.PZ.x$index
+  
   if (sum(ind.PZx)==0) {
-    Dr <- d
+    Dr <- d - mean(d)
   } else {
   Dr <- d- x[,ind.PZx]%*%MASS::ginv(t(x[,ind.PZx])%*%x[,ind.PZx])%*%t(x[,ind.PZx])%*%PZ
   }
+  
+  if (sum(lasso.y.x$index)==0) {
+  Yr <- y- mean(y)
+  } else {
   Yr <- lasso.y.x$residuals
+  }
+  
+  if (sum(lasso.PZ.x$index)==0) {
+  Zr <- PZ  - mean(x)
+  } else {
   Zr <- lasso.PZ.x$residuals
+  }
+  
   result <- tsls(Yr,Dr,x=NULL,Zr, intercept=FALSE)
   coef <- as.vector(result$coefficient)
   se <- diag(sqrt(result$vcov))
@@ -117,8 +129,8 @@ rlassoIVmult <- function(x, d, y, z, select.Z=TRUE, select.X=TRUE, ...) {
   Drhat <- NULL
   Zrhat <- NULL
   for (i in 1:kd) {
-  lasso.d.x <- rlasso(x,d[,i],...)
-  lasso.d.zx <- rlasso(Z,d[,i],...)
+  lasso.d.x <- rlasso(d[,i] ~ x,...)
+  lasso.d.zx <- rlasso(d[,i] ~ Z,...)
   if (sum(lasso.d.zx$index)==0) {
     Drhat <- cbind(Drhat, d[,i] - mean(d[,i]))
     Zrhat <- cbind(Zrhat, d[,i] - mean(d[,i]))
@@ -126,7 +138,7 @@ rlassoIVmult <- function(x, d, y, z, select.Z=TRUE, select.X=TRUE, ...) {
   }
   ind.dzx <- lasso.d.zx$index
   PZ <- Z[,ind.dzx,drop=FALSE]%*%MASS::ginv(t(Z[,ind.dzx,drop=FALSE])%*%Z[,ind.dzx,drop=FALSE])%*%t(Z[,ind.dzx,drop=FALSE])%*%d[,i,drop=FALSE]
-  lasso.PZ.x <- rlasso(x,PZ,...)
+  lasso.PZ.x <- rlasso(PZ ~ x,...)
   ind.PZx <- lasso.PZ.x$index
   Dr <- d[,i]- x[,ind.PZx,drop=FALSE]%*%MASS::ginv(t(x[,ind.PZx,drop=FALSE])%*%x[,ind.PZx,drop=FALSE])%*%t(x[,ind.PZx,drop=FALSE])%*%PZ
   Zr <- lasso.PZ.x$residuals

@@ -44,20 +44,20 @@ rlassoIVselectZ <- function(x, d, y, z, post=TRUE, ...) {
   Dhat <- NULL
   for (i in 1:ke) {
     di <- d[,i]
-    lasso.fit <- rlasso(z, di, post=post, ...)
+    lasso.fit <- rlasso(di ~ z, post=post, ...)
     if (sum(lasso.fit$ind)==0) {
       dihat <- rep(mean(di),n) #dihat <- mean(di)
     } else {
       #dihat <- z%*%lasso.fit$coefficients
-      dihat <- predict(lasso.fit)
+      dihat <- predict(lasso.fit, newdata=z)
     }
     Dhat <- cbind(Dhat, dihat)
   }
   Dhat <- cbind(Dhat, x)
   d <- cbind(d,x)
   # calculation coefficients
-  alpha.hat <- solve(t(Dhat)%*%d)%*%(t(Dhat)%*%y)
-  #alpha.hat <- MASS::ginv(t(Dhat)%*%d)%*%(t(Dhat)%*%y)
+  #alpha.hat <- solve(t(Dhat)%*%d)%*%(t(Dhat)%*%y)
+  alpha.hat <- MASS::ginv(t(Dhat)%*%d)%*%(t(Dhat)%*%y)
   # calcualtion of the variance-covariance matrix
   residuals <- y - d%*%alpha.hat
   Omega.hat <- t(Dhat)%*%diag(as.vector(residuals^2))%*%Dhat #  Dhat.e <- Dhat*as.vector(residuals);  Omega.hat <- t(Dhat.e)%*%Dhat.e
@@ -70,6 +70,38 @@ rlassoIVselectZ <- function(x, d, y, z, post=TRUE, ...) {
   return(res)
 }
 
+
+rlassoIVselectZ2 <- function(x, d, y, z, post=TRUE, ...) {
+  
+  d <- as.matrix(d)
+  if(is.vector(x)) x <-  as.matrix(x)
+  kx <- dim(x)[2]
+  n <- length(y)
+  kex <- dim(x)[2]
+  ke <- dim(d)[2]
+  kiv <- dim(z)[2]
+  
+  if (is.null(colnames(d))) colnames(d) <- paste("d", 1:ke, sep="")
+  if (is.null(colnames(x)) & !is.null(x)) colnames(x) <- paste("x", 1:kex, sep="")
+  # partialling out
+  My <- lm(y ~ x)$residuals
+  Md <- lm(d ~ x)$residuals
+  Md <- as.matrix(Md)
+  Mz <- lm(z ~ x)$residuals
+ 
+  index <- rlasso(Md ~ Mz, post=post, ...)$index
+  if (sum(index==0)) {
+    zt <-Mz[,1,drop=FALSE]
+  } else {
+  zt = Mz[,index]
+  }
+  TSLS <- solve((t(Md)%*%zt)%*%solve(t(zt)%*%zt)%*%(t(zt)%*%Md))%*%((t(Md)%*%zt)%*%solve(t(zt)%*%zt)%*%(t(zt)%*%My))
+  et = My-Md%*%TSLS
+  sTSLS = sqrt((n-1)/(n-kx-1))*hetero_se(zt,et, solve((t(Md)%*%zt)%*%solve(t(zt)%*%zt)%*%(t(zt)%*%Md))%*%((t(Md)%*%zt)%*%solve(t(zt)%*%zt)))[[1]]
+  res <- list(coefficients=TSLS, se=sTSLS, vcov=sTSLS^2, residuals=et, samplesize=n, call=match.call())
+  class(res) <- "rlassoIVselectZ"
+  return(res)
+}
 
 ################# Methods for rlassoIVselectZ
 

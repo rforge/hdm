@@ -1,4 +1,4 @@
-globalVariables(c("post", "intercept", "normalize", "penalty", "control", "error", "n", "select.Z" , "select.X", "aes"))
+globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "select.Z" , "select.X", "aes"))
 
 #' rlasso: Function for Lasso estimation under homoscedastic and heteroskeadstic non-Gaussian
 #' disturbances
@@ -10,7 +10,7 @@ globalVariables(c("post", "intercept", "normalize", "penalty", "control", "error
 #'
 #' The function estimates the coefficients of a Lasso regression with
 #' data-driven penalty under homoscedasticity / heteroscedasticity and non-Gaussian noise. The options \code{homoscedastic} is a logical with \code{FALSE} by default.
-#' Moreover, for the calculation of the penalty parameter it can be chosen, if the design matrix (\code{X.design}) is \code{independent} (default option) or \code{dependent}.
+#' Moreover, for the calculation of the penalty parameter it can be chosen, if the penalization parameter depends on the  design matrix (\code{X.dependent.lambda=TRUE}) or \code{independent} (default, \code{X.dependent.lambda=FALSE}).
 #' A \emph{special} option is to set \code{homoscedastic} to \code{none} and to supply a values \code{lambda.start}. Then this value is used as penalty parameter with independent design and heteroscedastic errors to weight the regressors.
 #' For details of the
 #' implementation of the Algorithm for estimation of the data-driven penalty,
@@ -25,9 +25,7 @@ globalVariables(c("post", "intercept", "normalize", "penalty", "control", "error
 #' The option \code{post=TRUE} conducts post-lasso estimation, i.e. a refit of
 #' the model with the selected variables.
 #'
-#' @aliases rlasso rlasso.default rlasso.formula
-#' @param y dependent variable (vector or matrix)
-#' @param x regressors (vector, matrix or data.frame)
+#' @aliases rlasso
 #' @param formula an object of class "formula" (or one that can be coerced to
 #' that class): a symbolic description of the model to be fitted in the form
 #' \code{y~x}
@@ -38,12 +36,11 @@ globalVariables(c("post", "intercept", "normalize", "penalty", "control", "error
 #' @param post logical. If \code{TRUE}, post-lasso estimation is conducted.
 #' @param intercept logical. If \code{TRUE}, intercept is included which is not
 #' penalized.
-#' @param normalize logical. If \code{TRUE}, design matrix \code{x} is scaled.
 #' @param penalty list with options for the calculation of the penalty. 
 #' \itemize{
 #' \item{\code{c} and \code{gama}}{constants for the penalty with default \code{c=1.1} and \code{gamma=0.1}}
 #' \item{\code{homoscedastic}}{logical, if homoscedastic errors are considered (default \code{FALSE}). Option \code{none} is described below.}
-#' \item{\code{X.design}}{if \code{independent} or \code{dependent} design matrix \code{X}}
+#' \item{\code{X.dependent.lambda}}{logical,  \code{TRUE}, if the penalization parameter depends on the the design of the matrix \code{x}. \code{FALSE}, if independent of the design matrix  (default).}
 #' \item{\code{numSim}}{number of simulations for the dependent methods, default=5000}
 #' \item{\code{lambda.start}}{initial penalization value, compulsory for method "none"}
 #' }
@@ -75,22 +72,34 @@ globalVariables(c("post", "intercept", "normalize", "penalty", "control", "error
 #' @keywords Lasso data-driven penalty non-Gaussian heteroscedasticity
 #' @export
 #' @rdname rlasso
+rlasso <- function(formula, data, post = TRUE, intercept = TRUE, 
+                           penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = 0.1),
+                          control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...) {
+  cl <- match.call()
+  mf <- match.call(expand.dots = FALSE)
+  m <- match(c("formula", "data"), names(mf), 0L)
+  mf <- mf[c(1L, m)]
+  mf$drop.unused.levels <- TRUE
+  mf[[1L]] <- quote(stats::model.frame)
+  mf <- eval(mf, parent.frame())
+  mt <- attr(mf, "terms")
+  attr(mt, "intercept") <- 0
+  y <- model.response(mf, "numeric")
+  x <- model.matrix(mt, mf)
 
-#lasso <- function(x,  post = TRUE, intercept = TRUE, normalize = TRUE,
-#                  penalty = list(method = "standard", lambda.start = NULL, c = 1.1, gamma = 0.1),
-#                  control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...)
-#lasso <- function(x, y, post = TRUE, intercept = TRUE, normalize = TRUE,
-#                  penalty = list(method = "standard", lambda.start = NULL, c = 1.1, gamma = 0.1),
-#                  control = list(numIter = 15, tol = 10^-5, threshold = NULL))
-rlasso <- function(x, ...)
-UseMethod("rlasso") # definition generic function
-
+  est <- rlasso.fit(x, y, post = post, intercept = intercept, penalty=penalty,
+               control = control)
+  est$call <- cl
+  return(est)
+}
 
 #' @rdname rlasso
 #' @export
-rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, normalize = TRUE,
-                          penalty = list(homoscedastic = FALSE, X.design = "independent", lambda.start = NULL, c = 1.1, gamma = 0.1),
-                          control = list(numIter = 15, tol = 10^-5, threshold = NULL),...) {
+#' @param y dependent variable (vector or matrix)
+#' @param x regressors (vector, matrix or data.frame)
+rlasso.fit <- function(x, y, post = TRUE, intercept = TRUE,
+                           penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = 0.1),
+                           control = list(numIter = 15, tol = 10^-5, threshold = NULL),...) {
   n <- dim(x)[1]
   p <- dim(x)[2]
   
@@ -106,12 +115,22 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, normalize = TRUE
     control$numIter = 15
     message("numIter in control not provided. Set to default 15")
   }
-
+  
   if (!exists("tol", where = control)) {
     control$tol = 10^-5
     message("tol in control not provided. Set to default 10^-5")
   }
-
+  
+  if (post==FALSE & (!exists("c", where = penalty) | is.na(match("penalty", names(as.list(match.call)))))) {
+    penalty$c = 0.5
+    message("c in penalty not provided. Set to default c=0.5 for Lasso")
+  }
+  
+  #if (post==FALSE & is.na(match("penalty", names(as.list(match.call))))) {
+  #  penalty$c=0.5
+  #  message("c in penalty not provided. Set to default c=0.5 for Lasso")
+  #}
+  
   # Intercept handling and scaling
   if (intercept) {
     meanx <- colMeans(x)
@@ -122,32 +141,19 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, normalize = TRUE
     meanx <- rep(0, p)
     mu <- 0
   }
-  ind <- NULL
-  if (normalize) {
-    normx <- sqrt(apply(x, 2, var))
-    ind <- which(normx < eps)
-    if (length(ind) != 0) {
-      x <- x[, -ind]
-      normx <- normx[-ind]
-      ind.names <- ind.names[-ind]
-      p <- dim(x)[2]
-      if (!is.null(penalty$lambda.start)) {
-        penalty$lambda.start <- penalty$lambda.start[-ind]
-      }
-    }
-    x <- scale(x, FALSE, normx)
-  } else {
-    normx <- rep(1, p)
-  }
-
+  
+  normx <- sqrt(apply(x, 2, var))
+  ind <- which(normx < eps) #TBD: check for those variables
+  
   XX <- crossprod(x)
   Xy <- crossprod(x, y)
   
-  pen <- lambdaCalculation(penalty = penalty, y = y - mean(y), x = x)
+  startingval <- init_values(x,y)$residuals
+  pen <- lambdaCalculation(penalty = penalty, y = startingval, x = x)
   lambda <- pen$lambda
   Ups0 <- Ups1 <- pen$Ups0
   lambda0 <- pen$lambda0
-
+  
   mm <- 1
   s0 <- sqrt(var(y))
   while (mm <= control$numIter) {
@@ -157,7 +163,6 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, normalize = TRUE
     ind1 <- (abs(coefTemp) > 0)
     x1 <- as.matrix(x[, ind1, drop = FALSE])
     if (dim(x1)[2] == 0) {
-      message("No variables selected!")
       if (intercept) {
         intercept.value <- mean(y + mu)
       } else {
@@ -166,13 +171,12 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, normalize = TRUE
       est <- list(coefficients = rep(0, p), intercept.value=intercept.value, index = rep(FALSE, p),
                   lambda = lambda, lambda0 = lambda0, loadings = Ups0, residuals = y -
                     mean(y), sigma = var(y), iter = mm, call = match.call(),
-                  options = list(post = post, intercept = intercept, normalize = normalize,
-                                 control = control, mu = mu, meanx = meanx, scalex = normx,
-                                 ind.scaled = ind))
+                  options = list(post = post, intercept = intercept,
+                                 control = control, mu = mu, meanx = meanx))
       class(est) <- "rlasso"
       return(est)
     }
-
+    
     # refinement variance estimation
     if (post) {
       reg <- lm(y ~ -1 + x1)
@@ -185,25 +189,25 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, normalize = TRUE
       e1 <- y - x1 %*% coefTemp[ind1]
     }
     s1 <- sqrt(var(e1))
-
+    
     # homoscedatic and X-independent
-    if (penalty$homoscedastic == TRUE && penalty$X.design == "independent") {
-      Ups1 <- s1
+    if (penalty$homoscedastic == TRUE && penalty$X.dependent.lambda == FALSE) {
+      Ups1 <- s1*normx
       lambda <- rep(pen$lambda0 * s1, p)
     }
     # homoscedatic and X-dependent
-    if (penalty$homoscedastic == TRUE && penalty$X.design == "dependent") {
-      Ups1 <- s1
+    if (penalty$homoscedastic == TRUE && penalty$X.dependent.lambda == TRUE) {
+      Ups1 <- s1*normx
       lambda <- rep(pen$lambda0 * s1, p)
     }
     # heteroscedastic and X-independent
-    if (penalty$homoscedastic == FALSE && penalty$X.design == "independent") {
+    if (penalty$homoscedastic == FALSE && penalty$X.dependent.lambda == FALSE) {
       Ups1 <- 1/sqrt(n) * sqrt(t(t(e1^2) %*% (x^2)))
       lambda <- pen$lambda0 * Ups1
     }
     
     # heteroscedastic and X-dependent
-    if (penalty$homoscedastic == FALSE && penalty$X.design == "dependent") {
+    if (penalty$homoscedastic == FALSE && penalty$X.dependent.lambda == TRUE) {
       lc <- lambdaCalculation(penalty, y=e1, x=x)
       Ups1 <- lc$Ups0
       lambda <- lc$lambda
@@ -217,19 +221,18 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, normalize = TRUE
       Ups1 <- 1/sqrt(n) * sqrt(t(t(e1^2) %*% (x^2)))
       lambda <- pen$lambda0 * Ups1
     }
-
+    
     mm <- mm + 1
     if (abs(s0 - s1) < control$tol) {
       break
     }
     s0 <- s1
   }
-
+  
   if (dim(x1)[2] == 0) {
     coefTemp = NULL
     ind1 <- rep(0, p)
   }
-  coefTemp <- scale(t(coefTemp), FALSE, normx)
   coefTemp <- as.vector(coefTemp)
   coefTemp[abs(coefTemp) < control$threshold] <- 0
   ind1 <- as.vector(ind1)
@@ -249,34 +252,9 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, normalize = TRUE
   est <- list(coefficients = coefTemp, intercept.value=intercept.value, index = ind1, lambda = lambda,
               lambda0 = lambda0, loadings = Ups1, residuals = as.vector(e1), sigma = s1,
               iter = mm, call = match.call(), options = list(post = post, intercept = intercept,
-                                                             normalize = normalize, control = control, penalty = penalty,
-                                                             mu = mu, meanx = meanx, scalex = normx, ind.scaled = ind))
+                                                             control = control, penalty = penalty,
+                                                             mu = mu, meanx = meanx))
   class(est) <- "rlasso"
-  return(est)
-}
-
-
-
-#' @rdname rlasso
-#' @export
-rlasso.formula <- function(formula, data, post = TRUE, intercept = TRUE, normalize = TRUE,  
-                           penalty = list(homoscedastic = FALSE, X.design = "independent", lambda.start = NULL, c = 1.1, gamma = 0.1),
-                          control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...) {
-  cl <- match.call()
-  mf <- match.call(expand.dots = FALSE)
-  m <- match(c("formula", "data"), names(mf), 0L)
-  mf <- mf[c(1L, m)]
-  mf$drop.unused.levels <- TRUE
-  mf[[1L]] <- quote(stats::model.frame)
-  mf <- eval(mf, parent.frame())
-  mt <- attr(mf, "terms")
-  attr(mt, "intercept") <- 0
-  y <- model.response(mf, "numeric")
-  x <- model.matrix(mt, mf)
-
-  est <- rlasso(x, y, post = post, intercept = intercept, normalize = normalize, penalty=penalty,
-               control = control)
-  est$call <- cl
   return(est)
 }
 
@@ -291,7 +269,7 @@ rlasso.formula <- function(formula, data, post = TRUE, intercept = TRUE, normali
 #' \itemize{
 #' \item{\code{c} and \code{gamma}}{ constants for the penalty with default \code{c=1.1} and \code{gamma=0.1}}
 #' \item{\code{homoscedastic}}{ logical, if homoscedastic errors are considered (default \code{FALSE}). Option \code{none} is described below.}
-#' \item{\code{X.design}}{ if \code{independent} or \code{dependent} design matrix \code{X}}
+#' \item{\code{X.dependent.lambda}}{ if \code{independent} or \code{dependent} design matrix \code{X}}
 #' \item{\code{numSim}}{ number of simulations for the dependent methods}
 #' \item{\code{lambda.start}}{ initial penalization value, compulsory for method "none"}
 #' }
@@ -302,9 +280,9 @@ rlasso.formula <- function(formula, data, post = TRUE, intercept = TRUE, normali
 #' @export
 
 
-lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.design = "independent", lambda.start = NULL, c = 1.1, gamma = 0.1),
+lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = 0.1),
                               y = NULL, x = NULL) {
-  checkmate::checkChoice(penalty$X.design, c("independent", "dependent", NULL))
+  checkmate::checkChoice(penalty$X.dependent.lambda, c(TRUE, FALSE, NULL))
   checkmate::checkChoice(penalty$homoscedastic, c(TRUE, FALSE, "none"))
   if (!exists("c", where = penalty) & penalty$homoscedastic!="none") {
     penalty$c = 1.1
@@ -317,7 +295,7 @@ lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.design = "
 
 
   # homoscedastic and X-independent
-  if (penalty$homoscedastic==TRUE && penalty$X.design == "independent") {
+  if (penalty$homoscedastic==TRUE && penalty$X.dependent.lambda == FALSE) {
     p <- dim(x)[2]
     n <- dim(x)[1]
     lambda0 <- 2 * penalty$c * sqrt(n) * qnorm(1 - penalty$gamma/(2 *
@@ -327,7 +305,7 @@ lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.design = "
   }
 
   # homoscedastic and X-dependent
-  if (penalty$homoscedastic==TRUE && penalty$X.design == "dependent") {
+  if (penalty$homoscedastic==TRUE && penalty$X.dependent.lambda == TRUE) {
     if (!exists("numSim", where = penalty)) {
       penalty$numSim = 5000
       message("numSim in penalty for method \"X-dependent\" not provided. Set to default 5000")
@@ -346,7 +324,7 @@ lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.design = "
   }
 
   # heteroscedastic and X-independent (was "standard")
-  if (penalty$homoscedastic==FALSE && penalty$X.design == "independent") {
+  if (penalty$homoscedastic==FALSE && penalty$X.dependent.lambda == FALSE) {
     p <- dim(x)[2]
     n <- dim(x)[1]
     lambda0 <- 2*penalty$c*sqrt(n)*sqrt(2*log(2*p*log(n)/penalty$gamma))
@@ -357,10 +335,10 @@ lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.design = "
   }
   
   # heteroscedastic and X-dependent
-  if (penalty$homoscedastic==FALSE && penalty$X.design == "dependent") {
+  if (penalty$homoscedastic==FALSE && penalty$X.dependent.lambda == TRUE) {
     if (!exists("numSim", where = penalty)) {
       penalty$numSim = 5000
-      message("numSim in penalty for method \"X-dependent\" not provided. Set to default 5000")
+      message("numSim in penalty for method \"X.dependent.lambda\" not provided. Set to default 5000")
     }
     p <- dim(x)[2]
     n <- dim(x)[1]

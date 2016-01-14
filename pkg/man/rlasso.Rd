@@ -2,42 +2,40 @@
 % Please edit documentation in R/rlasso.R
 \name{rlasso}
 \alias{rlasso}
-\alias{rlasso.default}
-\alias{rlasso.formula}
+\alias{rlasso.fit}
 \title{rlasso: Function for Lasso estimation under homoscedastic and heteroskeadstic non-Gaussian
 disturbances}
 \usage{
-rlasso(x, ...)
+rlasso(formula, data, post = TRUE, intercept = TRUE,
+  penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE,
+  lambda.start = NULL, c = 1.1, gamma = 0.1), control = list(numIter = 15, tol
+  = 10^-5, threshold = NULL), ...)
 
-\method{rlasso}{default}(x, y, post = TRUE, intercept = TRUE,
-  normalize = TRUE, penalty = list(homoscedastic = FALSE, X.design =
-  "independent", lambda.start = NULL, c = 1.1, gamma = 0.1),
-  control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...)
-
-\method{rlasso}{formula}(formula, data, post = TRUE, intercept = TRUE,
-  normalize = TRUE, penalty = list(homoscedastic = FALSE, X.design =
-  "independent", lambda.start = NULL, c = 1.1, gamma = 0.1),
-  control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...)
+rlasso.fit(x, y, post = TRUE, intercept = TRUE,
+  penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE,
+  lambda.start = NULL, c = 1.1, gamma = 0.1), control = list(numIter = 15, tol
+  = 10^-5, threshold = NULL), ...)
 }
 \arguments{
-\item{x}{regressors (vector, matrix or data.frame)}
+\item{formula}{an object of class "formula" (or one that can be coerced to
+that class): a symbolic description of the model to be fitted in the form
+\code{y~x}}
 
-\item{...}{further arguments (only for consistent defintion of methods)}
-
-\item{y}{dependent variable (vector or matrix)}
+\item{data}{an optional data frame, list or environment (or object coercible
+by as.data.frame to a data frame) containing the variables in the model. If
+not found in data, the variables are taken from environment(formula),
+typically the environment from which \code{rlasso} is called.}
 
 \item{post}{logical. If \code{TRUE}, post-lasso estimation is conducted.}
 
 \item{intercept}{logical. If \code{TRUE}, intercept is included which is not
 penalized.}
 
-\item{normalize}{logical. If \code{TRUE}, design matrix \code{x} is scaled.}
-
 \item{penalty}{list with options for the calculation of the penalty.
 \itemize{
 \item{\code{c} and \code{gama}}{constants for the penalty with default \code{c=1.1} and \code{gamma=0.1}}
 \item{\code{homoscedastic}}{logical, if homoscedastic errors are considered (default \code{FALSE}). Option \code{none} is described below.}
-\item{\code{X.design}}{if \code{independent} or \code{dependent} design matrix \code{X}}
+\item{\code{X.dependent.lambda}}{logical,  \code{TRUE}, if the penalization parameter depends on the the design of the matrix \code{x}. \code{FALSE}, if independent of the design matrix  (default).}
 \item{\code{numSim}}{number of simulations for the dependent methods, default=5000}
 \item{\code{lambda.start}}{initial penalization value, compulsory for method "none"}
 }}
@@ -49,14 +47,11 @@ the estimation of the variance and data-driven penalty, ie. loadings,
 \code{threshold} is applied to the final estimated lasso
 coefficients. Absolute values below the threshold are set to zero.}
 
-\item{formula}{an object of class "formula" (or one that can be coerced to
-that class): a symbolic description of the model to be fitted in the form
-\code{y~x}}
+\item{...}{further arguments (only for consistent defintion of methods)}
 
-\item{data}{an optional data frame, list or environment (or object coercible
-by as.data.frame to a data frame) containing the variables in the model. If
-not found in data, the variables are taken from environment(formula),
-typically the environment from which \code{rlasso} is called.}
+\item{x}{regressors (vector, matrix or data.frame)}
+
+\item{y}{dependent variable (vector or matrix)}
 }
 \value{
 \code{rlasso} returns an object of class \code{rlasso} An object of
@@ -80,7 +75,7 @@ returned is of the S3 class \code{rlasso}.
 \details{
 The function estimates the coefficients of a Lasso regression with
 data-driven penalty under homoscedasticity / heteroscedasticity and non-Gaussian noise. The options \code{homoscedastic} is a logical with \code{FALSE} by default.
-Moreover, for the calculation of the penalty parameter it can be chosen, if the design matrix (\code{X.design}) is \code{independent} (default option) or \code{dependent}.
+Moreover, for the calculation of the penalty parameter it can be chosen, if the penalization parameter depends on the  design matrix (\code{X.dependent.lambda=TRUE}) or \code{independent} (default, \code{X.dependent.lambda=FALSE}).
 A \emph{special} option is to set \code{homoscedastic} to \code{none} and to supply a values \code{lambda.start}. Then this value is used as penalty parameter with independent design and heteroscedastic errors to weight the regressors.
 For details of the
 implementation of the Algorithm for estimation of the data-driven penalty,

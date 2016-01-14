@@ -36,13 +36,13 @@ rlassoIVselectX <- function(x,d,y,z, post=TRUE, ...) {
   n <- length(y)
   numIV <- dim(z)[2]
   Z <- cbind(z,x)
-  lasso.d.x <- rlasso(x,d,...)
+  lasso.d.x <- rlasso(d ~ x,...)
   Dr <- d - predict(lasso.d.x, newdata=x)
-  lasso.y.x <- rlasso(x,y,...)
+  lasso.y.x <- rlasso(y ~ x,...)
   Yr <- y - predict(lasso.y.x, newdata=x)
   Zr <- matrix(NA, nrow=n, ncol=numIV)
   for (i in seq(length.out=numIV)) {
-  lasso.z.x <- rlasso(x,z[,i],...)
+  lasso.z.x <- rlasso(z[,i] ~ x,...)
   Zr[,i] <- z - predict(lasso.z.x, newdata=x)
   }
   result <- tsls(Yr,Dr,x=NULL,Zr, intercept=FALSE)
