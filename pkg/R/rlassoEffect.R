@@ -92,6 +92,7 @@ rlassoEffects.default <- function(x, y, index=c(1:ncol(x)), method="double selec
   I3ind <- which(I3==T)
   if (length(intersect(index, I3ind)!=0)) stop("I3 and index must not overlap!")
   }
+  
   if (is.null(colnames(x))) colnames(x) <- paste("V", 1:dim(x)[2], sep="")
   coefficients <- as.vector(rep(NA_real_,k))
   se <-  rep(NA_real_,k)
@@ -107,7 +108,7 @@ rlassoEffects.default <- function(x, y, index=c(1:ncol(x)), method="double selec
     d <- x[,index[i], drop=FALSE]
     Xt <- x[,-index[i], drop=FALSE]
 
-    lasso.regs[[i]] <- try(col <- rlassoEffectone(Xt,y,d, method=method, I3=I3, post=post, ...))
+    lasso.regs[[i]] <- try(col <- rlassoEffect(Xt,y,d, method=method, I3=I3, post=post, ...))
     if(class(lasso.regs[[i]]) == "try-error") {
       next
     }
@@ -365,7 +366,7 @@ plot.rlassoEffects <- function(x, main="", xlab="coef", ylab="", xlim=NULL, col=
   colnames(coefmatrix) <- c("names","coef","lower","upper")
   coefmatrix <- coefmatrix[order(abs(coefmatrix[, 2])), ]
   
-  
+  col <- "#000099"
   # scale
   if(missing(xlim)){
     low <- min(coefmatrix[,-1])
@@ -374,12 +375,12 @@ plot.rlassoEffects <- function(x, main="", xlab="coef", ylab="", xlim=NULL, col=
     low <- xlim[1]
     up <- xlim[2]
   }
-  
+  browser()
   # generate points 
-  plotobject <- ggplot2::ggplot(coefmatrix,aes(y=coef,x=factor(names,levels=names))) + ggplot2::geom_point(colour=col)+ggplot2::geom_hline(h=0)
+  plotobject <- ggplot2::ggplot(coefmatrix,aes(y=coef,x=factor(names,levels=names))) + ggplot2::geom_point(colour=col)+ggplot2::geom_hline(h=0, colour=col, width=0.1)
   
   # generate errorbars (KIs)
-  plotobject <- plotobject + ggplot2::geom_errorbar(ymin=coefmatrix$lower,ymax=coefmatrix$upper,colour=col)
+  plotobject <- plotobject + ggplot2::geom_errorbar(ymin=coefmatrix$lower,ymax=coefmatrix$upper,colour=col, width=2, size=1)
   
   # further graphic parameter
   plotobject <- plotobject + ggplot2::ggtitle(main) + ggplot2::ylim(low,up) + ggplot2::xlab(ylab) + ggplot2::ylab(xlab) 
@@ -390,9 +391,12 @@ plot.rlassoEffects <- function(x, main="", xlab="coef", ylab="", xlim=NULL, col=
   # invert x and y axis
   plotobject <- plotobject + ggplot2::coord_flip()
   
+  # layout
+  plotobject <- plotobject + theme_bw() + geom_blank() +
+    theme(panel.grid.major.x = element_blank(),
+          panel.grid.minor.x = element_blank()) 
   # plot
   plotobject
-  
 }
 
 
