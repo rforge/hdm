@@ -268,9 +268,7 @@ where $e_i$are iid standard normal distributed, indepently from the data, and $ 
 The estimation proceeds by iteration.  The estimates of residuals $\hat \varepsilon_i$ are initialized by running least squares of $y_i$ on five most regressors that are most correlated to $y_i$. This implies conservative starting values for $\lambda$ and the penalty loadings, and leads to the initial Lasso and post-Lasso estimates, which are then further updated by iteration.
 
   
-\subsection*{R implementation} [TO BE UPDATED]. The function \texttt{rlasso} implements Lasso and post-Lasso, where the prefix ``r" signifies that these are theoretically rigorous versions of Lasso and post-Lasso.  The option \code{penalty} of the function \code{rlasso} allows different choices for the penalization parameter and loadings. It allows for homoscedastic or heterosceastic errors with default \code{homoscedastic = FALSE}. Moreover, the dependence structure of the design matrix might be taken into consideration for calculation of the penalization parameter with \code{X.design =
-  "dependent"}. The default is \code{"dependent"}. With \code{lambda.start} initial values for the algorithm can be set to get started. In some cases the user might want to use a predefined, fixed penalization parameter. This can be done by a special option in the following way: set homoscedastic to "none" and  supply a values \code{lambda.start}. Then this value is used as penalty parameter with independent design and heteroscedastic errors to weight the regressors.
-  
+\subsection*{R implementation}  The function \texttt{rlasso} implements Lasso and post-Lasso, where the prefix ``r" signifies that these are theoretically rigorous versions of Lasso and post-Lasso. The default option is post-Lasso, \code{post=TRUE}. The user can also decide if an unpenalized \code{intercept} should be included (\code{TRUE} by default), \code{LassoShooting.fit} is the computational algoritm that underlies the estimation procedure, which implements a version of the Shooting Lasso Algorithm.  The option \code{penalty} of the function \code{rlasso} allows different choices for the penalization parameter and loadings. It allows for homoscedastic or heterosceastic errors with default \code{homoscedastic = FALSE}. Moreover, the dependence structure of the design matrix might be taken into consideration for calculation of the penalization parameter with \code{X.dependent.lambda = "TRUE"}. With \code{lambda.start} initial values for the algorithm can be set to get started. In some cases the user might want to use a predefined, fixed penalization parameter. This can be done by a special option in the following way: set homoscedastic to "none" and  supply a values \code{lambda.start}. Then this value is used as penalty parameter with independent design and heteroscedastic errors to weight the regressors. This function returns an object of S3 class \code{rlasso} for which methods like \code{predict}, \code{print}, \code{summary} are provided.
 
 The constants $c$ and $\gamma$ from above can be set in the option \code{penalty}.
 The quantities $\hat{\varepsilon}$, $\hat{\Psi}$, $\hat{\sigma}$ are calculated in a iterative manner. The maximum number of iterations and the tolerance when the algorithms should  stop can be set with \code{control}. 
@@ -391,7 +389,14 @@ Eff= rlassoEffect(X[,-1],y,X[,1], method="partialling out")
 cbind(Eff$coef, Eff$se)
 @
 
-Another first-order equivalent strategy implemented relies on the double-selection method, which uses the union of $x_{i,j}$'s selected in two projection equations for partialling out.  This is equivalent to doing OLS of $y_i$ on $d_i$ and the union of controls selected in the two projection equations.
+Another first-order equivalent strategy implemented in the package relies on the double-selection method, which uses the union of $x_{i,j}$'s selected in two projection equations for partialling out.  This is equivalent to doing OLS of $y_i$ on $d_i$ and the union of controls selected in the two projection equations:
+\begin{enumerate}
+  \item Select controls $x_{ij}$'s that predict $y_i$ by LASSO.
+  \item Select controls $x_{ij}$'s that predict $d_i$ by LASSO.
+  \item Run OLS of $y_i$ on $d_i$ and the union of controls selected in steps 1
+  and 2.
+\end{enumerate}
+We can implement this version by \texttt{rlassoEffect} by setting the method option to "double selection":
 <<simulation_doubleselection_rlassoEffectone>>=
 Eff= rlassoEffect(X[,-1],y,X[,1], method="double selection")
 cbind(Eff$coef, Eff$se)
@@ -422,62 +427,31 @@ cbind(Eff$coef, Eff$se)
 
 
 \subsection{Inference}
-Besides estimation inference is highly relevant for empirical applications. Using LASSO as a method for penalized estimation of the coefficients of a sparse linear model is useful for obtaining forecasting rules and for estimating which variables have a strong association to an outcome in a sparse framework. However, naively using the results obtained from such a procedure to draw inferences about model parameters may be invalid. The reason is that only under very strong conditions LASSO is consistent concerning model selection which hardly apply in empirical applications and omission of relevant variables cannot be excluded in general distorting the validity of traditional approaches. This caveat applies to both low- {\bf and} high-dimensional settings when model selection is considered. Moreover, even in the case of consistent model selection non-uniformity of the results might lead to poor finite sample approximations. P\"otscher and Leeb have analyzed these issues in a series of papers.
-
-Valid inference on low-dimensional parameters in a high-dimensional setting as described in the previous section is possible by the so-called double selection method.
-
-We are interested in doing inference on a low dimensional parameter $\alpha$. For ease of exposition, we consider the case that the parameter of interest is a scalar. This gives us the following model
-
-\[ y_i = \alpha_0 d_i + x_i' \beta_0  + \xi_i, i=1,\ldots,n, \]
-with $x_i$ p-dimensional vector of controls, $d_i$ the low-dimensional object we are concerned about, and $\xi_i$ iid errors with $\mathbb{E}[\xi_i|d_i, x_i]=0$. To perform valid inference, we introduce an auxiliary regression:
-
-\[ d_i= x_i' \theta + v_i, \]
-
-where $\mathbb{E}[v_i|x_i]=0$ and captures the relation between variable of interest and the control variables.
-The double selection method is designed to guard against moderately sized model selection mistakes and consists of the following steps:
-\begin{enumerate}
-  \item Select controls $x_{ij}$'s that predict $y_i$ by LASSO.
-  \item Select controls $x_{ij}$'s that predict $d_i$ by LASSO.
-  \item Run OLS of $y_i$ on $d_i$ and the union of controls selected in steps 1
-  and 2.
-\end{enumerate}
-The additional selection step controls the omitted variable bias. In essence the procedure is a selection version of Frisch-Waugh
-procedure for estimating linear regression.
-\subsection{Functions for Lasso and Inference}
-The package contains several functions for estimation and inference by LASSO. In this section we introduce the core functions which are then illustrated in an example.
-
-The core functions for estimation are \code{LassoShooting.fit} and \code{rlasso}. \code{LassoShooting.fit} is the working horse for the estimation and implements a version of the Shooting Lasso Algorithm. It allows variable dependent penalties or weights.
-The function \code{rlasso} implements LASSO and Post-LASSO estimation with non-Gaussian errors and under heteroskedasticity.
-The default option is \code{post=TRUE}. The user can also decide if an unpenalized \code{intercept} should be included (\code{TRUE} by default) and if the regressors should be \code{normalize}d (\code{TRUE} by default). The choice of \code{penalty} is passed by a list. It can be chosen between homoscedastic errors (\code{FALSE} by default) and if the penalty should take into consideration the design of the \code{X} matrix which gives tighter bounds on the penalization parameter. The two options for \code{X.design} are \code{dependent} and the default \code{independent}. This function returns an object of S3 class \code{rlasso} for which methods like \code{predict}, \code{print}, \code{summary} are provided.
-The function \code{rlassoEffect} does inference for selected variables. Those can be specified either by the variable names, an integer valued vector giving their position in \code{x} or by logical indicating the variables for which inference should be conducted. It returns an object of S3 class \code{rlassoEffect} for which the methods \code{summary}, \code{print}, \code{confint}, and \code{plot} are provided. \code{rlassoEffect} is a wrap function for \code{rlassoEffectone} which does inference for a single, specified variable.
-
-
-\subsection{Example}
-In this section we demonstrate the functionality for LASSO estimation and inference at a simulated data set. In the next sections the methods will be illustrated at hand of empirical applications using the data sets introduced earlier.
+The function \code{rlassoEffects} does inference for a target variables. Those can be specified either by the variable names, an integer valued vector giving their position in \code{x} or by logical indicating the variables for which inference should be conducted. It returns an object of S3 class \code{rlassoEffect} for which the methods \code{summary}, \code{print}, \code{confint}, and \code{plot} are provided. \code{rlassoEffects} is a wrap function for \code{rlassoEffect} which does inference for a single target regressor.
 
 First we generate data in a sparse linear model:
-
 <<DGP_Lasso>>=
-set.seed(1234)
-n = 250 #sample size
+set.seed(1)
+n = 100 #sample size
 p = 100 # number of variables
-s = 10 # nubmer of non-zero variables
+s = 3 # nubmer of non-zero variables
 X = matrix(rnorm(n*p), ncol=p)
-beta = c(rep(2,s), rep(0,p-s))
+beta = c(rep(3,s), rep(0,p-s))
 y = 1 + X%*%beta + rnorm(n)
 @
 We can do inference on a set of variables of intest, e.g. the first,
-second, and the fiftieth:
+second, third, and the fiftieth:
 <<Estimation_inference>>=
-lasso.effect = rlassoEffect(x=X, y=y, index=c(1,2,50))
+lasso.effect = rlassoEffects(x=X, y=y, index=c(1,2,3,50))
 print(lasso.effect)
 summary(lasso.effect)
 confint(lasso.effect)
 @
 Finally, we can also plot the estimated effects with their confidence intervals:
 <<Lasso_plot, fig.width=3, fig.height=2.5, out.width='.49\\linewidth'>>=
-plot(lasso.effect, main="Confidence Interval of Selected Variables")
+plot(lasso.effect, main="Confidence Intervals")
 @
+
 \subsection{Application: Estimation of the treatment effect in a linear model
 with many confounding factors}
 
@@ -521,48 +495,30 @@ X = as.matrix(GrowthData)[,-c(1,2,3)]
 varnames = colnames(GrowthData)
 @
 
-Now we can estimate the influence of initial GDP level to test the Economic hypothesis
-
+Now we can estimate the influence of initial GDP level to test the convergence hypothesis. First, we estimate by OLS:
 <<>>=
 xnames= varnames[-c(1,2,3)] # names of X variables
 dandxnames= varnames[-c(1,2)] # names of D and X variables
 # create formulas by pasting names (this saves typing times)
 fmla= as.formula(paste("Outcome ~ ", paste(dandxnames, collapse= "+")))
-full.fit= lm(fmla, data=GrowthData)
-fmla.y= as.formula(paste("Outcome ~ ", paste(xnames, collapse= "+")))
-fmla.d= as.formula(paste("gdpsh465~ ", paste(xnames, collapse= "+")))
-# partial fit via ols
-rY= lm(fmla.y, data =GrowthData)$res
-rD= lm(fmla.d, data =GrowthData)$res
-partial.fit.ls= lm(rY~rD)
-# partial ls via lasso
-rY= rlasso(fmla.y, data =GrowthData)$res
-rD= rlasso(fmla.d, data =GrowthData)$res
-partial.fit.lasso= lm(rY~rD)
+ls.effect= lm(fmla, data=GrowthData)
 @
 
-
+Second, we estimate by the partialling out method by (post)-Lasso:
 <<Growth_analysis>>=
 dX = as.matrix(cbind(d,X))
-partial.fit.lasso2 = rlassoEffect(x=dX, y=y, index=1, intercept=TRUE, normalize=TRUE, post=TRUE)
-#partial.fit.lasso2 = rlassoEffectone(x=X,y=y,d=d)
-summary(partial.fit.lasso2)
+lasso.effect = rlassoEffect(x=X, y=y, d=d)
+summary(lasso.effect)
 @
-
 
 <<summary_results, results="hide">>=
 library(xtable)
-table= matrix(0, 4, 2)
-table[1,]= summary(full.fit)$coef["gdpsh465",1:2]
-table[2,]= summary(partial.fit.ls)$coef["rD",1:2]
-table[3,]= summary(partial.fit.lasso)$coef["rD",1:2]
-table[4,]= summary(partial.fit.lasso2)["d",1:2]
+table= matrix(0, 2, 3)
+table[1,]= summary(ls.effect)$coef["gdpsh465",1:2]
+table[2,]= summary(lasso.effect)["d",1:2]
 colnames(table)= names(summary(full.fit)$coef["gdpsh465",])[1:2]
-rownames(table)= c("full reg", "partial reg", "partial reg via lasso 1", "partial reg
-via lasso 2")
-# adjust partial ls standard error by sqrt{n/(n-p)}
-n= dim(GrowthData)[1]; p= dim(GrowthData)[2]
-table[2,2]= table[2,2]*sqrt(n/(n-p))
+rownames(table)= c("full reg via ols",  "partial reg
+via post-lasso ")
 tab= xtable(table, digits=c(2, 2,7))
 @
 
