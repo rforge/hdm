@@ -4,6 +4,14 @@
 %\VignetteEngine{knitr}
 %\VignetteEncoding{UTF-8}
 \documentclass{amsart}
+%\newcommand{\indep}{\mathop{\perp\!\!\!\!\perp}}
+\setlength{\textwidth}{6.2in}
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\renewcommand{\baselinestretch}{1.25}
+
+
+
 \usepackage{harvard}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage[utf8]{inputenc}
@@ -18,46 +26,14 @@
 \renewcommand{\S}{{\normalfont\textsf{S }}{}}
 \newcommand{\code}[1]{\texttt{#1}}
 \DeclareMathOperator*{\argmin}{arg\,min}
-\title{High-Dimensional Metrics in R: A Tutorial\\ Preliminary -- Please do not distribute}
+\title{High-Dimensional Metrics in R}
 \thanks{Version:  \today}
 \author{Victor Chernozhukov, Christian Hansen, Martin Spindler}
 
 
-%' %%%%%%%%%%%%%%%%%%%%%% Test
-%'  \usepackage{listings}
-%'  %\usepackage{inconsolata}
-%'  
-%'  <<echo=FALSE>>=
-%'    options(width=60)
-%'    listing <- function(x, options) {
-%'      paste("\\begin{lstlisting}[basicstyle=\\ttfamily,breaklines=true]\n",
-%'        x, "\\end{lstlisting}\n", sep = "")
-%'    }
-%'    knit_hooks$set(source=listing, output=listing)
-%'  @
-%' 
 \begin{document}
-%' %\SweaveOpts{concordance=TRUE}
-%' %options(width = 60)
-<<echo=FALSE>>=
-library(knitr)
-@
-
-<<setupOp, include=FALSE>>=
-opts_chunk$set(tidy=TRUE)
-@
-%\raggedright
-
-<<echo=FALSE>>=
-options(width=60)
-@
-
 \begin{abstract}
-High-dimensional Metrics (hdm) is an evolving collection of statistical
-methods for estimating and drawing inferences in settings with very many variables. An implementation of some of these methods in the \R language is available in the package \Rpackage{hdm}.
-This vignette offers a brief tutorial to
-the package and the implemented methods.  \R and the package \Rpackage{hdm} are open-source
-software projects and can be freely downloaded from CRAN:
+The package High-dimensional Metrics (\Rpackage{hdm}) is an evolving collection of statistical methods for estimating and drawing inferences in high-dimensional approximately sparse models.  This vignette offers a brief introduction and a tutorial to the implemented methods.  \R and the package \Rpackage{hdm} are open-source software projects and can be freely downloaded from CRAN:
 \texttt{http://cran.r-project.org}.
 \end{abstract}
 
@@ -69,30 +45,45 @@ software projects and can be freely downloaded from CRAN:
 \tableofcontents
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
-Analysis of high-dimensional models, models in which the number of parameters to be estimated is large relative to the sample size, is becoming increasingly important. Such models arise naturally in readily available high-dimensional data which have many measured characteristics available per individual observation as in, for example, large survey data sets, scanner data, and text data.  Such models also arise naturally even in data with a small number of measured characteristics in situations where the exact functional form with which the observed variables enter the model is unknown.  Examples of this scenario include semiparametric models with nonparametric nuisance functions.  More generally, models with many parameters relative to the sample size often arise when attempting to model complex phenomena.
+Analysis of high-dimensional models, models in which the number of parameters to be estimated is large relative to the sample size, is becoming increasingly important. Such models arise naturally in readily available high-dimensional data which have many measured characteristics available per individual observation as in, for example, large survey data sets, scanner data, and text data.  Such models also arise naturally even in data with a small number of measured characteristics in situations where the exact functional form with which the observed variables enter the model is unknown, and we create many technical variables, a dictionary, from the raw characteristics. Examples of this scenario include semiparametric models with nonparametric nuisance functions.  More generally, models with many parameters relative to the sample size often arise when attempting to model complex phenomena.
 
-With increasing availability of such data sets in Economics and other fields, new methods for analyzing those data have been developed. The \R package \Rpackage{hdm} contains implementations of recently developed methods with a focus on microeconometric applications and this vignette serves as tutorial. The methods are also useful in other disciplines like Medicine, Biology, Sociology or Psychology to mention a few. The methods which are implemented in this package are distinctive from already available methods in mainly the following: First, the choice of the penalization parameter $\lambda$ in the Lasso regressions is theoretical grounded and feasible. Because of this we call it \textquotedblleft rigorous\textquotedblright LASSO (=\code{rlasso}). The prefix \textbf{r} in function names should underscore this. In high-dimensions setting cross-validation is very popular, but lacking a theoretical justification and other proposals are often not feasible. Second, the Lasso regressions allow for non-Gaussian and heteroscedastic errors. Third, valid inference on low-dimensional (structural) parameters of interest is possible. Examples are inference for selected variables in a high-dimensional regression, a situation which arises in estimation of a treatment effect with very many control variables, or the estimation of a treatment effect in a high-dimensional Instrumental Variable (IV) setting.
+With increasing availability of such data sets in economics and other data science fields, new methods for analyzing those data have been developed. The \R package \Rpackage{hdm} contains implementations of recently developed methods for high-dimensional approximately sparse models, mainly relying on forms of Lasso and post-Lasso as well as related estimation and inference methods.  The methods are illustrated with econometric applications, but are also useful in other  disciplines like medicine, biology, sociology or psychology to mention a few. 
 
-In this vignette, we first show how to get started with package. Then we introduce briefly the data sets which are contained in the package and used later for illustration. Next the functions for LASSO and Post-LASSO estimation under heteroscedastic and non-Gaussian errors are presented. They are the core for the further applications. Next, different micoreconometric models in a high-dimensional setting are introduced and illustrated by an empirical application.
+The methods which are implemented in this package are distinctive from already available methods in other packages in mainly the following three major ways: 
+\begin{itemize} 
+
+
+\item[\textbf{1)}] First, we provide efficient estimators and  uniformaly valid confidence intervals for various low-dimensional causal/structural parameters  appearing in high-dimensional approximately sparse models.   For example, we provide efficient estimators and uniformly valid confidence intervals for a regression coefficient on a target variable (e.g., a treatment or policy variable) in a high-dimensional sparse regression model.  We also provide estimates and confidence intervals for average treatment effect (ATE) and average treatment effect for the treated (ATET),  as well  extensions of these parameters to the endogenous setting.
+
+
+\item[\textbf{2)}] Second, we provide theoretically grounded, data-driven choice of the penalty level $\lambda$ in the Lasso regressions is both theoretical grounded and data-driven. Because of this we call it \textquotedblleft rigorous\textquotedblright LASSO (=\code{rlasso}). The prefix \textbf{r} in function names should underscore this. In high-dimensions setting cross-validation is very popular, but it lacks a theoretical justification and some theoretical proposals are often not feasible. 
+
+\item[\textbf{3)}] Third, we provide a version of Lasso regressions that expressly handle and allow for non-Gaussian and heteroscedastic errors.
+
+
+
+
+\end{itemize}
+
+In this vignette, we first show how to get started with package. Then we introduce briefly the data sets which are contained in the package and used later for illustration. Next the functions for LASSO and Post-LASSO estimation under heteroscedastic and non-Gaussian errors are presented. They are the core for the further applications. Next, different econometric models in a high-dimensional setting are introduced and illustrated by an empirical application.
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{How to get started}
 \R is an open source software project and can be freely downloaded from the CRAN
-website along with its associated documentation. The \R package \Rpackage{hdm} can be downloaded from \texttt{cran.r-project.org}. To install the hdm package from \R one simply types,
+website along with its associated documentation. The \R package \Rpackage{hdm} can be downloaded from \texttt{cran.r-project.org}. To install the hdm package from \R we simply type,
 
-\vspace{2mm}
-\noindent
-\texttt{>install.packages("hdm")}
-\vspace{2mm}
+<<eval=FALSE>>=
+install.packages("hdm")
+@
 
 \noindent
 The most current version of the package (development version) is maintained at R-Forge and can installed by
 
-\vspace{2mm}
-\noindent
-\texttt{>install.packages("hdm", repos="http://R-Forge.R-project.org")}
-\vspace{2mm} 	
+<<eval=FALSE>>=
+install.packages("hdm", repos="http://R-Forge.R-project.org")
+@
 
 
 \noindent
@@ -101,10 +92,12 @@ have write permission in the appropriate system directories,
 the installation of the package should proceed automatically.
 Once the \texttt{hdm} package is installed, it needs
 to be made accessible to the current \R session by the command,
-<<echo=FALSE>>=
+<<echo=TRUE>>=
 library(hdm)
 @
-
+<<echo=FALSE,results='hide'>>=
+library(hdm); library(ggplot2);
+@
 
 Online help is available in two ways.  If you know
 precisely the command you are
@@ -116,14 +109,13 @@ help(lasso)
 The former command gives an overview over the available commands in the package, and
 the latter gives detailed information about a specific command.
 
+
+
 More generally one can initiate a web-browser help session with the command,
 
-\vspace{2mm}
-\noindent
-\texttt{> help.start()}
-
-\vspace{2mm}
-\noindent
+<<eval=FALSE>>=
+ help.start()
+@
 and navigate as desired.  The browser approach is better adapted to exploratory
 inquiries, while the command line approach is better suited to confirmatory ones.
 
@@ -131,12 +123,10 @@ A valuable feature of \R help files is that the examples used to illustrate comm
 are executable, so they can be pasted into an \R session, or run as a group with
 a command like,
 
-\vspace{2mm}
-\noindent
-\texttt{>example(lasso)}
+<<eval=FALSE>>=
+example(lasso)
+@
 
-\vspace{2mm}
-\noindent
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Data Sets}
 In this section we describe briefly the data sets which are contained in the package and used afterwards. They might also be of general interest for other researchers either for illustrating methods or for class-room presentation.
@@ -152,7 +142,7 @@ workers in firms offering plans are eligible for participation. This data set co
 
 The data set can be loaded with
 
-<<results='hide'>>=
+<<results="hide">>=
 data(pension)
 @
 
@@ -175,7 +165,7 @@ nonparticipants. Available measures of wealth in the 1991 SIPP are total wealth,
 
 \subsection{Growth Data}
 The question what drives Economic Growth, measured in GDP, is a central question of Economics. A famous data set with information about GDP growth for many countries and long period was collected by Barro and Lee. This data set is also provided in the data set and can be loaded by
-<<results='hide'>>=
+<<results="hide">>=
 data(GrowthData)
 @
 This data sets contains the national growth rates in GDP per capita (Outcome) for many countries with additional covariates. A very important covariate is gdpsh465, which is the initial level of per-capita GDP. For further information we refer to the help page and the references herein, in particular the online descriptions of the data set.
@@ -184,7 +174,7 @@ This data sets contains the national growth rates in GDP per capita (Outcome) fo
 
 \subsection{Institutions and Economic Development -- Data on settler mortality}
 This data set was introduced by paper Acemoglu, Johnson, and Robinson (2001) to analyse the effect of institutions on economic development. The data is contained in the package and can be accessed with
-<<results='hide'>>=
+<<results="hide">>=
 data(AJR)
 @
 
@@ -196,7 +186,7 @@ Eminent domain refers to the government's taking of private property. This data 
 appellate takings decisions on economic relevant outcome variables like house prices, measured by some index. 
 
 The data set is loaded into \R by
-<<results='hide'>>=
+<<results="hide">>=
 data(EminentDomain)
 @
 
@@ -212,19 +202,132 @@ the distribution of characteristics of federal circuit court judges in a given c
 \item z: instrumental variables, here characteristics of judges serving on federal appellate panels
 \end{itemize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Partialling Out}
+
+
+\section{Prediction using Approximate Sparsity}
+
+
+\subsection{Prediction in Linear Models using Approximate Sparsity}
+
+We consider linear high dimensional approximate sparse regression models. These models have a large number of regressors $p$, possibly much larger than the sample size $n$, but only a relatively small number $s =o(n)$ of these regressors are important for capturing accurately the main features of the regression function. The latter assumption makes it possible to estimate these models effectively by searching for approximately the right set of the regressors, using $\ell_1$-based penalization methods.
+
+The model reads: \[ y_i = x_i' \beta_0  + \varepsilon_i, \quad \mathbb{E}[\varepsilon_i x_i]=0, \quad \beta_0 \in \mathbb{R}^p, i=1,\ldots,n \]
+where $y_i$ are observations of the response variable, $x_i=(x_{i,j}, \ldots, x_{i,p})$'s are observations of $p-$dimensional fixed regressors, and $\varepsilon_i$'s are iid, mean-zero centered disturbances, where possibly $p \gg n$.    An important point is that the errors $\varepsilon_i$ are \textit{not} restricted to be Gaussian or homoscedastic. This means that we allow for both non-Gaussian and heteroscedastic errors. 
+
+The model can be exactly sparse, namely
+$$
+\| \beta_0\|_0 \leq s = o(n),
+$$
+or approximately sparse, so that the values of coefficients, sorted in decreasing
+order, $(| \beta_0|_{(j)})_{j=1}^p$ obey,
+$$
+| \beta_0|_{(j)} \leq \mathsf{A} j^{-\mathsf{a}},  \quad a>1/2, \quad j=1,...,p.
+$$
+An approximately sparse model can be well-approximated by an exactly sparse model
+with sparsity index $$s \propto n^{1/(2 \mathsf{a})}.$$ 
+
+
+
+In order to get  theoretically valid results in these settings,  we consider the LASSO 
+estimator with data-driven penalty loadings: 
+\[ \hat \beta = \arg \min_{\beta \in  \mathbb{R}^p} \mathbb{E}_n [(y_i - x_i' \beta)^2] + \frac{\lambda}{n} ||\hat{\Psi} \beta||_1 \]
+where $||\beta||_1=\sum_{j=1}^p |\beta_j|$ and $\hat{\Psi}=\mathrm{diag}(\hat{\psi}_1,\ldots,\hat{\psi}_p)$ is a diagonal matrix consisting of regressor dependent penalty loadings, and $\mathbb{E}_n$ abbreviates the empirical average. The penalty loadings are chosen to insure basic equivariance of coefficient estimates to rescaling of $x_{i,j}$ and can also be chosen to address the heteroskedastiticy in model errors.   We discuss the choice of $\lambda$ and $\hat \Psi$ below.
+
+Regularization by the $\ell_1$-norm naturally helps the LASSO estimator to avoid overfitting the data, but it also shrinks the fitted coefficients towards zero, causing a potentially significant bias. In order to remove some of this bias, let us consider the Post-LASSO estimator that applies ordinary least squares regression to the model $\hat{T}$ selected by LASSO, formally, 
+\[ \hat{T} = \text{support}(\hat{\beta}) = \{ j \in \{ 1, \ldots,p\}: \lvert \hat{\beta} \rvert >0 \}. \]
+The Post-LASSO estimate is then defined as
+\[ \tilde{\beta} \in \argmin_{\beta \in \mathbb{R}^p}  \ \mathbb{E}_n \left( y_i - \sum_{j=1}^p x_{i,j} \beta_j \right) ^2: \beta_j=0 \quad\forall j \in \hat{T}^C, \]
+where $\hat{T}^C=\{1,\ldots,p\} \setminus  \hat{T}$. In words, the estimator is ordinary least squares applied to the data after removing the regressors that were not selected by LASSO.
+
+
+
+A crucial point for the performance of LASSO is the choice of the penalization parameter $\lambda$. In high-dimensions setting cross-validation is very popular but lacking a theoretical justification, and other proposals are often not feasible. The choice of the penalization parameter $\lambda$ in the Lasso regressions in this package is theoretical grounded and feasible. Therefore we call the resulting procedure the \textquotedblleft rigorous\textquotedblright Lasso and hence add as prefix \textbf{r} to the function names.
+
+In the case of homoscedasticity, we set the penalty loadings $\hat{\psi}_j = \sqrt{\mathbb{E}_n x_{i,j}^2}$, which insures basic equivariance properties.
+The are two choices for penalty level $\lambda$:  the $X$-independent choice
+and $X$-dependent choice.  In the $X$-independent choice we set the penalty level
+to
+\[ \lambda = 2c \hat{\sigma} \Phi^{-1}(1-\gamma/(2p)), \]
+where $\Phi$ denotes the cumulative standard normal distribution, 
+ $\hat \sigma$ is a preliminary estimate of $\sigma = \sqrt{\mathbb{E} \varepsilon^2}$,
+and $c>1$ is a theoretical constant , which is set to $c=1.1$ by default, and $\gamma$ is the probability level, which is set to $\gamma =.01$ by default. \footnote{The probability is probability of mistakenly not removing some of the $X$'s, when all of them have zero coefficients.}  In the X-dependent case the penalty level is calculated as
+\[ \lambda = 2c \hat{\sigma} \Lambda(1-\gamma|X), \]
+where
+\[ \Lambda(1-\gamma|X)=(1-\gamma)-\text{quantile of}\quad n||\mathbb{E}_n[x_i e_i] ||_{\infty}|X,\]
+where $X=[x_1, \ldots, x_n]'$ and $eg_i$ are iid $N(0,1)$, generated independently from $X$; this quantity  is approximated by simulation. The $X$-independent penalty is more conservative, while the $X$-dependent penalty level is least conservative. In particular the $X$-dependent penalty automatically adapts to highly correlated designs, using less aggressive penalization in this case.
+
+In the case of heteroscedasticity, the loadings are given by $\hat{\psi}_j=\sqrt{\mathbb{E}_n[x_{ij}^2 \hat \varepsilon_i^2]}$, where $\hat \varepsilon_i$ are preliminary estimates of the errors. The penalty level
+can be $X$-independent:
+\[ \lambda = 2c \sqrt{n} \Psi^{-1}(1-\gamma/(2p)), \]or it
+can be X-dependent and estimated by a multiplier bootstrap procedure.
+\[ \lambda = c \times c_W(1-\gamma), \]
+where $c_W(1-\gamma)$ is the $1-\gamma$-quantile of the random variable $W$, conditional on the data, where
+\[ W:= \sqrt{n} \max_{1 \leq j \leq p} |2\mathbb{E}_n [x_{ij} \hat{\varepsilon}_i e_i]|,\]
+where $e_i$are iid standard normal distributed, indepently from the data, and $ \hat{\varepsilon}_i$ denotes an estimate of the residuals.
+
+The estimation proceeds by iteration.  The estimates of residuals $\hat \varepsilon_i$ are initialized by running least squares of $y_i$ on five most regressors that are most correlated to $y_i$. This implies conservative starting values for $\lambda$ and the penalty loadings, and leads to the initial Lasso and post-Lasso estimates, which are then further updated by iteration.
+
+  
+\subsection*{R implementation} [TO BE UPDATED]. The function \texttt{rlasso} implements Lasso and post-Lasso, where the prefix ``r" signifies that these are theoretically rigorous versions of Lasso and post-Lasso.  The option \code{penalty} of the function \code{rlasso} allows different choices for the penalization parameter and loadings. It allows for homoscedastic or heterosceastic errors with default \code{homoscedastic = FALSE}. Moreover, the dependence structure of the design matrix might be taken into consideration for calculation of the penalization parameter with \code{X.design =
+  "dependent"}. The default is \code{"dependent"}. With \code{lambda.start} initial values for the algorithm can be set to get started. In some cases the user might want to use a predefined, fixed penalization parameter. This can be done by a special option in the following way: set homoscedastic to "none" and  supply a values \code{lambda.start}. Then this value is used as penalty parameter with independent design and heteroscedastic errors to weight the regressors.
+  
+
+The constants $c$ and $\gamma$ from above can be set in the option \code{penalty}.
+The quantities $\hat{\varepsilon}$, $\hat{\Psi}$, $\hat{\sigma}$ are calculated in a iterative manner. The maximum number of iterations and the tolerance when the algorithms should  stop can be set with \code{control}. 
+
+
+\subsection*{Example} Consider generated data from a sparse linear model:
+<<DGP_Lasso1>>=
+set.seed(1)
+n = 100 #sample size
+p = 100 # number of variables
+s = 3 # nubmer of variables with non-zero coefficients
+X = matrix(rnorm(n*p), ncol=p)
+beta = c(rep(5,s), rep(0,p-s))
+Y = X%*%beta + rnorm(n)
+@
+Next we estimate it, show the results and make predictions for the old and for new X-variables
+<<Estimation_Lasso1>>=
+# use Lasso for fitting and prediction
+lasso.reg = rlasso(Y~X,post=FALSE)  # use Lasso, not-Post-Lasso
+print(lasso.reg, all=FALSE)
+# summary(lasso.reg, all=FALSE) # use this option to summarize results
+yhat.lasso = predict(lasso.reg)   #in-sample prediction
+Xnew = matrix(rnorm(n*p), ncol=p)  # new X
+Ynew =  Xnew%*%beta + rnorm(n)  #new Y
+yhat.lasso.new = predict(lasso.reg, newdata=Xnew)  #out-of-sample prediction
+
+# now use Post-Lasso for fitting and prediction
+post.lasso.reg = rlasso(Y~X,post=TRUE)
+print(post.lasso.reg, all=FALSE)    #use this option to print results
+#summary(post.lasso.reg, all=FALSE)  #use this option to summarize results
+yhat.postlasso = predict(post.lasso.reg)  #in-sample prediction
+yhat.postlasso.new = predict(post.lasso.reg, newdata=Xnew)  #out-of-sample prediction
+# compute Mean Absolute Error for Lasso and Post-Lasso predictions:
+MAE<- apply(cbind(abs(Ynew-yhat.lasso.new), abs(Ynew - yhat.postlasso.new)),2, mean)
+names(MAE)<- c("Lasso MAE", "Post-Lasso MAE")
+print(MAE, digits=2)
+@
+
+The methods \code{print} and \code{summarize} have the option \code{all}, which by setting to \code{FALSE} shows only the non-zero coefficients.
+
+
+
+\section{Inference on Target Regression Coefficients in Regression, Using Approximate Sparsity}
+
+\subsection{Intuition via Partialling Out}
 An important concept which underlies some of the methods applied later is the so--called \textquotedblleft partialling out\textquotedblright, an application of the Frisch-Waugh-Lovell Theorem. The idea is to take out the effect of (conditioning) variables which are not the target of analysis. Suppose we are interested in the effect (=parameter estimate) of a single variable in a regression setting. One could either run an ols regression of the dependent variable on all independent variables and the focus on the parameter estimates of interest. An alternative approach leading to the same result is to partial out the effect of all variables which are not of interest from both the independent variable and the variable under consideration. Partialling out means to project on the space spanned by these variables and taking the residuals. Finally, the residuals of the depedent variable are regressed on the residuals of the variable under consideration and this gives the desired parameter estimates. We illsutrate this procedure with an simulation:  
 First, we generate some data
 <<simulation_partialling_out>>=
 set.seed(1234)
-n <-5000
-p <- 20
-X <- matrix(rnorm(n*p), ncol=p)
-colnames(X) <- c("d", paste("x", 1:19, sep=""))
-xnames <- colnames(X)[-1]
-beta <- rep(1,20)
-y <- X%*%beta + rnorm(n)
-dat <- data.frame(y=y, X)
+n =5000
+p = 20
+X = matrix(rnorm(n*p), ncol=p)
+colnames(X) = c("d", paste("x", 1:19, sep=""))
+xnames = colnames(X)[-1]
+beta = rep(1,20)
+y = X%*%beta + rnorm(n)
+dat = data.frame(y=y, X)
 @
 
 We are interest in the effect of the variable $d$.
@@ -232,119 +335,54 @@ We are interest in the effect of the variable $d$.
 One way is to conduct a full fit and then concentrate on the parameter of interest
 <<simulation_partialling_out_full_fit>>=
 # full fit
-fmla <- as.formula(paste("y ~ ", paste(colnames(X), collapse= "+")))
-full.fit<- lm(fmla, data=dat)
+fmla = as.formula(paste("y ~ ", paste(colnames(X), collapse= "+")))
+full.fit= lm(fmla, data=dat)
 @
 
 An alternative is first to partial out the influence of the x-variables and then do a regression of the corresponding residuals
 <<simulation_partialling_out_partial_fit>>=
-fmla.y <- as.formula(paste("y ~ ", paste(xnames,  collapse= "+")))
-fmla.d <- as.formula(paste("d ~ ", paste(xnames, collapse= "+")))
+fmla.y = as.formula(paste("y ~ ", paste(xnames,  collapse= "+")))
+fmla.d = as.formula(paste("d ~ ", paste(xnames, collapse= "+")))
 # partial fit via ols
-rY <- lm(fmla.y, data = dat)$res
-rD <- lm(fmla.d, data = dat)$res
-partial.fit.ls<- lm(rY~rD)
+rY = lm(fmla.y, data = dat)$res
+rD = lm(fmla.d, data = dat)$res
+partial.fit.ls= lm(rY~rD)
 @
 
 Instead of OLS the partialling out might also be done with a different estimation method, e.g. Lasso, which is in particular attractive in high-dimensional settings. An alternative is using the function \code{rlassoEffect} resp. \code{rlassoEffectone} which implements the partialling out in a slightly different way.
 
 <<simulation_partialling_out_partial_fit_lasso>>=
 # partial fit via lasso
-rY <- rlasso(fmla.y, data =dat)$res
-rD <- rlasso(fmla.d, data =dat)$res
-partial.fit.lasso<- lm(rY~rD)
+rY = rlasso(fmla.y, data =dat)$res
+rD = rlasso(fmla.d, data =dat)$res
+partial.fit.lasso= lm(rY~rD)
 # directly via rlassoEffect
-lasso.Effect <- rlassoEffectone(x=X[,-1], d=X[,1], y=y)
-alpha <- lasso.Effect$alpha
-se <- lasso.Effect$se
+lasso.Effect = rlassoEffectone(x=X[,-1], d=X[,1], y=y)
+alpha = lasso.Effect$alpha
+se = lasso.Effect$se
 @
 
 <<summary results, echo=FALSE>>=
 library(xtable)
-table<- matrix(0, 4, 2)
-table[1,]<- summary(full.fit)$coef["d",1:2]
-table[2,]<- summary(partial.fit.ls)$coef["rD",1:2]
-table[3,]<- summary(partial.fit.lasso)$coef["rD",1:2]
-table[4,]<- c(alpha,se)
-colnames(table)<- names(summary(full.fit)$coef["d",])[1:2]
-rownames(table)<- c("full reg", "partial reg", "partial reg via lasso 1", "partial reg via lasso 2")
+table= matrix(0, 4, 2)
+table[1,]= summary(full.fit)$coef["d",1:2]
+table[2,]= summary(partial.fit.ls)$coef["rD",1:2]
+table[3,]= summary(partial.fit.lasso)$coef["rD",1:2]
+table[4,]= c(alpha,se)
+colnames(table)= names(summary(full.fit)$coef["d",])[1:2]
+rownames(table)= c("full reg", "partial reg", "partial reg via lasso 1", "partial reg via lasso 2")
 # adjust partial ls standard error by sqrt{n/(n-p)}
-n<- dim(dat)[1]; p<- dim(dat)[2]
-table[2,2]<- table[2,2]*sqrt(n/(n-p))
-tab<- xtable(table, digits=c(2, 2,7))
+n= dim(dat)[1]; p= dim(dat)[2]
+table[2,2]= table[2,2]*sqrt(n/(n-p))
+tab= xtable(table, digits=c(2, 2,7))
 @
 
 We see in the table which summarizes the results that full regression and the partial regression give the same results. As in the simulation the number of observations is much larger than the parameters to estimate lasso gives -- not surprisingly -- comparable results.
-<<results='asis', echo=TRUE>>=
+<<results="asis", echo=TRUE>>=
 tab
 @
 
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{LASSO and Post-LASSO Estimation under Heteroscedastic and Non-Gaussian Errors}
-\subsection{Estimation}
-We consider linear, high dimensional sparse (HDS) regression models. Despite its simplicity it is very powerful and might also capture / approximate nonlinear functions by using basis functions and transformations of the base regressors.
-The HDS regression model has a large number of regressors $p$, possibly much
-larger than the sample size n, but only a relatively small number $s < n$ of these regressors
-are important for capturing accurately the main features of the regression
-function. The latter assumption makes it possible to estimate these models effectively
-by searching for approximately the right set of the regressors, using $\ell_1$-based
-penalization methods.
-
-Let us first consider an exact or parametric HDS regression model, namely,
-\[ y_i = x_i' \beta_0  + \varepsilon_i, \mathbb{E}[\varepsilon_i]=0, \beta_0 \in \mathbb{R}^p, i=1,\ldots,n \]
-where $y_i$ are observations of the response variable, $x_i=(x_{i,j}, \ldots, x_{i,p})$'s are observations of $p-$dimensional fixed regressors, and $\varepsilon_i$'s are iid, mean-zero centered disturbances, where possibly $p \gg n$. An important point is that the disturbances are \textbf{not} restricted to be Gaussian or homoscedastic. This means that we allow for both non-Gaussian and heteroscedastic errors. In order to get "valid" results in those settings, a data-driven weighting matrix is introduced.
-
-The LASSO estimator is defined as
-\[  \hat{\beta}= \argmin_{\beta \in \mathbb{R}^p} \sum_{i=1}^n \left( y_i - \sum_{j=1}^p x_{i,j} \beta_j \right) ^2 + \lambda \sum_{j=1}^p \gamma_ j\lvert \beta_j \rvert, \]
-
-where $\lambda >0$ is the \textquotedblleft penalty level\textquotedblright and $\gamma_j$ are \textquotedblleft penalty loadings\textquotedblright. The penalty loadings are chosen to insure basic equivariance of coefficient estimates to rescaling of $x_{i,j}$ and can also be chosen to address the heteroskedastiticy, and non-normality in model errors.
-
-Regularization by the $\ell_1$-norm naturally helps the LASSO estimator to avoid overfitting the data, but it also shrinks the fitted coefficients towards zero, causing a potentially significant bias. In order to remove some of this bias, let us consider the Post-LASSO estimator that applies ordinary least squares regression to the model $\hat{T}$ selected by LASSO, formally, 
-
-\[ \hat{T} = \text{support}(\hat{\beta}) = \{ j \in \{ 1, \ldots,p\}: \lvert \hat{\beta} \rvert >0 \}. \]
-The Post-LASSO estimate is then defined as
-\[ \tilde{\beta} \in \argmin_{\beta \in \mathbb{R}^p} \left( y_i - \sum_{j=1}^p x_{i,j} \beta_j \right) ^2: \beta_j=0 \forall j \in \hat{T}^C, \]
-where $\hat{T}^C=\{1,\ldots,p\} \setminus  \hat{T}$. In words, the estimator is ordinary least squares applied to the data after removing the regressors that were not selected by LASSO.
-
-%The \textquotedblleft exact\textquotedblright sparsity setting which we desceibed above can also be weakened to  so--called  %\textquotedblleft approximate\textquotedblright sparsity. We  consider  
-
-A key concept in estimation in high-dimenisonal settings is \textquotedblleft sparsity\textquotedblright. This states that the number of potential variables might be large (even larger than the sample size), but the number of variables with non-zero coefficients is quite small. Although this assumption is reasonable in many situations, it might look strict in other application and can be weakened to so-called \textquotedblleft approximate sparsity\textquotedblright. This means that potentially all variables have non-zero coefficients, but the signal can be captured sufficiently well by a small set of variables.
-
-\hl{MS: onw section for penalization parameter? More theory?}
-
-A crucial point for the performance of LASSO is the choice of the penalization parameter $\lambda$. In high-dimensions setting cross-validation is very popular, but lacking a theoretical justification and other proposals are often not feasible. The choice of the penalization parameter $\lambda$ in the Lasso regressions in this package is theoretical grounded and feasible. Therefore we call it \textquotedblleft rigorous\textquotedblright lasso and hence add as prefix \textbf{r} to the function names.
-
-The option \code{penalty} of the function \code{rlasso} allows different choices for the penalization parameter and loadings. It allows for homoscedastic or heterosceastic errors with default \code{homoscedastic = FALSE}. Moreover, the dependence structure of the design matrix might be taken into consideration for calculation of the penalization parameter with \code{X.design =
-  "dependent"}. The default is \code{"dependent"}. With \code{lambda.start} initial values for the algorithm can be set to get started. In some cases the user might want to use a predefined, fixed penalization parameter. This can be done by a special option in the follwoing way: set homoscedastic to "none" and  supply a values \code{lambda.start}. Then this value is used as penalty parameter with independent design and heteroscedastic errors to weight the regressors.
-  
-We  consider again the LASSO optimization problem
-
-\[ \min_{\beta \in  \mathbb{R}^p} \mathbb{E}_n [(y_i - x_i' \beta)^2] + \frac{\lambda}{n} ||\hat{\Psi} \beta||_1 \]
-where $||\beta||_1=\sum_{j=1}^p |\beta_j|$ and $\hat{\Psi}=diag(\hat{\psi}_1,\ldots,\hat{\psi}_p)$ is a diagonal matrix consisting of regressor dependent penalty loadings.
-
-In the case of homoscedasticity, $\hat{\Psi}$ is the identity matrix as no weighting in neccessary.
-In the X-independent case the penalty is set to
-\[ \lambda = 2c \hat{\sigma} \Phi^{-1}(1-\gamma/(2p)), \]
-where $\Phi$ denotes the cumulative standard normal distribution.
-In the X-dependent case the penalty level is calculated as
-\[ \lambda = 2c \hat{\sigma} \Lambda(1-\gamma|X), \]
-where
-\[ \Lambda(1-\gamma|X)=(1-\gamma)-\text{quantile of}\quad n||\mathbb{E}_n[x_i g_i] ||_{\infty}|X,\]
-where $X=[x_1, \ldots, x_n]'$ and $g_i$ are iid $N(0,1)$, which an be easily approximated by simulation.
-
-In the case of heteroscedasticity, the loadings are given by $\hat{\psi}_j=\sqrt{\mathbb{E}_n[x_{ij}^2 \varepsilon_i^2]}$.
-In the X-independet setting, the penalization parameter is given by 
-\[ \lambda = 2c \sqrt{n} \Psi^{-1}(1-\gamma/(2p)). \]
-In the X-dependent case, the penalty is estimated by a multiplier bootstrap procedure.
-\[ \lambda = c \times c_W(1-\gamma), \]
-where $c_W(1-\gamma)$ is the $1-\alpha$-quantile of the random $W$ which is given by
-\[ W:= \sqrt{n} \max_{1 \leq j \leq p} |2\mathbb{E}_n [x_{ij} \hat{\varepsilon}_i e_i]|.\]
-$e_i$ is iid standard normal distributed and $ \hat{\varepsilon}_i$ denotes an estimate of the residuals.
-
-The constants $c$ and $\gamma$ from above can be set in the option \code{penalty}.
-The quantities $\hat{\varepsilon}$, $\hat{\Psi}$, $\hat{\sigma}$ are calculated in a iterative manner. The maximum number of iterations and the tolerance when the algorithms should  stop can be set with \code{control}. 
 
 \subsection{Inference}
 Besides estimation inference is highly relevant for empirical applications. Using LASSO as a method for penalized estimation of the coefficients of a sparse linear model is useful for obtaining forecasting rules and for estimating which variables have a strong association to an outcome in a sparse framework. However, naively using the results obtained from such a procedure to draw inferences about model parameters may be invalid. The reason is that only under very strong conditions LASSO is consistent concerning model selection which hardly apply in empirical applications and omission of relevant variables cannot be excluded in general distorting the validity of traditional approaches. This caveat applies to both low- {\bf and} high-dimensional settings when model selection is considered. Moreover, even in the case of consistent model selection non-uniformity of the results might lead to poor finite sample approximations. P\"otscher and Leeb have analyzed these issues in a series of papers.
@@ -384,29 +422,17 @@ First we generate data in a sparse linear model:
 
 <<DGP_Lasso>>=
 set.seed(1234)
-n <- 250 #sample size
-p <- 100 # number of variables
-s <- 10 # nubmer of non-zero variables
-X <- matrix(rnorm(n*p), ncol=p)
-beta <- c(rep(2,s), rep(0,p-s))
-y <- 1 + X%*%beta + rnorm(n)
+n = 250 #sample size
+p = 100 # number of variables
+s = 10 # nubmer of non-zero variables
+X = matrix(rnorm(n*p), ncol=p)
+beta = c(rep(2,s), rep(0,p-s))
+y = 1 + X%*%beta + rnorm(n)
 @
-Next we estimate it, show the results and make predictions for the old and for new x-variables
-<<Estimation_Lasso>>=
-lasso.reg <- rlasso(x=X, y=y, post=TRUE, intercept=TRUE, normalize=TRUE)
-# Methods for Lasso
-print(lasso.reg, all=FALSE)
-summary(lasso.reg, all=FALSE)
-yhat <- predict(lasso.reg)
-Xnew <- matrix(rnorm(n*p), ncol=p)
-yhat.new <- predict(lasso.reg, newdata=Xnew)
-@
-
-The methods \code{print} and \code{summarize} have the option \code{all} which by setting to \code{FALSE} shows only the non-zero coefficients which gives clarity in very high-dimensional settings.
-
-We can also do inference on selected variables, e.g. variables number one, two and fifty:
+We can do inference on a set of variables of intest, e.g. the first,
+second, and the fiftieth:
 <<Estimation_inference>>=
-lasso.effect <- rlassoEffect(x=X, y=y, index=c(1,2,50))
+lasso.effect = rlassoEffect(x=X, y=y, index=c(1,2,50))
 print(lasso.effect)
 summary(lasso.effect)
 confint(lasso.effect)
@@ -415,164 +441,6 @@ Finally, we can also plot the estimated effects with their confidence intervals:
 <<Lasso_plot, fig.width=3, fig.height=2.5, out.width='.49\\linewidth'>>=
 plot(lasso.effect, main="Confidence Interval of Selected Variables")
 @
-
-
-\section{Instrumental Variable Estimation in a High-Dimensional Setting}
-In many applied settings the researcher is interested in estimating the (structural) effect of a variable (treatment variable), but this variable is endogenous, i.e. correlated with the error term which might occur because of several reasons. Classical examples are omitted variables, measurement error or what often arises in economic and medical applications that the assignment was not random but result of some optimization procedure with respect to the potential outcomes. While ordinary least squares estimation of the parameter of interest are inconsistent in general, instrumental variables (IV) estimation might be a solution.
-
-We consider the linear instrumental variables model
-
-\begin{eqnarray}
-y_i &=& \alpha_0 d_i + \beta_0 x_i' + \varepsilon_i,\\
-d_i &=& z_i' \Pi + \gamma_0 x_i' + v_i,
-\end{eqnarray}
-where $\mathbb{E}[\varepsilon_i| x_i, z_i]= \mathbb{E}[v_i | x_i, z_i]=0$, but $\mathbb{E}[\varepsilon_i v_i] \neq 0$ leading to endogeneity. In this setting $d_i$ is a scalar endogenous variable of interest, $z_i$ is a $p_z$-dimensional vector of instruments and $x_i$ is a $p_x$-dimensional vector of control variables.
-
-In this section we present methods to estimate the effect $\alpha_0$ in a setting, where either $p_x$ is high-dimensional, either $p_z$ is high-dimensional or both $p_x$ and $p_z$ are high-dimensional. The wrap function \code{rlassoIV} handels all these cases, but allows additionally low-dimensional $p_x$ and $p_z$ which leads to classical two-stage least squares (tsls) estimation. The function \code{rlassoIV} hast the options \code{select.X} and \code{select.Z} which determine if selection shall take place, both with default values \code{TRUE}. The class of the return object depends on the chosen options, but the methods \code{summary}, \code{print} and \code{confint} are available.
-
-
-\subsection{Selection on the IVs}
-\subsubsection{Estimation}
-\subsubsection{Application -- Eminent Domain}
- Federal court rulings
-that a government seizure was unlawful (pro-plaintiff rulings) thus uphold individual
-property rights and make future exercise of eminent domain more difficult
-due to the structure of the US legal system. A more detailed discussion of the
-economics of takings law (or eminent domain) and other institutional and econometric
-considerations can be found in Belloni, Chen, Chernozhukov, and Hansen
-(2012) and Chen and Yeh (2012).
-The analysis of the effects of takings law is complicated by the possible endogeneity
-between takings law decisions and economic variables: for example, a taking
-may be less likely if real estate prices are low and sellers are eager to unload property.
-To address the potential endogeneity of takings law, we employ an instrumental
-variables strategy based on the identification argument of Chen and Sethi (2010)
-and Chen and Yeh (2012) that relies on the random assignment of judges to federal
-appellate panels. Because judges are randomly assigned to three-judge panels to
-decide appellate cases, the exact identity of the judges and their demographics
-are randomly assigned conditional on the distribution of characteristics of federal
-circuit court judges in a given circuit-year. Under this random assignment, the
-characteristics of judges serving on federal appellate panels can only be related to
-property prices through the judges' decisions; thus the judge's characteristics will
-plausibly satisfy the instrumental variable exclusion restriction.
-
-
-First, we load the data an construct the matrices with the controls (X) and instruments (Z) and the output (y) and treatment variables (d)
-<<LassoIV>>=
-data(EminentDomain)
-Z <- as.matrix(EminentDomain[,grep("z", colnames(EminentDomain))])
-X <- as.matrix(EminentDomain[,grep("x", colnames(EminentDomain))])
-y <- as.matrix(EminentDomain[,"y"])
-d <- as.matrix(EminentDomain[,"d"])
-@
-As mentioned above, y is the Economic outcome, the Case-Shiller house price index, d  the number of pro plaintiff
-appellate takings decisions in federal circuit court c and year t, X a matrix with control variables and Z the matrix with instruments, here socio-economic and demographic characteristics of the judges.
-
-First, we estimate the effect of the treatment variable by simple OLS and 2SLS using two instruments:
-<<OLS_EminentDomina>>=
-ED.ols <- lm(y~cbind(d,X))
-ED.2sls <- tsls(y=y, d=d, x=X, z=Z[,1:2], intercept=FALSE)
-@
-
-
-
-
-Next we estimate the model with selection on the instruments
-<<ED_analysis>>=
-#lasso.IV <- rlassoIV(x=X, d=d, y=y, z=Z, select.X=FALSE, select.Z=TRUE, post=TRUE, normalize=FALSE, intercept=TRUE) # wrap function
-lasso.IV <- rlassoIVselectZ(x=X, d=d, y=y, z=Z, post=TRUE, normalize=TRUE, intercept=FALSE) #direct call
-print(lasso.IV)
-summary(lasso.IV)
-confint(lasso.IV)
-
-##############################################################
-dZlasso <- rlasso(x=Z, y=d, post=TRUE, normalize=TRUE, intercept=FALSE)
-Zsel <- Z[, dZlasso$index]
-ivift.lasso <- tsls(y=y, d=d, x=X, z=Zsel, intercept=FALSE)
-@
-%Note, that if the exogenous variables should contain an intercept, it has to be included in $x$. 
-\hl{MS: not exactly the estimate of BCCH 2012, in particular se!!}
-
-\subsection{Selection on the exogenous variables}
-\subsubsection{Estimation}
-
-\subsubsection{Economic Development and Institutions}
-Estimating the effect of institutions on output is complicated by the clear potential
-for simultaneity between institutions and output: specifically, better institutions may
-lead to higher incomes, but higher incomes may also lead to the development of
-better institutions. To help overcome this simultaneity, Acemoglu, Johnson, and
-Robinson (2001) use mortality rates for early European settlers as an instrument
-for institution quality. The validity of this instrument hinges on the argument that
-settlers set up better institutions in places where they are more likely to establish
-long-term settlements; that where they are likely to settle for the long term is related
-to settler mortality at the time of initial colonization; and that institutions are highly
-persistent. The exclusion restriction for the instrumental variable is then motivated
-by the argument that GDP, while persistent, is unlikely to be strongly influenced by
-mortality in the previous century, or earlier, except through institutions.
-In this application, a crucial point is on which variables to condition on. Economic / scientific reasoning suggests that Latitude is an important control variable, but somehow it is not obvious if this variable should enter linear, quadratic or an even higher order polynomial. In such a situation a data-driven selection rule might be beneficial, especially in the case when the ratio of variables to number of observations is quite high as in this application.
-Here we include Latitude additional as quadratic term and include all first-order interactions of all exogenous variables.
-
-First, we process the data
-
-<<AJR_processing>>=
-data(AJR)
-y <- AJR$GDP 
-d <- AJR$Exprop
-z <- AJR$logMort
-X <- model.matrix(~(Latitude + Latitude2 + Africa + Asia + Namer + Samer)^2, data=AJR)
-@
-
-Then we estimate an IV model with selection on the $X$
-<<AJR_analysis>>=
-#AJR.Xselect <- rlassoIV(x=X, d=d, y=y, z=z, select.X=TRUE, select.Z=FALSE) 
-AJR.Xselect <- rlassoIVselectX(x=X, d=d, y=y, z=z, intercept=TRUE, normalize=TRUE, post=TRUE)
-print(AJR.Xselect)
-summary(AJR.Xselect)
-confint(AJR.Xselect)
-@
-
-Here we demonstrate also the concept of partialling out which is quite useful and underlies much of the theory.
-First, we partial out the effect of the exogenous variables with ols and then apply 2SLS
-<<AJR_partiallingout_ols>>=
-# parialling out by linear model
-fmla.y <- GDP ~ (Latitude + Latitude2 + Africa + Asia + Namer + Samer)^2
-fmla.d <- Exprop ~ (Latitude + Latitude2 + Africa + Asia + Namer + Samer)^2
-fmla.z <- logMort ~ (Latitude + Latitude2 + Africa + Asia + Namer + Samer)^2
-rY <- lm(fmla.y, data = AJR)$res
-rD <- lm(fmla.d, data = AJR)$res
-rZ <- lm(fmla.z, data = AJR)$res
-ivfit.lm <- tsls(y=rY,d=rD, x=NULL, z=rZ, intercept=FALSE)
-@
-Next, we replace the \textquotedblleft ols operator\textquotedblright by lasso for partialling out
-<<AJR_partiallingout_lasso>>=
-# parialling out by lasso
-rY <- rlasso(fmla.y, data = AJR)$res
-rD <- rlasso(fmla.d, data = AJR)$res
-rZ <- rlasso(fmla.z, data = AJR)$res
-ivfit.lasso <- tsls(y=rY,d=rD, x=NULL, z=rZ, intercept=FALSE)
-@
-
-
- 
-\subsection{Selection on the IVs and exogenous variables}
-\subsubsection{Eminent Domain Example continued}
-Here again we consider the example from above, but now we do selection on the exogenous variables and on the instruments.
-
-<<LassoIV_ED, results='hide'>>=
-data(EminentDomain)
-Z <- as.matrix(EminentDomain[,grep("z", colnames(EminentDomain))])
-X <- as.matrix(EminentDomain[,grep("x", colnames(EminentDomain))])
-y <- as.matrix(EminentDomain[,"y"])
-d <- as.matrix(EminentDomain[,"d"])
-@
-
-<<LassoIV_analysis>>=
-lasso.IV <- rlassoIV(x=X, d=d, y=y, z=Z, select.X=TRUE, select.Z=TRUE) # wrap function
-print(lasso.IV)
-summary(lasso.IV)
-confint(lasso.IV)
-@
-
-\section{Estimation of Treatment Effects in a High-Dimensional Setting}
 \subsection{Estimation of the treatment effect in the case of many controls}
 
 \subsubsection{Application: Determinants of Growth}
@@ -617,60 +485,222 @@ First, we load and prepare the data
 <<Growth_processing>>=
 data(GrowthData)
 dim(GrowthData)
-y <- GrowthData[,1]
-d <- GrowthData[,3]
-X <- as.matrix(GrowthData)[,-c(1,2,3)]
-varnames <- colnames(GrowthData)
+y = GrowthData[,1]
+d = GrowthData[,3]
+X = as.matrix(GrowthData)[,-c(1,2,3)]
+varnames = colnames(GrowthData)
 @
 
 Now we can estimate the influence of initial GDP level to test the Economic hypothesis
 
 <<>>=
-xnames<- varnames[-c(1,2,3)] # names of X variables
-dandxnames<- varnames[-c(1,2)] # names of D and X variables
+xnames= varnames[-c(1,2,3)] # names of X variables
+dandxnames= varnames[-c(1,2)] # names of D and X variables
 # create formulas by pasting names (this saves typing times)
-fmla<- as.formula(paste("Outcome ~ ", paste(dandxnames, collapse= "+")))
-full.fit<- lm(fmla, data=GrowthData)
-fmla.y<- as.formula(paste("Outcome ~ ", paste(xnames, collapse= "+")))
-fmla.d<- as.formula(paste("gdpsh465~ ", paste(xnames, collapse= "+")))
+fmla= as.formula(paste("Outcome ~ ", paste(dandxnames, collapse= "+")))
+full.fit= lm(fmla, data=GrowthData)
+fmla.y= as.formula(paste("Outcome ~ ", paste(xnames, collapse= "+")))
+fmla.d= as.formula(paste("gdpsh465~ ", paste(xnames, collapse= "+")))
 # partial fit via ols
-rY<- lm(fmla.y, data =GrowthData)$res
-rD<- lm(fmla.d, data =GrowthData)$res
-partial.fit.ls<- lm(rY~rD)
+rY= lm(fmla.y, data =GrowthData)$res
+rD= lm(fmla.d, data =GrowthData)$res
+partial.fit.ls= lm(rY~rD)
 # partial ls via lasso
-rY<- rlasso(fmla.y, data =GrowthData)$res
-rD<- rlasso(fmla.d, data =GrowthData)$res
-partial.fit.lasso<- lm(rY~rD)
+rY= rlasso(fmla.y, data =GrowthData)$res
+rD= rlasso(fmla.d, data =GrowthData)$res
+partial.fit.lasso= lm(rY~rD)
 @
 
 
 <<Growth_analysis>>=
-dX <- as.matrix(cbind(d,X))
-partial.fit.lasso2 <- rlassoEffect(x=dX, y=y, index=1, intercept=TRUE, normalize=TRUE, post=TRUE)
-#partial.fit.lasso2 <- rlassoEffectone(x=X,y=y,d=d)
+dX = as.matrix(cbind(d,X))
+partial.fit.lasso2 = rlassoEffect(x=dX, y=y, index=1, intercept=TRUE, normalize=TRUE, post=TRUE)
+#partial.fit.lasso2 = rlassoEffectone(x=X,y=y,d=d)
 summary(partial.fit.lasso2)
 @
 
 
-<<summary_results, results='hide'>>=
+<<summary_results, results="hide">>=
 library(xtable)
-table<- matrix(0, 4, 2)
-table[1,]<- summary(full.fit)$coef["gdpsh465",1:2]
-table[2,]<- summary(partial.fit.ls)$coef["rD",1:2]
-table[3,]<- summary(partial.fit.lasso)$coef["rD",1:2]
-table[4,]<- summary(partial.fit.lasso2)["d",1:2]
-colnames(table)<- names(summary(full.fit)$coef["gdpsh465",])[1:2]
-rownames(table)<- c("full reg", "partial reg", "partial reg via lasso 1", "partial reg
+table= matrix(0, 4, 2)
+table[1,]= summary(full.fit)$coef["gdpsh465",1:2]
+table[2,]= summary(partial.fit.ls)$coef["rD",1:2]
+table[3,]= summary(partial.fit.lasso)$coef["rD",1:2]
+table[4,]= summary(partial.fit.lasso2)["d",1:2]
+colnames(table)= names(summary(full.fit)$coef["gdpsh465",])[1:2]
+rownames(table)= c("full reg", "partial reg", "partial reg via lasso 1", "partial reg
 via lasso 2")
 # adjust partial ls standard error by sqrt{n/(n-p)}
-n<- dim(GrowthData)[1]; p<- dim(GrowthData)[2]
-table[2,2]<- table[2,2]*sqrt(n/(n-p))
-tab<- xtable(table, digits=c(2, 2,7))
+n= dim(GrowthData)[1]; p= dim(GrowthData)[2]
+table[2,2]= table[2,2]*sqrt(n/(n-p))
+tab= xtable(table, digits=c(2, 2,7))
 @
 
-<<results='asis'>>=
+<<results="asis">>=
 tab
 @
+
+
+\end{document}
+
+
+\section{Instrumental Variable Estimation in a High-Dimensional Setting}
+In many applied settings the researcher is interested in estimating the (structural) effect of a variable (treatment variable), but this variable is endogenous, i.e. correlated with the error term which might occur because of several reasons. Classical examples are omitted variables, measurement error or what often arises in economic and medical applications that the assignment was not random but result of some optimization procedure with respect to the potential outcomes. While ordinary least squares estimation of the parameter of interest are inconsistent in general, instrumental variables (IV) estimation might be a solution.
+
+We consider the linear instrumental variables model
+
+\begin{eqnarray}
+y_i &=& \alpha_0 d_i + \beta_0 x_i' + \varepsilon_i,\\
+d_i &=& z_i' \Pi + \gamma_0 x_i' + v_i,
+\end{eqnarray}
+where $\mathbb{E}[\varepsilon_i| x_i, z_i]= \mathbb{E}[v_i | x_i, z_i]=0$, but $\mathbb{E}[\varepsilon_i v_i] \neq 0$ leading to endogeneity. In this setting $d_i$ is a scalar endogenous variable of interest, $z_i$ is a $p_z$-dimensional vector of instruments and $x_i$ is a $p_x$-dimensional vector of control variables.
+
+In this section we present methods to estimate the effect $\alpha_0$ in a setting, where either $p_x$ is high-dimensional, either $p_z$ is high-dimensional or both $p_x$ and $p_z$ are high-dimensional. The wrap function \code{rlassoIV} handels all these cases, but allows additionally low-dimensional $p_x$ and $p_z$ which leads to classical two-stage least squares (tsls) estimation. The function \code{rlassoIV} hast the options \code{select.X} and \code{select.Z} which determine if selection shall take place, both with default values \code{TRUE}. The class of the return object depends on the chosen options, but the methods \code{summary}, \code{print} and \code{confint} are available.
+
+\end{document}
+
+\subsection{Selection on the IVs}
+\subsubsection{Estimation}
+\subsubsection{Application -- Eminent Domain}
+ Federal court rulings
+that a government seizure was unlawful (pro-plaintiff rulings) thus uphold individual
+property rights and make future exercise of eminent domain more difficult
+due to the structure of the US legal system. A more detailed discussion of the
+economics of takings law (or eminent domain) and other institutional and econometric
+considerations can be found in Belloni, Chen, Chernozhukov, and Hansen
+(2012) and Chen and Yeh (2012).
+The analysis of the effects of takings law is complicated by the possible endogeneity
+between takings law decisions and economic variables: for example, a taking
+may be less likely if real estate prices are low and sellers are eager to unload property.
+To address the potential endogeneity of takings law, we employ an instrumental
+variables strategy based on the identification argument of Chen and Sethi (2010)
+and Chen and Yeh (2012) that relies on the random assignment of judges to federal
+appellate panels. Because judges are randomly assigned to three-judge panels to
+decide appellate cases, the exact identity of the judges and their demographics
+are randomly assigned conditional on the distribution of characteristics of federal
+circuit court judges in a given circuit-year. Under this random assignment, the
+characteristics of judges serving on federal appellate panels can only be related to
+property prices through the judges' decisions; thus the judge's characteristics will
+plausibly satisfy the instrumental variable exclusion restriction.
+
+
+First, we load the data an construct the matrices with the controls (X) and instruments (Z) and the output (y) and treatment variables (d)
+<<LassoIV>>=
+data(EminentDomain)
+Z = as.matrix(EminentDomain[,grep("z", colnames(EminentDomain))])
+X = as.matrix(EminentDomain[,grep("x", colnames(EminentDomain))])
+y = as.matrix(EminentDomain[,"y"])
+d = as.matrix(EminentDomain[,"d"])
+@
+As mentioned above, y is the Economic outcome, the Case-Shiller house price index, d  the number of pro plaintiff
+appellate takings decisions in federal circuit court c and year t, X a matrix with control variables and Z the matrix with instruments, here socio-economic and demographic characteristics of the judges.
+
+First, we estimate the effect of the treatment variable by simple OLS and 2SLS using two instruments:
+<<OLS_EminentDomina>>=
+ED.ols = lm(y~cbind(d,X))
+ED.2sls = tsls(y=y, d=d, x=X, z=Z[,1:2], intercept=FALSE)
+@
+
+
+
+
+Next we estimate the model with selection on the instruments
+<<ED_analysis>>=
+#lasso.IV = rlassoIV(x=X, d=d, y=y, z=Z, select.X=FALSE, select.Z=TRUE, post=TRUE, normalize=FALSE, intercept=TRUE) # wrap function
+lasso.IV = rlassoIVselectZ(x=X, d=d, y=y, z=Z, post=TRUE, normalize=TRUE, intercept=FALSE) #direct call
+print(lasso.IV)
+summary(lasso.IV)
+confint(lasso.IV)
+
+##############################################################
+dZlasso = rlasso(x=Z, y=d, post=TRUE, normalize=TRUE, intercept=FALSE)
+Zsel = Z[, dZlasso$index]
+ivift.lasso = tsls(y=y, d=d, x=X, z=Zsel, intercept=FALSE)
+@
+%Note, that if the exogenous variables should contain an intercept, it has to be included in $x$. 
+\hl{MS: not exactly the estimate of BCCH 2012, in particular se!!}
+
+\subsection{Selection on the exogenous variables}
+\subsubsection{Estimation}
+
+\subsubsection{Economic Development and Institutions}
+Estimating the effect of institutions on output is complicated by the clear potential
+for simultaneity between institutions and output: specifically, better institutions may
+lead to higher incomes, but higher incomes may also lead to the development of
+better institutions. To help overcome this simultaneity, Acemoglu, Johnson, and
+Robinson (2001) use mortality rates for early European settlers as an instrument
+for institution quality. The validity of this instrument hinges on the argument that
+settlers set up better institutions in places where they are more likely to establish
+long-term settlements; that where they are likely to settle for the long term is related
+to settler mortality at the time of initial colonization; and that institutions are highly
+persistent. The exclusion restriction for the instrumental variable is then motivated
+by the argument that GDP, while persistent, is unlikely to be strongly influenced by
+mortality in the previous century, or earlier, except through institutions.
+In this application, a crucial point is on which variables to condition on. Economic / scientific reasoning suggests that Latitude is an important control variable, but somehow it is not obvious if this variable should enter linear, quadratic or an even higher order polynomial. In such a situation a data-driven selection rule might be beneficial, especially in the case when the ratio of variables to number of observations is quite high as in this application.
+Here we include Latitude additional as quadratic term and include all first-order interactions of all exogenous variables.
+
+First, we process the data
+
+<<AJR_processing>>=
+data(AJR)
+y = AJR$GDP 
+d = AJR$Exprop
+z = AJR$logMort
+X = model.matrix(~(Latitude + Latitude2 + Africa + Asia + Namer + Samer)^2, data=AJR)
+@
+
+Then we estimate an IV model with selection on the $X$
+<<AJR_analysis>>=
+#AJR.Xselect = rlassoIV(x=X, d=d, y=y, z=z, select.X=TRUE, select.Z=FALSE) 
+AJR.Xselect = rlassoIVselectX(x=X, d=d, y=y, z=z, intercept=TRUE, normalize=TRUE, post=TRUE)
+print(AJR.Xselect)
+summary(AJR.Xselect)
+confint(AJR.Xselect)
+@
+
+Here we demonstrate also the concept of partialling out which is quite useful and underlies much of the theory.
+First, we partial out the effect of the exogenous variables with ols and then apply 2SLS
+<<AJR_partiallingout_ols>>=
+# parialling out by linear model
+fmla.y = GDP ~ (Latitude + Latitude2 + Africa + Asia + Namer + Samer)^2
+fmla.d = Exprop ~ (Latitude + Latitude2 + Africa + Asia + Namer + Samer)^2
+fmla.z = logMort ~ (Latitude + Latitude2 + Africa + Asia + Namer + Samer)^2
+rY = lm(fmla.y, data = AJR)$res
+rD = lm(fmla.d, data = AJR)$res
+rZ = lm(fmla.z, data = AJR)$res
+ivfit.lm = tsls(y=rY,d=rD, x=NULL, z=rZ, intercept=FALSE)
+@
+Next, we replace the \textquotedblleft ols operator\textquotedblright by lasso for partialling out
+<<AJR_partiallingout_lasso>>=
+# parialling out by lasso
+rY = rlasso(fmla.y, data = AJR)$res
+rD = rlasso(fmla.d, data = AJR)$res
+rZ = rlasso(fmla.z, data = AJR)$res
+ivfit.lasso = tsls(y=rY,d=rD, x=NULL, z=rZ, intercept=FALSE)
+@
+
+
+ 
+\subsection{Selection on the IVs and exogenous variables}
+\subsubsection{Eminent Domain Example continued}
+Here again we consider the example from above, but now we do selection on the exogenous variables and on the instruments.
+
+<<LassoIV_ED, results="hide">>=
+data(EminentDomain)
+Z = as.matrix(EminentDomain[,grep("z", colnames(EminentDomain))])
+X = as.matrix(EminentDomain[,grep("x", colnames(EminentDomain))])
+y = as.matrix(EminentDomain[,"y"])
+d = as.matrix(EminentDomain[,"d"])
+@
+
+<<LassoIV_analysis>>=
+lasso.IV = rlassoIV(x=X, d=d, y=y, z=Z, select.X=TRUE, select.Z=TRUE) # wrap function
+print(lasso.IV)
+summary(lasso.IV)
+confint(lasso.IV)
+@
+
+\section{Estimation of Treatment Effects in a High-Dimensional Setting}
 
 \subsection{Estimation of LATE, ATE, LATET, and , ATET}
 \subsubsection{Treatment effects -- A short introduction}
@@ -695,25 +725,25 @@ and  selection  of  the  participation  state  will  be  biased  upward,  tendin
 Again, we start first with the data preparation
 <<401_processing>>=
 data(pension)
-y <- pension$tw
-d <- pension$p401
-z <- pension$e401
-X <- model.matrix(~(age + inc + fsize + educ + marr + twoearn + db +pira)^2, data=pension)
+y = pension$tw
+d = pension$p401
+z = pension$e401
+X = model.matrix(~(age + inc + fsize + educ + marr + twoearn + db +pira)^2, data=pension)
 @
 
 Now we can calculate the interesting treatment effects
 
 <<401_analysis>>=
-pension.late <- rlassoLATE(X,d,y,z, 
+pension.late = rlassoLATE(X,d,y,z, 
                            bootstrap=NULL, post=TRUE, intercept=FALSE, normalize=FALSE)
 print(pension.late)
-pension.latet <- rlassoLATET(X,d,y,z, 
+pension.latet = rlassoLATET(X,d,y,z, 
                              bootstrap=NULL, post=TRUE, intercept=FALSE, normalize=FALSE)
 print(pension.latet)
-pension.ate <-  rlassoATE(X,d,y,z, 
+pension.ate =  rlassoATE(X,d,y,z, 
                           bootstrap=NULL, post=TRUE, intercept=FALSE, normalize=FALSE)
 print(pension.ate)
-pension.atet <-  rlassoATET(X,d,y,z, 
+pension.atet =  rlassoATET(X,d,y,z, 
                             bootstrap=NULL, post=TRUE, intercept=FALSE, normalize=FALSE)
 print(pension.atet)
 @
@@ -729,4 +759,4 @@ and view vignettes from within \R.
 \bibliographystyle{econometrica}
 %\bibliographystyle{aea}
 \bibliography{mybib}
-\end{document}
+
