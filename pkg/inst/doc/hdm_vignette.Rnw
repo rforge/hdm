@@ -386,7 +386,7 @@ In low-dimensional settings this is entirely expected, as any sensible way of ap
 Let us note that  the above strategy, based on partialling out via lasso or post-lasso is implemented in the package by the function \texttt{rlassoEffect}.
 <<simulation_partialling_out_rlassoEffectone>>=
 Eff= rlassoEffect(X[,-1],y,X[,1], method="partialling out")
-cbind(Eff$coef, Eff$se)
+summary(Eff)[,1:2]
 @
 
 Another first-order equivalent strategy implemented in the package relies on the double-selection method, which uses the union of $x_{i,j}$'s selected in two projection equations for partialling out.  This is equivalent to doing OLS of $y_i$ on $d_i$ and the union of controls selected in the two projection equations:
@@ -399,7 +399,7 @@ Another first-order equivalent strategy implemented in the package relies on the
 We can implement this version by \texttt{rlassoEffect} by setting the method option to "double selection":
 <<simulation_doubleselection_rlassoEffectone>>=
 Eff= rlassoEffect(X[,-1],y,X[,1], method="double selection")
-cbind(Eff$coef, Eff$se)
+cbind(summary(Eff)$coef, summary(Eff)$se)
 @
 
 
