@@ -4,13 +4,13 @@
 #'
 #' The functions estimates selected (low-dimensional) coefficients in a high-dimensional linear model.
 #' An application is e.g. estimation of a treatment effect \eqn{\alpha_0} in a
-#' setting of high-dimensional controls. The so-called post-double-selection
-#' estimator is implemented. The idea is to select variables by regression of
+#' setting of high-dimensional controls. The user can choose between the so-called post-double-selection method and partialling-out.
+#' The idea of the double selection method is to select variables by regression of
 #' the outcome variable on the control variables and the treatment variable on
 #' the control variables. The final estimation is done by a regression of the
 #' outcome on the treatment effect and the union of the selected variables in
-#' the first two steps. The resulting estimator for \eqn{\alpha_0} is normal
-#' distributed which allows inference on the treatment effect. It presents a wrap function for \code{rlassoEffectone} 
+#' the first two steps. In partialling-out first the effect of the regressors on the outcome and the treatment variable is taken out and then a regression of the residuals is conducted. The resulting estimator for \eqn{\alpha_0} is normal
+#' distributed which allows inference on the treatment effect. It presents a wrap function for \code{rlassoEffect} 
 #' which does inference for a single variable.
 #'
 #' @param x matrix of regressor variables serving as controls and potential
@@ -34,7 +34,7 @@
 #' Review of Economic Studies 81(2), 608-650.
 #' @keywords Estimation Inference Treatment effect High-dimensional controls
 #' @export
-#' @rdname rlassoEffect
+#' @rdname rlassoEffects
 #' @examples
 #' library(hdm)
 #' ## DGP
@@ -45,18 +45,18 @@
 #' beta <- c(rep(2,px), rep(0,p-px))
 #' intercept <- 1
 #' y <- intercept + X %*% beta + rnorm(n)
-#' ## fit rlassoEffect object with inference on three variables
-#' rlassoEffect.reg <- rlassoEffect(x=X, y=y, index=c(1,7,20))
+#' ## fit rlassoEffects object with inference on three variables
+#' rlassoEffects.reg <- rlassoEffects(x=X, y=y, index=c(1,7,20))
 #' ## methods
-#' summary(rlassoEffect.reg)
-#' confint(rlassoEffect.reg, level=0.9)
-rlassoEffect <- function(x, ...)
-  UseMethod("rlassoEffect") # definition generic function
+#' summary(rlassoEffects.reg)
+#' confint(rlassoEffects.reg, level=0.9)
+rlassoEffects <- function(x, ...)
+  UseMethod("rlassoEffects") # definition generic function
 
-#' @rdname rlassoEffect
+#' @rdname rlassoEffects
 #' @export
 
-rlassoEffect.default <- function(x, y, index=c(1:ncol(x)), method="double selection" , I3=NULL, post=TRUE, ...) {
+rlassoEffects.default <- function(x, y, index=c(1:ncol(x)), method="double selection" , I3=NULL, post=TRUE, ...) {
   
   checkmate::checkChoice(method, c("partialling out", "double selection"))
   
@@ -122,23 +122,23 @@ rlassoEffect.default <- function(x, y, index=c(1:ncol(x)), method="double select
   }
   residuals <- list(e=reside, v=residv)
   res <- list(coefficients=coefficients, se=se, t=t, pval=pval, lasso.regs=lasso.regs, index=index, call=match.call(), samplesize=n, residuals=residuals)
-  class(res) <- "rlassoEffect"
+  class(res) <- "rlassoEffects"
   return(res)
 }
 
-#' @rdname rlassoEffect
+#' @rdname rlassoEffects
 #' @export
 
-rlassoEffect.formula <- function(formula, data, index, method="double selection", I3=NULL, post=TRUE, ...) {
+rlassoEffects.formula <- function(formula, data, index, method="double selection", I3=NULL, post=TRUE, ...) {
   # TBD
 }
 
 
-#' @rdname rlassoEffect
+#' @rdname rlassoEffects
 #' @param d variable for which inference is conducted (treatment variable)
 #' @export
 
-rlassoEffectone <- function(x, y, d, method="double selection", I3=NULL,  post=TRUE, ...) {
+rlassoEffect <- function(x, y, d, method="double selection", I3=NULL,  post=TRUE, ...) {
   d <- as.matrix(d, ncol=1)
   y <- as.matrix(y, ncol=1)
   kx <- dim(x)[2]
@@ -189,7 +189,7 @@ rlassoEffectone <- function(x, y, d, method="double selection", I3=NULL,  post=T
     res <- list(epsilon = reg1$residuals, v=dr)
     results <- list(alpha=unname(alpha), se=drop(se), t=unname(tval), pval=unname(pval), coefficients.reg=coef(reg1), residuals=res, call=match.call(), samplesize=n)
     }
-  class(results) <- "rlassoEffect"
+  class(results) <- "rlassoEffects"
   return(results)
 }
 
@@ -243,24 +243,24 @@ rlassoEffectone <- function(x, y, d, method="double selection", I3=NULL,  post=T
 
 ################# Methods for rlassoEffect
 
-#' Methods for S3 object \code{rlassoEffect}
+#' Methods for S3 object \code{rlassoEffects}
 #'
-#' Objects of class \code{rlassoEffect} are constructed by \code{rlassoEffect.formula} or \code{rlassoEffect.default}.
-#' \code{print.rlassoEffect} prints and displays some information about fitted \code{rlassoEffect} objects.
-#' \code{summary.rlassoEffect} summarizes information of a fitted \code{rlassoEffect} object.
-#' \code{confint.rlassoEffect} extracts the confidence intervals.
-#' \code{plot.rlassoEffect} plots the estimates with confidence intervals.
+#' Objects of class \code{rlassoEffects} are constructed by \code{rlassoEffects.formula} or \code{rlassoEffects.default}.
+#' \code{print.rlassoEffects} prints and displays some information about fitted \code{rlassoEffect} objects.
+#' \code{summary.rlassoEffects} summarizes information of a fitted \code{rlassoEffect} object.
+#' \code{confint.rlassoEffects} extracts the confidence intervals.
+#' \code{plot.rlassoEffects} plots the estimates with confidence intervals.
 #'
-#' @param object An object of class \code{rlassoEffect}
-#' @param x An object of class \code{rlassoEffect}
+#' @param object An object of class \code{rlassoEffects}
+#' @param x An object of class \code{rlassoEffects}
 #' @param digits significant digits in printout
 #' @param ... arguments passed to the print function and other methods.
-#' @keywords methods rlassoEffect
-#' @rdname methods.rlassoEffect
-#' @aliases methods.rlassoEffect print.rlassoEffect summary.rlassoEffect confint.rlassoEffect plot.rlassoEffect
+#' @keywords methods rlassoEffects
+#' @rdname methods.rlassoEffects
+#' @aliases methods.rlassoEffects print.rlassoEffects summary.rlassoEffects confint.rlassoEffects plot.rlassoEffects
 #' @export
 
-print.rlassoEffect <- function(x, digits = max(3L, getOption("digits") - 3L), ...) {
+print.rlassoEffects <- function(x, digits = max(3L, getOption("digits") - 3L), ...) {
   cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), "\n\n", sep = "")
   if (length(coef(x))) {
       cat("Coefficients:\n")
@@ -273,10 +273,10 @@ print.rlassoEffect <- function(x, digits = max(3L, getOption("digits") - 3L), ..
 }
 
 
-#' @rdname methods.rlassoEffect
+#' @rdname methods.rlassoEffects
 #' @export
 
-summary.rlassoEffect <- function(object, digits = max(3L, getOption("digits") - 3L), ...) {
+summary.rlassoEffects <- function(object, digits = max(3L, getOption("digits") - 3L), ...) {
   if (length(coef(object))) {
     k <- length(object$coefficients)
     table <- matrix(NA,ncol=4,nrow=k)
@@ -296,13 +296,13 @@ summary.rlassoEffect <- function(object, digits = max(3L, getOption("digits") - 
   invisible(table)
 }
 
-#' @rdname methods.rlassoEffect
+#' @rdname methods.rlassoEffects
 #' @param parm a specification of which parameters are to be given confidence intervals among the variables for which inference was done, either a vector of numbers or a vector of names. If missing, all parameters are considered.
 #' @param level	the confidence level required
-#' @param joint logical, if \code{TRUE} joint confidence intervals are clalculated.
+#' @param joint logical, if \code{TRUE} joint confidence intervals are calculated.
 #' @export
 
-confint.rlassoEffect <- function(object, parm, level=0.95, joint=FALSE, ...) {
+confint.rlassoEffects <- function(object, parm, level=0.95, joint=FALSE, ...) {
   B <- 500 # number of bootstrap repitions
   n <- object$samplesize
   k <- p1 <- length(object$coefficient)
@@ -348,14 +348,14 @@ confint.rlassoEffect <- function(object, parm, level=0.95, joint=FALSE, ...) {
   return(ci)
 }
 
-#' @rdname methods.rlassoEffect
+#' @rdname methods.rlassoEffects
 #' @export
 #' @param main an overall title for the plot
 #' @param xlab a title for the x axis
 #' @param ylab a title for the y axis
 #' @param xlim vector of length two giving lower and upper bound of x axis
 #' @param col color of lines of the graph
-plot.rlassoEffect <- function(x, main="", xlab="coef", ylab="", xlim=NULL, col="black",...){
+plot.rlassoEffects <- function(x, main="", xlab="coef", ylab="", xlim=NULL, col="black",...){
   
   # generate ordered KI-matrix
   coefmatrix <- cbind(summary(x), confint(x))[, c(1, 5, 6)]
