@@ -113,23 +113,15 @@ rlasso.fit <- function(x, y, post = TRUE, intercept = TRUE,
   # checking input numIter, tol
   if (!exists("numIter", where = control)) {
     control$numIter = 15
-    message("numIter in control not provided. Set to default 15")
   }
   
   if (!exists("tol", where = control)) {
     control$tol = 10^-5
-    message("tol in control not provided. Set to default 10^-5")
   }
   
   if (post==FALSE & (!exists("c", where = penalty) | is.na(match("penalty", names(as.list(match.call)))))) {
     penalty$c = 0.5
-    message("c in penalty not provided. Set to default c=0.5 for Lasso")
   }
-  
-  #if (post==FALSE & is.na(match("penalty", names(as.list(match.call))))) {
-  #  penalty$c=0.5
-  #  message("c in penalty not provided. Set to default c=0.5 for Lasso")
-  #}
   
   # Intercept handling and scaling
   if (intercept) {
@@ -286,11 +278,9 @@ lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.dependent.
   checkmate::checkChoice(penalty$homoscedastic, c(TRUE, FALSE, "none"))
   if (!exists("c", where = penalty) & penalty$homoscedastic!="none") {
     penalty$c = 1.1
-    message("c in penalty not provided. Set to default 1.1")
   }
   if (!exists("gamma", where = penalty) & penalty$homoscedastic!="none") {
     penalty$gamma = 0.1
-    message("gamma in penalty not provided. Set to default 0.1")
   }
 
 
@@ -308,7 +298,6 @@ lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.dependent.
   if (penalty$homoscedastic==TRUE && penalty$X.dependent.lambda == TRUE) {
     if (!exists("numSim", where = penalty)) {
       penalty$numSim = 5000
-      message("numSim in penalty for method \"X-dependent\" not provided. Set to default 5000")
     }
     p <- dim(x)[2]
     n <- dim(x)[1]
@@ -338,7 +327,6 @@ lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.dependent.
   if (penalty$homoscedastic==FALSE && penalty$X.dependent.lambda == TRUE) {
     if (!exists("numSim", where = penalty)) {
       penalty$numSim = 5000
-      message("numSim in penalty for method \"X.dependent.lambda\" not provided. Set to default 5000")
     }
     p <- dim(x)[2]
     n <- dim(x)[1]
@@ -399,7 +387,7 @@ lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.dependent.
 #' @param ... arguments passed to the print function and other methods
 #' @keywords methods rlasso
 #' @rdname methods.rlasso
-#' @aliases methods.rlasso print.rlasso summary.rlasso predict.rlasso model.matrix.rlasso
+#' @aliases methods.rlasso print.rlasso predict.rlasso model.matrix.rlasso
 #' @export
 
 print.rlasso <- function(x, all=TRUE ,digits = max(3L, getOption("digits") - 3L), ...) {
