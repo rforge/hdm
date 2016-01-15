@@ -325,10 +325,16 @@ plot.rlassoEffects <- function(x, main="", xlab="coef", ylab="", xlim=NULL,...){
 #' @export 
 summary.rlassoEffects  <- function(object, ...) {
   ans <- NULL
-  ans$coefficients <- object$coefficients
-  ans$se <- object$se
-  ans$t <- object$t
-  ans$pval <- object$pval
+  k <- length(object$coefficients)
+  table <- matrix(NA,ncol=4,nrow=k)
+  rownames(table) <- names(object$coefficient)
+  colnames(table) <- c("Estimate.", "Std. Error", "t value", "Pr(>|t|)")
+  table[,1] <- object$coefficients
+  table[,2] <- object$se
+  table[,3] <- object$t
+  table[,4] <- object$pval
+  ans$coefficients <- table
+  ans$object <- object
   class(ans) <- "summary.rlassoEffects"
   return(ans)
 }
@@ -340,15 +346,9 @@ summary.rlassoEffects  <- function(object, ...) {
 #' @rdname summary.rlassoEffects
 #' @export
 print.summary.rlassoEffects <- function(x,  digits = max(3L, getOption("digits") - 3L), ...) {
-  if (length(coef(x))) {
-    k <- length(x$coefficients)
-    table <- matrix(NA,ncol=4,nrow=k)
-    rownames(table) <- names(x$coefficient)
-    colnames(table) <- c("coeff.", "se.", "t-value", "p-value")
-    table[,1] <- x$coefficient
-    table[,2] <- x$se
-    table[,3] <- x$t
-    table[,4] <- x$pval
+  if (length(coef(x$object))) {
+    k <- dim(x$coefficients)[1]
+    table <- x$coefficients
     print("Estimation of the effect of selected variables in a high-dimensional regression")
     printCoefmat(table, digits=digits, P.values=TRUE, has.Pvalue=TRUE)
     cat("\n")
