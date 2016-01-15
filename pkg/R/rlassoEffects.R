@@ -158,8 +158,9 @@ rlassoEffect <- function(x, y, d, method="double selection", I3=NULL,  post=TRUE
       no.selected <- 0
     }
     res <- list(epsilon = xi, v=v)
-    results <- list(alpha=unname(alpha), se=drop(se), t=unname(tval), pval=unname(pval), no.selected=no.selected, coefficients=unname(alpha),  coefficient=unname(alpha), coefficients.reg=coef(reg1), residuals=res, call=match.call(), samplesize=n)
-  }
+    #results <- list(alpha=unname(alpha), se=drop(se), t=unname(tval), pval=unname(pval), no.selected=no.selected, coefficients=unname(alpha),  coefficient=unname(alpha), coefficients.reg=coef(reg1), residuals=res, call=match.call(), samplesize=n)
+    results <- list(alpha=alpha, se=drop(se), t=tval, pval=pval, no.selected=no.selected, coefficients=alpha,  coefficient=alpha, coefficients.reg=coef(reg1), residuals=res, call=match.call(), samplesize=n)
+    }
   
   if (method=="partialling out") {
     yr <- rlasso(y~x, post=post, ...)$residuals
@@ -271,7 +272,13 @@ confint.rlassoEffects <- function(object, parm, level=0.95, joint=FALSE, ...) {
 plot.rlassoEffects <- function(x, main="", xlab="coef", ylab="", xlim=NULL,...){
   
   # generate ordered KI-matrix
-  coefmatrix <- cbind(summary(x), confint(x))[, c(1, 5, 6)]
+  coefmatrix <- cbind(summary(x)$coef, confint(x))[, c(1, 5, 6)]
+  if (is.null(dim(coefmatrix))) {
+  vec <- coefmatrix
+  coefmatrix <- matrix(vec, ncol=3)
+  colnames(coefmatrix) <- names(vec)
+  }
+  
   rownames(coefmatrix) <- names(x$coefficients)
   coefmatrix <- as.data.frame(coefmatrix)
   coefmatrix <- cbind(rownames(coefmatrix),coefmatrix)
