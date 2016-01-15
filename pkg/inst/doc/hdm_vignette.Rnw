@@ -104,7 +104,7 @@ precisely the command you are
 looking for, e.g. in order to check the details, try:
 <<eval=FALSE>>=
 help(package="hdm")
-help(lasso)
+help(rlasso)
 @
 The former command gives an overview over the available commands in the package, and
 the latter gives detailed information about a specific command.
