@@ -124,7 +124,7 @@ are executable, so they can be pasted into an \R session, or run as a group with
 a command like,
 
 <<eval=FALSE>>=
-example(lasso)
+example(rlasso)
 @
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -513,10 +513,10 @@ summary(lasso.effect)
 
 <<summary_results, results="hide">>=
 library(xtable)
-table= matrix(0, 2, 3)
+table= matrix(0, 2, 2)
 table[1,]= summary(ls.effect)$coef["gdpsh465",1:2]
-table[2,]= summary(lasso.effect)["d",1:2]
-colnames(table)= names(summary(full.fit)$coef["gdpsh465",])[1:2]
+table[2,]= summary(lasso.effect)$coef[,1:2]
+colnames(table)= names(summary(full.fit)$coef)[1:2]
 rownames(table)= c("full reg via ols",  "partial reg
 via post-lasso ")
 tab= xtable(table, digits=c(2, 2,7))
