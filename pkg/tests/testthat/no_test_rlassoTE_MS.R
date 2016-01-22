@@ -222,10 +222,37 @@ d <- data$d
 z <- data$z
 x <- as.matrix(data$xS)
 debug(rlassoLATE)
-output1 <- rlassoLATE(x,d,y,z, bootstrap=NULL, post=TRUE, intercept=TRUE, normalize=FALSE)
+output1 <- rlassoLATE(x,d,y,z, bootstrap="none", post=TRUE, intercept=TRUE)
 # output2 <- rlassoLATE(x,d,y,z, bootstrap=NULL, post=TRUE, intercept=TRUE, normalize=TRUE)
 # output3 <- rlassoLATE(x,d,y,z, bootstrap=NULL, post=TRUE, intercept=FALSE, normalize=TRUE)
 # output4 <- rlassoLATE(x,d,y,z, bootstrap=NULL, post=TRUE, intercept=TRUE, normalize=FALSE)
 # 
 # debug(rlassoATE)
 # output1 <- rlassoATE(x,d,y, bootstrap=NULL, post=TRUE, intercept=FALSE, normalize=FALSE)
+
+################
+rm(list=ls())
+data_int <- readMat("E:\\R Package hdm\\Misc\\LATE_spec2.mat")
+y <- data_int$y
+d <- data_int$d
+z <- data_int$z
+xS <- data_int$xS
+
+output1 <- rlassoLATE(xS,d,y,z, bootstrap="none", post=TRUE, intercept=TRUE)
+output2 <- rlassoLATE(xS,d,y,z, bootstrap="none", post=TRUE, intercept=FALSE)
+output3 <- rlassoLATE(xS,d,y,z, bootstrap="none", post=FALSE, intercept=TRUE)
+output4 <- rlassoLATE(xS,d,y,z, bootstrap="none", post=FALSE, intercept=FALSE)
+
+data_int <- readMat("E:\\R Package hdm\\Misc\\LATE_spec62.mat")
+y <- data_int$y
+d <- data_int$d
+z <- data_int$z
+xS <- data_int$xS
+
+output1a <- rlassoLATE(xS,d,y,z, bootstrap="none", post=TRUE, intercept=TRUE)
+output2a <- rlassoLATE(xS,d,y,z, bootstrap="none", post=TRUE, intercept=FALSE)
+output3a <- rlassoLATE(xS,d,y,z, bootstrap="none", post=FALSE, intercept=TRUE)
+output4a <- rlassoLATE(xS,d,y,z, bootstrap="none", post=FALSE, intercept=FALSE)
+
+b_y_z1xL <- rlasso(y[indz1] ~ x[indz1,,drop=FALSE], post=post, intercept=intercept)
+my_z1x <- predict(b_y_z1xL, newdata=x)

@@ -4,7 +4,7 @@
 \alias{tsls}
 \title{Two-Stage Least Squares Estimation (TSLS)}
 \usage{
-tsls(y, d, x, z, intercept = TRUE)
+tsls(y, d, x, z, intercept = TRUE, homoscedastic = TRUE)
 }
 \arguments{
 \item{y}{outcome variable}
@@ -15,7 +15,9 @@ tsls(y, d, x, z, intercept = TRUE)
 
 \item{z}{instruments}
 
-\item{intercept}{logical, if intercept is included}
+\item{intercept}{logical, if intercept should be included}
+
+\item{homoscedastic}{logical, if homoscedastic (\code{TRUE}, default) or heteroscedastic erros (\code{FALSE}) should be calculated.}
 }
 \value{
 The function returns a list with the following elements \item{coefficients}{coefficients}
@@ -28,7 +30,7 @@ The function does Two-Stage Least Squares Estimation (TSLS).
 \details{
 The function computes tsls estimate (coefficients) and variance-covariance-matrix assuming homoskedasticity
 for outcome variable \code{y} where \code{d} are endogenous variables in structural equation, \code{x} are exogensous variables in
-structural equation and z are instruments.  \code{x} should include a constant term.
+structural equation and z are instruments.
 }
 \keyword{2SLS}
 \keyword{Endogeneity}

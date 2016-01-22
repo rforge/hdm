@@ -15,15 +15,15 @@
 \alias{rlassoLATET}
 \title{Functions for estimation of treatment effects}
 \usage{
-rlassoATE(x, d, y, bootstrap = NULL, nRep = 500, ...)
+rlassoATE(x, d, y, bootstrap = "none", nRep = 500, ...)
 
-rlassoATET(x, d, y, bootstrap = NULL, nRep = 500, ...)
+rlassoATET(x, d, y, bootstrap = "none", nRep = 500, ...)
 
-rlassoLATE(x, d, y, z, bootstrap = NULL, nRep = 500, post = TRUE,
-  intercept = TRUE, normalize = TRUE)
+rlassoLATE(x, d, y, z, bootstrap = "none", nRep = 500, post = TRUE,
+  intercept = TRUE)
 
-rlassoLATET(x, d, y, z, bootstrap = NULL, nRep = 500, post = TRUE,
-  intercept = TRUE, normalize = TRUE)
+rlassoLATET(x, d, y, z, bootstrap = "none", nRep = 500, post = TRUE,
+  intercept = TRUE)
 }
 \arguments{
 \item{x}{exogenous variables}
@@ -37,7 +37,7 @@ rlassoLATET(x, d, y, z, bootstrap = NULL, nRep = 500, post = TRUE,
 
 \item{nRep}{number of replications for the bootstrap}
 
-\item{...}{arguments passed}
+\item{...}{arguments passed, e.g. \code{intercept} and \code{post}}
 
 \item{z}{instrumental variables (binary)}
 
@@ -45,8 +45,6 @@ rlassoLATET(x, d, y, z, bootstrap = NULL, nRep = 500, post = TRUE,
 
 \item{intercept}{logical. If \code{TRUE}, intercept is included which is not
 penalized.}
-
-\item{normalize}{logical. If \code{TRUE}, design matrix \code{x} is scaled.}
 }
 \value{
 Functions return an object of class \code{rlassoTE} with estimated effects, standard errors and

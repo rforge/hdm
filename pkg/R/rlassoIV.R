@@ -15,6 +15,7 @@
 #' @param d endogenous variable
 #' @param y outcome / dependent variable (vector or matrix)
 #' @param z matrix of instrumental variables
+#' @param post logical, wheter post-Lasso should be conducted (default=\code{TRUE})
 #' @param select.Z logical, indicating selection on the instruments
 #' @param select.X logical, indicating selection on the exogenous variables
 #' @param \dots arguments passed to the function \code{rlasso}
@@ -28,8 +29,9 @@
 #' @rdname rlassoIV
 #' @export
 
-rlassoIV <- function(x, d, y, z, select.Z=TRUE, select.X=TRUE, ...) {
+rlassoIV <- function(x, d, y, z, select.Z=TRUE, select.X=TRUE, post=TRUE, ...) {
   d <- as.matrix(d)
+  z <- as.matrix(z)
   if (is.null(colnames(d))) colnames(d) <- paste("d", 1:ncol(d), sep="")
   if (is.null(colnames(x)) & !is.null(x)) colnames(x) <- paste("x", 1:ncol(x), sep="")
   if (is.null(colnames(z)) & !is.null(z)) colnames(z) <- paste("z", 1:ncol(z), sep="")
@@ -41,30 +43,30 @@ rlassoIV <- function(x, d, y, z, select.Z=TRUE, select.X=TRUE, ...) {
   }
   
   if (select.Z==TRUE && select.X==FALSE) {
-    res <- rlassoIVselectZ(x, d, y, z, ...)
+    res <- rlassoIVselectZ(x, d, y, z, post=post, ...)
     return(res)
   }
   
   if (select.Z==FALSE && select.X==TRUE) {
-    res <- rlassoIVselectX(x, d, y, z, ...)
+    res <- rlassoIVselectX(x, d, y, z, post=post, ...)
     return(res)
   }
   
   if (select.Z==TRUE && select.X==TRUE) {
   Z <- cbind(z,x)
-  lasso.d.zx <- rlasso(d ~ Z,...)
-  lasso.y.x <- rlasso(y ~ x,...)
-  lasso.d.x <- rlasso(d ~ x,...)
+  lasso.d.zx <- rlasso(d ~ Z, post=post, ...)
+  lasso.y.x <- rlasso(y ~ x, post=post, ...)
+  lasso.d.x <- rlasso(d ~ x, post=post,...)
   if (sum(lasso.d.zx$index)==0) return(list(alpha=NA, se=NA))
   ind.dzx <- lasso.d.zx$index
   PZ <- Z[,ind.dzx]%*%MASS::ginv(t(Z[,ind.dzx])%*%Z[,ind.dzx])%*%t(Z[,ind.dzx])%*%d
-  lasso.PZ.x <- rlasso(x,PZ,...)
+  lasso.PZ.x <- rlasso.fit(x, PZ, post=post, ...)
   ind.PZx <- lasso.PZ.x$index
   
   if (sum(ind.PZx)==0) {
     Dr <- d - mean(d)
   } else {
-  Dr <- d- x[,ind.PZx]%*%MASS::ginv(t(x[,ind.PZx])%*%x[,ind.PZx])%*%t(x[,ind.PZx])%*%PZ
+  Dr <- d - predict(lasso.PZ.x, newdata=x) #x[,ind.PZx]%*%MASS::ginv(t(x[,ind.PZx])%*%x[,ind.PZx])%*%t(x[,ind.PZx])%*%PZ
   }
   
   if (sum(lasso.y.x$index)==0) {

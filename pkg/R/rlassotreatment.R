@@ -28,7 +28,7 @@
 #' @param bootstrap boostrap method which should be employed: "none", "Bayes",
 #' "normal", "wild"
 #' @param nRep number of replications for the bootstrap
-#' @param ... arguments passed 
+#' @param ... arguments passed, e.g. \code{intercept} and \code{post}
 #' @return Functions return an object of class \code{rlassoTE} with estimated effects, standard errors and
 #' individual effects in the form of a \code{list}.
 #' @references A. Belloni, V. Chernozhukov, I. Fernandez-Val, and C. Hansen
@@ -38,7 +38,7 @@
 #' @rdname TE
 #' @export
 
-rlassoATE <- function(x,d,y, bootstrap=NULL, nRep=500, ...) {
+rlassoATE <- function(x,d,y, bootstrap="none", nRep=500, ...) {
   z <- d
   res <- rlassoLATE(x,d,y,z, bootstrap=bootstrap, nRep=nRep, ...)
   res$type <- "ATE"
@@ -47,7 +47,7 @@ rlassoATE <- function(x,d,y, bootstrap=NULL, nRep=500, ...) {
 
 #' @export
 #' @rdname TE
-rlassoATET <- function(x,d,y, bootstrap=NULL, nRep=500, ...) {
+rlassoATET <- function(x,d,y, bootstrap="none", nRep=500, ...) {
   z <- d
   res <- rlassoLATET(x,d,y,z, bootstrap=bootstrap, nRep=nRep, ...)
   res$type <- "ATET"
@@ -57,14 +57,13 @@ rlassoATET <- function(x,d,y, bootstrap=NULL, nRep=500, ...) {
 #' @param post logical. If \code{TRUE}, post-lasso estimation is conducted.
 #' @param intercept logical. If \code{TRUE}, intercept is included which is not
 #' penalized.
-#' @param normalize logical. If \code{TRUE}, design matrix \code{x} is scaled.
 #' @rdname TE
 
-rlassoLATE <- function(x,d,y,z, bootstrap=NULL, nRep=500, post=TRUE, intercept=TRUE, normalize=TRUE) {
+rlassoLATE <- function(x,d,y,z, bootstrap="none", nRep=500, post=TRUE, intercept=TRUE) {
   x <- as.matrix(x)
   n <- dim(x)[1]
   p <- dim(x)[2]
-
+  checkmate::checkChoice(bootstrap, c("none", "Bayes", "normal", "wild"))
   lambda <- 2.2*sqrt(n)*qnorm(1-(1/log(n))/(2*(2*p)))
   control <- list(numIter = 15, tol = 10^-5)
   #penalty <- list(method = "none",   lambda.start = rep(lambda, p), c = 1.1, gamma = 0.1)
@@ -72,16 +71,16 @@ rlassoLATE <- function(x,d,y,z, bootstrap=NULL, nRep=500, post=TRUE, intercept=T
   indz1 <- (z==1)
   indz0 <- (z==0)
   # E[Y|Z = 1,X] = my_z1x
-  b_y_z1xL <- rlasso(y[indz1] ~ x[indz1,,drop=FALSE], post=post, intercept=intercept, normalize=normalize, control=control, penalty=penalty)
+  b_y_z1xL <- rlasso(y[indz1] ~ x[indz1,,drop=FALSE], post=post, intercept=intercept, control=control, penalty=penalty)
   my_z1x <- predict(b_y_z1xL, newdata=x)
   # E[Y|Z = 0,X] = my_z0x
-  b_y_z0xL <- rlasso(y[indz0] ~ x[indz0,,drop=FALSE],  post=post, intercept=intercept, normalize=normalize, control=control, penalty=penalty)
+  b_y_z0xL <- rlasso(y[indz0] ~ x[indz0,,drop=FALSE],  post=post, intercept=intercept, control=control, penalty=penalty)
   my_z0x <- predict(b_y_z0xL, newdata=x)
   # E[D|Z = 1,X] = md_z1x
   lambda <- 2.2*sqrt(n)*qnorm(1-(1/log(n))/(2*(2*p)))
   penalty <- list(lambda.start = lambda, c = 1.1, gamma = 0.1)
   if (sum(d-z)!=0) {
-    b_d_z1xL <- rlassologit(d[indz1] ~ x[indz1,,drop=FALSE],  post=post, intercept=intercept, normalize=normalize, penalty=penalty)
+    b_d_z1xL <- rlassologit(d[indz1] ~ x[indz1,,drop=FALSE],  post=post, intercept=intercept, penalty=penalty)
     md_z1x <- predict(b_d_z1xL, newdata=x)
   } else {
     md_z1x <- rep(1,n)
@@ -92,8 +91,8 @@ rlassoLATE <- function(x,d,y,z, bootstrap=NULL, nRep=500, post=TRUE, intercept=T
   # E[Z|X] = mz_x
   #lambdaP <- 2.2*sqrt(n)*qnorm(1-(1/log(n))/(2*p))
   #penalty <- list(lambda.start = lambdaP, c = 1.1, gamma = 0.1)
-  #b_z_xL <- rlassologit(x, z, post=post, intercept=intercept, normalize=normalize, penalty=penalty)
-  b_z_xL <- rlassologit(z ~ x, post=post, intercept=intercept, normalize=normalize)
+  #b_z_xL <- rlassologit(x, z, post=post, intercept=intercept, penalty=penalty)
+  b_z_xL <- rlassologit(z ~ x, post=post, intercept=intercept)
   mz_x <- predict(b_z_xL, newdata=x)
   mz_x <- mz_x*(mz_x > 1e-12 & mz_x < 1-1e-12) + (1-1e-12)*(mz_x > 1-1e-12) + 1e-12*(mz_x < 1e-12)
 
@@ -125,7 +124,7 @@ rlassoLATE <- function(x,d,y,z, bootstrap=NULL, nRep=500, post=TRUE, intercept=T
 #   object$ate <- alpha1 - alpha0
 #   # end alternative method
 
-  if (!is.null(bootstrap)) {
+  if (bootstrap!="none") {
     boot <- rep(NA,nRep)
     for (i in 1:nRep) {
       if (bootstrap=="Bayes") {
@@ -151,10 +150,11 @@ rlassoLATE <- function(x,d,y,z, bootstrap=NULL, nRep=500, post=TRUE, intercept=T
 
 #' @export
 #' @rdname TE
-rlassoLATET <- function(x, d, y, z, bootstrap=NULL, nRep=500, post=TRUE, intercept=TRUE, normalize=TRUE) {
+rlassoLATET <- function(x, d, y, z, bootstrap="none", nRep=500, post=TRUE, intercept=TRUE) {
   x <- as.matrix(x)
   n <- dim(x)[1]
   p <- dim(x)[2]
+  checkmate::checkChoice(bootstrap, c("none", "Bayes", "normal", "wild"))
   lambda <- 2.2*sqrt(n)*qnorm(1-(1/log(n))/(2*(2*p)))
   control <- list(numIter = 15, tol = 10^-5)
   #penalty <- list(method = "none",   lambda.start = rep(lambda, p), c = 1.1, gamma = 0.1)
@@ -162,7 +162,7 @@ rlassoLATET <- function(x, d, y, z, bootstrap=NULL, nRep=500, post=TRUE, interce
   indz1 <- (z==1)
   indz0 <- (z==0)
   # E[Y|Z = 0,X] = my_z0x
-  b_y_z0xL <- rlasso(y[indz0] ~ x[indz0,],  post=post, intercept=intercept, normalize=normalize, control=control, penalty=penalty)
+  b_y_z0xL <- rlasso(y[indz0] ~ x[indz0,],  post=post, intercept=intercept, control=control, penalty=penalty)
   my_z0x <- predict(b_y_z0xL, newdata=x)
   # E[D|Z = 0,X] = md_z0x
   md_z0x <- rep(0,n)
@@ -170,7 +170,7 @@ rlassoLATET <- function(x, d, y, z, bootstrap=NULL, nRep=500, post=TRUE, interce
   lambdaP <- 2.2*sqrt(n)*qnorm(1-(1/log(n))/(2*p))
   #penalty <- list(lambda.start = lambdaP, c = 1.1, gamma = 0.1)
   penalty <- list(homoscedastic = "none",   lambda.start = p, c = 1.1, gamma = 0.1)
-  b_z_xL <- rlassologit(z ~ x, post=post, intercept=intercept, normalize=normalize, penalty=penalty)
+  b_z_xL <- rlassologit(z ~ x, post=post, intercept=intercept, penalty=penalty)
   mz_x <- predict(b_z_xL, newdata=x)
   mz_x <- mz_x*(mz_x > 1e-12 & mz_x < 1-1e-12) + (1-1e-12)*(mz_x > 1-1e-12) + 1e-12*(mz_x < 1e-12)
 
@@ -184,7 +184,7 @@ rlassoLATET <- function(x, d, y, z, bootstrap=NULL, nRep=500, post=TRUE, interce
 
   object <- list(se = se, te=latet, individual = individual, type="LATET", call=match.call(), samplesize=n)
 
-  if (!is.null(bootstrap)) {
+  if (bootstrap!="none") {
     boot <- rep(NA,nRep)
     for (i in 1:nRep) {
       if (bootstrap=="Bayes") {

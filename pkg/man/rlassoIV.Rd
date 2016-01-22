@@ -6,7 +6,7 @@
 \title{Post-Selection and Post-Regularization Inference in Linear Models with Many
 Controls and Instruments}
 \usage{
-rlassoIV(x, d, y, z, select.Z = TRUE, select.X = TRUE, ...)
+rlassoIV(x, d, y, z, select.Z = TRUE, select.X = TRUE, post = TRUE, ...)
 
 rlassoIVmult(x, d, y, z, select.Z = TRUE, select.X = TRUE, ...)
 }
@@ -22,6 +22,8 @@ rlassoIVmult(x, d, y, z, select.Z = TRUE, select.X = TRUE, ...)
 \item{select.Z}{logical, indicating selection on the instruments}
 
 \item{select.X}{logical, indicating selection on the exogenous variables}
+
+\item{post}{logical, wheter post-Lasso should be conducted (default=\code{TRUE})}
 
 \item{\dots}{arguments passed to the function \code{rlasso}}
 }

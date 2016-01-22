@@ -295,10 +295,10 @@ plot.rlassoEffects <- function(x, main="", xlab="coef", ylab="", xlim=NULL,...){
     up <- xlim[2]
   }
   # generate points 
-  plotobject <- ggplot2::ggplot(coefmatrix,aes(y=coef,x=factor(names,levels=names))) + ggplot2::geom_point(colour=col)+ggplot2::geom_hline(h=0, colour=col, width=0.1)
+  plotobject <- ggplot2::ggplot(coefmatrix,ggplot2::aes(y=coef,x=factor(names,levels=names))) + ggplot2::geom_point(colour=col, size=0.75)+ggplot2::geom_hline(h=0, colour=col, width=0.1)
   
   # generate errorbars (KIs)
-  plotobject <- plotobject + ggplot2::geom_errorbar(ymin=coefmatrix$lower,ymax=coefmatrix$upper,colour=col, width=0.5, size=0.25 )
+  plotobject <- plotobject + ggplot2::geom_errorbar(ymin=coefmatrix$lower,ymax=coefmatrix$upper,colour=col, width=0.4, size=0.2)
   
   # further graphic parameter
   plotobject <- plotobject + ggplot2::ggtitle(main) + ggplot2::ylim(low,up) + ggplot2::xlab(ylab) + ggplot2::ylab(xlab) 
@@ -306,8 +306,8 @@ plot.rlassoEffects <- function(x, main="", xlab="coef", ylab="", xlim=NULL,...){
   # var.names xlim(0.5,nrow(coefmatrix)+0.5)
   #plotobject <- plotobject + scale_x_discrete(limits=rownames(coefmatrix)[1:nrow(coefmatrix)])
   
-  # invert x and y axis
-  plotobject <- plotobject + ggplot2::coord_flip()
+  ## invert x and y axis
+  #plotobject <- plotobject + ggplot2::coord_flip()
   
   # layout
   plotobject <- plotobject + ggplot2::theme_bw() + ggplot2::geom_blank() +

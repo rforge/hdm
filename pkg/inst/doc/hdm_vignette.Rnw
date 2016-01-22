@@ -1,7 +1,7 @@
 %\VignetteIndexEntry{High-Dimensional Metrics, Lasso}
 %\VignetteDepends{hdm, MASS, glmnet, ggplot2}
 %\VignettePackage{hdm}
-%\VignetteEngine{knitr}
+%\VignetteEngine{knitr::knitr}
 %\VignetteEncoding{UTF-8}
 \documentclass{amsart}
 %\newcommand{\indep}{\mathop{\perp\!\!\!\!\perp}}
@@ -30,7 +30,6 @@
 \thanks{Version:  \today}
 \author{Victor Chernozhukov, Christian Hansen, Martin Spindler}
 
-
 \begin{document}
 \begin{abstract}
 The package High-dimensional Metrics (\Rpackage{hdm}) is an evolving collection of statistical methods for estimating and drawing inferences in high-dimensional approximately sparse models.  This vignette offers a brief introduction and a tutorial to the implemented methods.  \R and the package \Rpackage{hdm} are open-source software projects and can be freely downloaded from CRAN:
@@ -56,7 +55,7 @@ The methods which are implemented in this package are distinctive from already a
 \item[\textbf{1)}] First, we provide efficient estimators and  uniformaly valid confidence intervals for various low-dimensional causal/structural parameters  appearing in high-dimensional approximately sparse models.   For example, we provide efficient estimators and uniformly valid confidence intervals for a regression coefficient on a target variable (e.g., a treatment or policy variable) in a high-dimensional sparse regression model.  We also provide estimates and confidence intervals for average treatment effect (ATE) and average treatment effect for the treated (ATET),  as well  extensions of these parameters to the endogenous setting.
 
 
-\item[\textbf{2)}] Second, we provide theoretically grounded, data-driven choice of the penalty level $\lambda$ in the Lasso regressions is both theoretical grounded and data-driven. Because of this we call it \textquotedblleft rigorous\textquotedblright LASSO (=\code{rlasso}). The prefix \textbf{r} in function names should underscore this. In high-dimensions setting cross-validation is very popular, but it lacks a theoretical justification and some theoretical proposals are often not feasible. 
+\item[\textbf{2)}] Second, we provide theoretically grounded, data-driven choice of the penalty level $\lambda$ in the Lasso regressions is both theoretical grounded and data-driven. Because of this we call it \textquotedblleft rigorous\textquotedblright LASSO (=\code{rlasso}). The prefix \textbf{r} in function names should underscore this. In high-dimensions setting cross-validation is very popular, but it lacks a theoretical justification and some theoretical proposals for the choice of $\lambda$ are often not feasible.
 
 \item[\textbf{3)}] Third, we provide a version of Lasso regressions that expressly handle and allow for non-Gaussian and heteroscedastic errors.
 
@@ -73,6 +72,11 @@ In this vignette, we first show how to get started with package. Then we introdu
 \section{How to get started}
 \R is an open source software project and can be freely downloaded from the CRAN
 website along with its associated documentation. The \R package \Rpackage{hdm} can be downloaded from \texttt{cran.r-project.org}. To install the hdm package from \R we simply type,
+
+<<R_setup, include=FALSE>>=
+library(knitr)
+knitr::opts_chunk$set(warning = FALSE)
+@
 
 <<eval=FALSE>>=
 install.packages("hdm")
@@ -191,7 +195,7 @@ data(EminentDomain)
 @
 
 
-The data set consists of four groups of variables:
+The data set consists of four \textquotedblleft sub data sets\textquotedblright which have the following structure:
 \begin{itemize}
 \item y: outcome variable, a house price index
 \item d: the treatment variable,represents the number of pro-plaintiff
@@ -201,6 +205,8 @@ cases in that circuit-year, the number of takings appellate decisions, and contr
 the distribution of characteristics of federal circuit court judges in a given circuit-year
 \item z: instrumental variables, here characteristics of judges serving on federal appellate panels
 \end{itemize}
+
+The four data sets differ mainly in the dependent variable wich is some kind of house price index or the GDP, exactly speaking the logarithm of those variales: repeat-sales FHFA/OFHEO house price index for metro (FHFA) and non-metro (NM), the Case-Shiller home price index (CS), and state-level GDP from the Bureau of Economic Analysis. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -254,7 +260,7 @@ and $c>1$ is a theoretical constant , which is set to $c=1.1$ by default, and $\
 \[ \lambda = 2c \hat{\sigma} \Lambda(1-\gamma|X), \]
 where
 \[ \Lambda(1-\gamma|X)=(1-\gamma)-\text{quantile of}\quad n||\mathbb{E}_n[x_i e_i] ||_{\infty}|X,\]
-where $X=[x_1, \ldots, x_n]'$ and $eg_i$ are iid $N(0,1)$, generated independently from $X$; this quantity  is approximated by simulation. The $X$-independent penalty is more conservative, while the $X$-dependent penalty level is least conservative. In particular the $X$-dependent penalty automatically adapts to highly correlated designs, using less aggressive penalization in this case.
+where $X=[x_1, \ldots, x_n]'$ and $e_i$ are iid $N(0,1)$, generated independently from $X$; this quantity  is approximated by simulation. The $X$-independent penalty is more conservative, while the $X$-dependent penalty level is least conservative. In particular the $X$-dependent penalty automatically adapts to highly correlated designs, using less aggressive penalization in this case.
 
 In the case of heteroscedasticity, the loadings are given by $\hat{\psi}_j=\sqrt{\mathbb{E}_n[x_{ij}^2 \hat \varepsilon_i^2]}$, where $\hat \varepsilon_i$ are preliminary estimates of the errors. The penalty level
 can be $X$-independent:
@@ -331,7 +337,7 @@ $$
 u_i = \alpha v_i + \epsilon_i,  
 $$
 where $u_i$ is the residual that is left after partialling out the linear effect of $x_i$ from $y_i$ and $v_i$ is the residual that is left after partialling out the linear effect of $x_i$ from $d_i$, both done in the population.  Note that we have
-$\mathbb{E} u_i  x_i =0$, i.e. $u_i = y_i - x_i'\delta_0$ where $x_i'\delta_0$ is the linar projection of $y_i$ on $x_i$.  After partialling out,  $\alpha$ is the regression coefficient in the bivariate regression of $u_i$ on $v_i$.  This is the Frisch-Waugh-Lovell theorem. 
+$\mathbb{E} u_i  x_i =0$, i.e. $u_i = y_i - x_i'\delta_0$ where $x_i'\delta_0$ is the linar projection of $y_i$ on $x_i$.  After partialling out,  $\alpha$ is the regression coefficient in the univariate regression of $u_i$ on $v_i$.  This is the Frisch-Waugh-Lovell theorem. 
 
 
 In low-dimensional settings the empirical version of the partialling out approach is simply another way to do the least squares.  Let's verify this in an example.
@@ -427,7 +433,7 @@ summary(Eff)$coef[,1:2]
 
 
 \subsection{Inference}
-The function \code{rlassoEffects} does inference for a target variables. Those can be specified either by the variable names, an integer valued vector giving their position in \code{x} or by logical indicating the variables for which inference should be conducted. It returns an object of S3 class \code{rlassoEffect} for which the methods \code{summary}, \code{print}, \code{confint}, and \code{plot} are provided. \code{rlassoEffects} is a wrap function for \code{rlassoEffect} which does inference for a single target regressor.
+The function \code{rlassoEffects} does inference for target variables. Those can be specified either by the variable names, an integer valued vector giving their position in \code{x} or by logical indicating the variables for which inference should be conducted. It returns an object of S3 class \code{rlassoEffect} for which the methods \code{summary}, \code{print}, \code{confint}, and \code{plot} are provided. \code{rlassoEffects} is a wrap function for \code{rlassoEffect} which does inference for a single target regressor.
 
 First we generate data in a sparse linear model:
 <<DGP_Lasso>>=
@@ -489,8 +495,8 @@ First, we load and prepare the data
 <<Growth_processing>>=
 data(GrowthData)
 dim(GrowthData)
-y = GrowthData[,1]
-d = GrowthData[,3]
+y = GrowthData[,1,drop=F]
+d = GrowthData[,3, drop=F]
 X = as.matrix(GrowthData)[,-c(1,2,3)]
 varnames = colnames(GrowthData)
 @
@@ -516,7 +522,7 @@ library(xtable)
 table= matrix(0, 2, 2)
 table[1,]= summary(ls.effect)$coef["gdpsh465",1:2]
 table[2,]= summary(lasso.effect)$coef[,1:2]
-colnames(table)= names(summary(full.fit)$coef)[1:2]
+colnames(table)= c("Estimate", "Std. Error") #names(summary(full.fit)$coef)[1:2]
 rownames(table)= c("full reg via ols",  "partial reg
 via post-lasso ")
 tab= xtable(table, digits=c(2, 2,7))
@@ -525,9 +531,6 @@ tab= xtable(table, digits=c(2, 2,7))
 <<results="asis">>=
 tab
 @
-
-
-\end{document}
 
 
 \section{Instrumental Variable Estimation in a High-Dimensional Setting}
@@ -541,74 +544,27 @@ d_i &=& z_i' \Pi + \gamma_0 x_i' + v_i,
 \end{eqnarray}
 where $\mathbb{E}[\varepsilon_i| x_i, z_i]= \mathbb{E}[v_i | x_i, z_i]=0$, but $\mathbb{E}[\varepsilon_i v_i] \neq 0$ leading to endogeneity. In this setting $d_i$ is a scalar endogenous variable of interest, $z_i$ is a $p_z$-dimensional vector of instruments and $x_i$ is a $p_x$-dimensional vector of control variables.
 
-In this section we present methods to estimate the effect $\alpha_0$ in a setting, where either $p_x$ is high-dimensional, either $p_z$ is high-dimensional or both $p_x$ and $p_z$ are high-dimensional. The wrap function \code{rlassoIV} handels all these cases, but allows additionally low-dimensional $p_x$ and $p_z$ which leads to classical two-stage least squares (tsls) estimation. The function \code{rlassoIV} hast the options \code{select.X} and \code{select.Z} which determine if selection shall take place, both with default values \code{TRUE}. The class of the return object depends on the chosen options, but the methods \code{summary}, \code{print} and \code{confint} are available.
+In this section we present methods to estimate the effect $\alpha_0$ in a setting, where either $p_x$ is high-dimensional, either $p_z$ is high-dimensional or both $p_x$ and $p_z$ are high-dimensional.
 
-\end{document}
+\subsection{Inference}
+To get efficient estimators and uniformly valid confidence intervals for the strucutural parameters there are different strategies which are asymptotically equivalent where again partialling out is a key concept.
 
-\subsection{Selection on the IVs}
-\subsubsection{Estimation}
-\subsubsection{Application -- Eminent Domain}
- Federal court rulings
-that a government seizure was unlawful (pro-plaintiff rulings) thus uphold individual
-property rights and make future exercise of eminent domain more difficult
-due to the structure of the US legal system. A more detailed discussion of the
-economics of takings law (or eminent domain) and other institutional and econometric
-considerations can be found in Belloni, Chen, Chernozhukov, and Hansen
-(2012) and Chen and Yeh (2012).
-The analysis of the effects of takings law is complicated by the possible endogeneity
-between takings law decisions and economic variables: for example, a taking
-may be less likely if real estate prices are low and sellers are eager to unload property.
-To address the potential endogeneity of takings law, we employ an instrumental
-variables strategy based on the identification argument of Chen and Sethi (2010)
-and Chen and Yeh (2012) that relies on the random assignment of judges to federal
-appellate panels. Because judges are randomly assigned to three-judge panels to
-decide appellate cases, the exact identity of the judges and their demographics
-are randomly assigned conditional on the distribution of characteristics of federal
-circuit court judges in a given circuit-year. Under this random assignment, the
-characteristics of judges serving on federal appellate panels can only be related to
-property prices through the judges' decisions; thus the judge's characteristics will
-plausibly satisfy the instrumental variable exclusion restriction.
+For inference in a setting with many instruments (and low-dimensional exogenous variables) in a first stage predicted values $\hat{d}$ are calculated based on a (Post-)LASSO regression of $d$ on the instruments (z). In a second step, these predicted values are plugged into the first equation and then the coefficient of the treatment effect $\alpha_0$ is estimated by orindary least squares. An alternative, asympotically equivalent approach would be in a preliminary step to partial out the effect of the exogenoues variables and then proceed as before.
 
+In the case of many exogenous variables (and \textquotedblleft few\textquotedblright instruments) we employ the following estimation strategy: First, the effect of the exogenous variables is partialled out from the dependent variable, the treatment variable and the instruments by (Post-)LASSO. Second, the resulting residuals are used to conduct a two-stage least squares regression with no exogenous variables included.
 
-First, we load the data an construct the matrices with the controls (X) and instruments (Z) and the output (y) and treatment variables (d)
-<<LassoIV>>=
-data(EminentDomain)
-Z = as.matrix(EminentDomain[,grep("z", colnames(EminentDomain))])
-X = as.matrix(EminentDomain[,grep("x", colnames(EminentDomain))])
-y = as.matrix(EminentDomain[,"y"])
-d = as.matrix(EminentDomain[,"d"])
-@
-As mentioned above, y is the Economic outcome, the Case-Shiller house price index, d  the number of pro plaintiff
-appellate takings decisions in federal circuit court c and year t, X a matrix with control variables and Z the matrix with instruments, here socio-economic and demographic characteristics of the judges.
-
-First, we estimate the effect of the treatment variable by simple OLS and 2SLS using two instruments:
-<<OLS_EminentDomina>>=
-ED.ols = lm(y~cbind(d,X))
-ED.2sls = tsls(y=y, d=d, x=X, z=Z[,1:2], intercept=FALSE)
-@
+Finally, in the case of many instruments and many $x$-variables the treatment effect is estimated with the following algorithm:
+\textrm{Algorithm 1.} \textit{ (1) Do Lasso or Post-Lasso Regression of $d_i$ on $x_i, z_i$ to obtain $\hat \gamma$ and $\hat \delta$. (2) Do Lasso or Post-Lasso Regression of $y_i$ on $x_i$ to get $\hat \theta$. (3) Do Lasso or Post-Lasso Regression of $\hat d_i = x_i'\hat\gamma + z_i'\hat\delta$ on $x_i$ to get
+	 $\hat \vartheta$. (4) Let $\hat{r}^y_i := y_i - x_i'\hat \theta$, $\hat{r}^d_i := d_i - x_i'\hat \vartheta$, and 
+	$\hat{v}_i := x_i'\hat \gamma + z_i'\hat \delta - x_i'\hat \vartheta$. Get estimator $\hat \alpha$ by using standard IV regression of $\hat{r}^y_i$ on $\hat{r}^d_i$ with $\hat{v}_i$ as the instrument.  Perform inference on $\alpha$ using $\hat \alpha$ and conventional heteroscedasticity robust standard errors.} \\
 
 
 
+\subsection*{R Implementation}
+ The wrap function \code{rlassoIV} handels all these cases, but allows additionally low-dimensional $p_x$ and $p_z$ which leads to classical two-stage least squares (tsls) estimation. The function \code{rlassoIV} hast the options \code{select.X} and \code{select.Z} which determine if selection shall take place, both with default values \code{TRUE}. The class of the return object depends on the chosen options, but the methods \code{summary}, \code{print} and \code{confint} are available.
+The fuctions \code{rlassoSelectX} and \code{rlassoSelectZ} do selection on either the $X$-variables resp. on the $Z$-variables. Selection on both is done in \code{rlassoIV}. All functions all the option \code{post} with default \code{TRUE} which enables post-LASSO at the corresponding steps. Further arguments, like \code{intercept} can be passed through to the underlying \code{rlasso} function with the \code{...}-mechanism. Finally, a function \code{tsls} is contained which allows \textquotedblleft classical\textquotedblright two-stage least squares estimation where an \code{intercept} can be specified and it can be chosen between homoscedastic and heteroscedastic errors where the default \code{homoscedastic=TRUE}.
 
-Next we estimate the model with selection on the instruments
-<<ED_analysis>>=
-#lasso.IV = rlassoIV(x=X, d=d, y=y, z=Z, select.X=FALSE, select.Z=TRUE, post=TRUE, normalize=FALSE, intercept=TRUE) # wrap function
-lasso.IV = rlassoIVselectZ(x=X, d=d, y=y, z=Z, post=TRUE, normalize=TRUE, intercept=FALSE) #direct call
-print(lasso.IV)
-summary(lasso.IV)
-confint(lasso.IV)
-
-##############################################################
-dZlasso = rlasso(x=Z, y=d, post=TRUE, normalize=TRUE, intercept=FALSE)
-Zsel = Z[, dZlasso$index]
-ivift.lasso = tsls(y=y, d=d, x=X, z=Zsel, intercept=FALSE)
-@
-%Note, that if the exogenous variables should contain an intercept, it has to be included in $x$. 
-\hl{MS: not exactly the estimate of BCCH 2012, in particular se!!}
-
-\subsection{Selection on the exogenous variables}
-\subsubsection{Estimation}
-
+\subsection{Applications}
 \subsubsection{Economic Development and Institutions}
 Estimating the effect of institutions on output is complicated by the clear potential
 for simultaneity between institutions and output: specifically, better institutions may
@@ -632,13 +588,13 @@ data(AJR)
 y = AJR$GDP 
 d = AJR$Exprop
 z = AJR$logMort
-X = model.matrix(~(Latitude + Latitude2 + Africa + Asia + Namer + Samer)^2, data=AJR)
+X = model.matrix(~ -1 + (Latitude + Latitude2 + Africa + Asia + Namer + Samer)^2, data=AJR)
 @
 
 Then we estimate an IV model with selection on the $X$
 <<AJR_analysis>>=
-#AJR.Xselect = rlassoIV(x=X, d=d, y=y, z=z, select.X=TRUE, select.Z=FALSE) 
-AJR.Xselect = rlassoIVselectX(x=X, d=d, y=y, z=z, intercept=TRUE, normalize=TRUE, post=TRUE)
+AJR.Xselect = rlassoIV(x=X, d=d, y=y, z=z, select.X=TRUE, select.Z=FALSE)
+AJR.Xselect = rlassoIVselectX(x=X, d=d, y=y, z=z, intercept=TRUE, post=TRUE)
 print(AJR.Xselect)
 summary(AJR.Xselect)
 confint(AJR.Xselect)
@@ -665,33 +621,126 @@ rZ = rlasso(fmla.z, data = AJR)$res
 ivfit.lasso = tsls(y=rY,d=rD, x=NULL, z=rZ, intercept=FALSE)
 @
 
+Partialling out with LASSO is implemented in the function \code{rlassoSelectX} so that both procedures give the same results.
+We see that by doing selection on the exogenous variables, the effect of institutions is decreased but the selection enables a much more precise estimation leading to small standard errors.
 
- 
-\subsection{Selection on the IVs and exogenous variables}
-\subsubsection{Eminent Domain Example continued}
-Here again we consider the example from above, but now we do selection on the exogenous variables and on the instruments.
 
-<<LassoIV_ED, results="hide">>=
+\subsubsection{Eminent Domain Decisions}
+ Federal court rulings
+that a government seizure was unlawful (pro-plaintiff rulings) thus uphold individual
+property rights and make future exercise of eminent domain more difficult
+due to the structure of the US legal system. A more detailed discussion of the
+economics of takings law (or eminent domain) and other institutional and econometric
+considerations can be found in Belloni, Chen, Chernozhukov, and Hansen
+(2012) and Chen and Yeh (2012).
+The analysis of the effects of takings law is complicated by the possible endogeneity
+between takings law decisions and economic variables: for example, a taking
+may be less likely if real estate prices are low and sellers are eager to unload property.
+To address the potential endogeneity of takings law, we employ an instrumental
+variables strategy based on the identification argument of Chen and Sethi (2010)
+and Chen and Yeh (2012) that relies on the random assignment of judges to federal
+appellate panels. Because judges are randomly assigned to three-judge panels to
+decide appellate cases, the exact identity of the judges and their demographics
+are randomly assigned conditional on the distribution of characteristics of federal
+circuit court judges in a given circuit-year. Under this random assignment, the
+characteristics of judges serving on federal appellate panels can only be related to
+property prices through the judges' decisions; thus the judge's characteristics will
+plausibly satisfy the instrumental variable exclusion restriction.
+
+
+First, we load the data an construct the matrices with the controls (X) and instruments (Z) and the output (y) and treatment variables (d). Here we consider the regional GDP as outcome variable. 
+<<LassoIV>>=
 data(EminentDomain)
-Z = as.matrix(EminentDomain[,grep("z", colnames(EminentDomain))])
-X = as.matrix(EminentDomain[,grep("x", colnames(EminentDomain))])
-y = as.matrix(EminentDomain[,"y"])
-d = as.matrix(EminentDomain[,"d"])
+Z <- EminentDomain$logGDP$z
+X <- EminentDomain$logGDP$x
+y <- EminentDomain$logGDP$y
+d <- EminentDomain$logGDP$d
 @
+As mentioned above, y is the Economic outcome, the logarithm of the GDP, d  the number of pro plaintiff
+appellate takings decisions in federal circuit court c and year t, X a matrix with control variables and Z the matrix with instruments, here socio-economic and demographic characteristics of the judges.
+
+First, we estimate the effect of the treatment variable by simple OLS and 2SLS using two instruments:
+<<OLS_EminentDomina>>=
+ED.ols = lm(y~cbind(d,X))
+ED.2sls = tsls(y=y, d=d, x=X, z=Z[,1:2], intercept=FALSE)
+@
+
+
+Next, we estimate the model with selection on the instruments. In both cases post-LASSO and an intercept are included as they are default options.
+<<ED_analysis>>=
+lasso.IV.Z = rlassoIV(x=X, d=d, y=y, z=Z, select.X=FALSE, select.Z=TRUE) # wrap function
+#lasso.IV.Z = rlassoIVselectZ(x=X, d=d, y=y, z=Z) #direct call
+print(lasso.IV.Z)
+summary(lasso.IV.Z)
+confint(lasso.IV.Z)
+@
+
+
+Finally, we do selection on both the $x$ and $z$ variables.
 
 <<LassoIV_analysis>>=
-lasso.IV = rlassoIV(x=X, d=d, y=y, z=Z, select.X=TRUE, select.Z=TRUE) # wrap function
-print(lasso.IV)
-summary(lasso.IV)
-confint(lasso.IV)
+lasso.IV.XZ = rlassoIV(x=X, d=d, y=y, z=Z, select.X=TRUE, select.Z=TRUE) # wrap function
+print(lasso.IV.XZ)
+summary(lasso.IV.XZ)
+confint(lasso.IV.XZ)
 @
 
-\section{Estimation of Treatment Effects in a High-Dimensional Setting}
+Comparing the results we see, that the OLS estimates indicate that the influence  of pro plaintiff
+appellate takings decisions in federal circuit court is siginifcantly positive. But the 2SLS estimates which account for the potential endogeneity render the results insignificant. Employing selection on the instruments confirms this result. Selection on both the $x$- and $z$-variables drives the estimate below zero, but yielding similar economic conclusions.
 
-\subsection{Estimation of LATE, ATE, LATET, and , ATET}
-\subsubsection{Treatment effects -- A short introduction}
-\hl{MS: TBD: Short explanation / definition}
-\subsubsection{401(k) plan participation}
+Finally, we compare all results
+
+<<summary_results_ED,  include=FALSE>>=
+library(xtable)
+table= matrix(0, 4, 2)
+table[1,]= summary(ED.ols)$coef[2,1:2]
+table[2,]= cbind(ED.2sls$coef[1], ED.2sls$se[1])
+table[3,]= summary(lasso.IV.Z)[,1:2]
+table[4,]= summary(lasso.IV.XZ)[,1:2]
+colnames(table)= c("Estimate", "Std. Error")
+rownames(table)= c("ols regression",  "IV estimation ", "selection on Z", "selection on X and Z")
+tab= xtable(table, digits=c(2, 2,7))
+@
+
+<<results="asis">>=
+tab
+@
+
+
+\section{Inference on Treatment Effects in a High-Dimensional Setting}
+\subsection{Treatment Effects -- A short Introduction}
+In many situations researchers are asked to evaluate the effect of a policy intervention. Examples are the effectiveness of a job-related training programme or the effect of a newly developed drug. We consider $n$ units or individuals, $i=1,\ldots,n$. For each individual we observe the treatment status. The treatment variable $D_i$ takes the value $1$, if the unit received (active) treatment, and $0$, if it received the control treatment. For each individual we observe the outcome for only one of the two potential treatment states. Hence, the observed outcome depends on the treatment status and is denoted by $Y_i(D_i)$. 
+
+A quantity of interest is the average treatment effect (ATE) which is defined as
+\[ \mathbb{E}[Y(1)-Y(0)] =  \mathbb{E}[Y(1)] - \mathbb{E}[Y(0)]. \]
+This quantity can be interpreted as the average effect of the policy intervention.
+
+Researchers might also be interested in the average treatment effect on the treated (ATET) given by
+\[ \mathbb{E}[Y(1)-Y(0)|D=1] =  \mathbb{E}[Y(1)|D=1] - \mathbb{E}[Y(0)|D=1]. \]
+This is the average treatment effect restricted to the subsample of the treated individuals.
+Under certain assumptions those quantities can be estimated unbiased.
+
+In observational studies the outcome variable often depends on the treatment variable given the conditioning variables. In such situations the local average treatment effect (LATE) can be of interest which can be estimated when a binary instrumental variable is available and is defined as
+
+\[  \mathbb{E}[Y(1)-Y(0)| D(1) > D(0)]. \]
+
+The random variables $D(1)$ and $D(0)$ indicate the potential participation decisions under the instrument states $1$ 
+It can be interpreted as the average treatment effect for the subgroup of compliers. The compliers are the individuals that take the treatment when assigned and the control treatment when not assigned. In an analog way, the the local average treatment effect can be restricted to the treated, yielding the so-called local average treatment effect of the treated (LATET):
+
+\[  \mathbb{E}[Y(1)-Y(0)| D(1) > D(0)| D=1]. \]
+
+
+\subsection{Estimation and Inference of Treatment effects}
+We  consider the estimation of the effect of an endogenous binary treatment, $D$, on an outcome variable, $Y$, in a setting with very many potential vontrol variables. In the case of endogeneity, the presence of a binary instrumental variable, $Z$, is required for the estimation of the LATE and LATET. 
+
+When trying to estimate treatment effects, the researcher has to decide what conditioning variables to include. In the case of a non-randomly assigned treatment or instrumental variable, the researcher must select the conditioning variables so that the instrument or treatment is plausibly exogenous. Even in the case of random assignment, for a precise estimation of the policy variable selection of control variables is neccessary to absorb residual variation, but overfitting should be avoided. For uniformly valid post-selection inference, \textquotedblleft low-bias\textquotedblright moment functions and approximate sparsity of the underlying structural parameters are key in a high-dimensional setting where the number of conditioning variables might surmount the number of observations. The estimation strategy which is implemented in the packages employs LASSO regressions to estimate the structural quantities which replicate the sparse structure.
+
+
+\subsection*{R Impementation}
+The package contains the functions \code{rlassoATE}, \code{rlassoATET}, \code{rlassoLATE}, and \code{rlassoLATE} to estimate the corresponding treatment effects. All functions have as arguments the outcome variable $y$, the treatment variable $d$, and the conditioning variables $x$. The functions \code{rlassoLATE}, and \code{rlassoLATE} have additionally the argument $z$ for the binary instrumental variable. For the calculation of the standard errors bootstrap methods are implemented. The choice options are \code{Bayes}, \code{normal}, and \code{wild} bootstrap. The number of repitions can be specified with the argument \code{nRep} and the default is set to $500$. By default no booststrap standared errors are provided (\code{bootstrap="none"}). For the functions the logicals \code{intercept} and \code{post} can be specified to include an intercept and to do post-LASSO at the selection steps. The family of treatment functions returns an object of class \code{rlassoTE} for which the methods \code{print}, \code{summary}, and \code{confint} are available.
+
+
+\subsection{Application: 401(k) plan participation}
 Though it is clear that 401(k) plans are widely used as vehicles for retirement saving, their
 effect on assets is less clear. The key problem in determin-
 ing the effect of participation in 401(k) plans on
@@ -714,27 +763,46 @@ data(pension)
 y = pension$tw
 d = pension$p401
 z = pension$e401
-X = model.matrix(~(age + inc + fsize + educ + marr + twoearn + db +pira)^2, data=pension)
+X = model.matrix(~(age + inc + fsize + educ + marr + twoearn + db +pira)^2, data=pension)[,-1]
 @
 
 Now we can calculate the interesting treatment effects
 
 <<401_analysis>>=
 pension.late = rlassoLATE(X,d,y,z, 
-                           bootstrap=NULL, post=TRUE, intercept=FALSE, normalize=FALSE)
+                           bootstrap="none", post=TRUE, intercept=TRUE)
 print(pension.late)
 pension.latet = rlassoLATET(X,d,y,z, 
-                             bootstrap=NULL, post=TRUE, intercept=FALSE, normalize=FALSE)
+                             bootstrap="none", post=TRUE, intercept=TRUE)
 print(pension.latet)
-pension.ate =  rlassoATE(X,d,y,z, 
-                          bootstrap=NULL, post=TRUE, intercept=FALSE, normalize=FALSE)
+pension.ate =  rlassoATE(X,d,y, 
+                          bootstrap="none", post=TRUE, intercept=TRUE)
 print(pension.ate)
-pension.atet =  rlassoATET(X,d,y,z, 
-                            bootstrap=NULL, post=TRUE, intercept=FALSE, normalize=FALSE)
+pension.atet =  rlassoATET(X,d,y, 
+                            bootstrap="none", post=TRUE, intercept=TRUE)
 print(pension.atet)
 @
 
-\section{Some Tipps and Tricks}
+The results are summarized in the following
+
+
+<<summary_pension, include=FALSE>>=
+library(xtable)
+table= matrix(0, 4, 2)
+table[1,]= summary(pension.ate)[,1:2]
+table[2,]= summary(pension.atet)[,1:2]
+table[3,]= summary(pension.late)[,1:2]
+table[4,]= summary(pension.latet)[,1:2]
+colnames(table)= c("Estimate", "Std. Error")
+rownames(table)= c("ATE",  "ATET ", "LATE", "LATET")
+tab= xtable(table, digits=c(2, 2,7))
+@
+
+<<results="asis">>=
+tab
+@
+
+%\section{Some Tipps and Tricks}
 \section{Conclusion}
 
 An introduction to some of the capabilities of the \R package \texttt{hdm}
@@ -746,3 +814,4 @@ and view vignettes from within \R.
 %\bibliographystyle{aea}
 \bibliography{mybib}
 
+\end{document}

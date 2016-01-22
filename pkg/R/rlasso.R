@@ -1,4 +1,4 @@
-globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "select.Z" , "select.X", "aes"))
+globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "select.Z" , "select.X", "aes", "element_blank"))
 
 #' rlasso: Function for Lasso estimation under homoscedastic and heteroskeadstic non-Gaussian
 #' disturbances
@@ -163,7 +163,7 @@ rlasso.fit <- function(x, y, post = TRUE, intercept = TRUE,
       est <- list(coefficients = rep(0, p), intercept.value=intercept.value, index = rep(FALSE, p),
                   lambda = lambda, lambda0 = lambda0, loadings = Ups0, residuals = y -
                     mean(y), sigma = var(y), iter = mm, call = match.call(),
-                  options = list(post = post, intercept = intercept,
+                  options = list(post = post, intercept = intercept, ind.scale=ind, 
                                  control = control, mu = mu, meanx = meanx))
       class(est) <- "rlasso"
       return(est)
@@ -236,7 +236,7 @@ rlasso.fit <- function(x, y, post = TRUE, intercept = TRUE,
     if (sum(ind)==0) {
       intercept.value <- mu - sum(meanx*coefTemp)
     } else {
-      intercept.value <- mu - sum(meanx[-ind]*coefTemp)
+      intercept.value <- mu - sum(meanx*coefTemp) #sum(meanx[-ind]*coefTemp)
     }
   } else {
     intercept.value <- NA
@@ -244,7 +244,7 @@ rlasso.fit <- function(x, y, post = TRUE, intercept = TRUE,
   est <- list(coefficients = coefTemp, intercept.value=intercept.value, index = ind1, lambda = lambda,
               lambda0 = lambda0, loadings = Ups1, residuals = as.vector(e1), sigma = s1,
               iter = mm, call = match.call(), options = list(post = post, intercept = intercept,
-                                                             control = control, penalty = penalty,
+                                                             control = control, penalty = penalty, ind.scale=ind,
                                                              mu = mu, meanx = meanx))
   class(est) <- "rlasso"
   return(est)

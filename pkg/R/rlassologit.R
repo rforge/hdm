@@ -62,7 +62,7 @@
 #' }
 #' @export
 rlassologit <- function(formula, data, post = TRUE, intercept = TRUE,
-                        penalty = list(c = 1.1, gamma =  0.1/log(n)), control = list(threshold = NULL), ...) {
+                        penalty = list(lambda= NULL, c = 1.1, gamma = NULL), control = list(threshold = NULL), ...) {
   cl <- match.call()
   mf <- match.call(expand.dots = FALSE)
   m <- match(c("formula", "data"), names(mf), 0L)
@@ -85,7 +85,7 @@ rlassologit <- function(formula, data, post = TRUE, intercept = TRUE,
 #' @rdname rlassologit
 #' @export
 
-rlassologit.fit <- function(x, y, post=TRUE, intercept=TRUE,  penalty = list(lambda= NULL, c = 1.1, gamma = 0.1/log(n)),
+rlassologit.fit <- function(x, y, post=TRUE, intercept=TRUE,  penalty = list(lambda= NULL, c = 1.1, gamma = NULL),
                            control = list(threshold = NULL),...) {
   n <- dim(x)[1]
   p <- dim(x)[2]
@@ -94,12 +94,14 @@ rlassologit.fit <- function(x, y, post=TRUE, intercept=TRUE,  penalty = list(lam
 
   if (!exists("c", where = penalty)) {
     penalty$c = 1.1
-    message("c in penalty not provided. Set to default 1.1")
   }
 
   if (!exists("gamma", where = penalty)) {
     penalty$gamma = 0.1/log(n)
-    message("gamma in penalty not provided. Set to default 0.1/log(n)")
+  }
+  
+  if (is.null(penalty$gamma)) {
+    penalty$gamma = 0.1/log(n)
   }
 
   if (!is.null(penalty$lambda)) {
@@ -113,8 +115,7 @@ rlassologit.fit <- function(x, y, post=TRUE, intercept=TRUE,  penalty = list(lam
   s0 <- sqrt(var(y))
     # calculation parameters
     xs <- scale(x, center=FALSE, scale=TRUE)
-    log.lasso <- glmnet::glmnet(xs, y, family=c("binomial"), alpha = 1, lambda = lambda[1],
-                        standardize = normalize, intercept = intercept)
+    log.lasso <- glmnet::glmnet(xs, y, family=c("binomial"), alpha = 1, lambda = lambda[1], standardize=TRUE, intercept = intercept)
     coefTemp <- as.vector(log.lasso$beta)
     coefTemp[is.na(coefTemp)] <- 0
     ind1 <- (abs(coefTemp) > 0)
@@ -173,7 +174,7 @@ rlassologit.fit <- function(x, y, post=TRUE, intercept=TRUE,  penalty = list(lam
     coefTemp[abs(coefTemp)<control$threshold] <- 0
     ind1 <- as.vector(ind1)
     names(coefTemp) <- names(ind1) <- colnames(x)
-    est <- list(coefficients=coefTemp, a0=a0, index=ind1, lambda0=lambda0, residuals=e1, sigma=sqrt(var(e1)), call=match.call(), options=list(post=post, intercept=intercept, normalize=normalize, control=control))
+    est <- list(coefficients=coefTemp, a0=a0, index=ind1, lambda0=lambda0, residuals=e1, sigma=sqrt(var(e1)), call=match.call(), options=list(post=post, intercept=intercept, control=control))
     class(est) <- c("rlassologit")
     return(est)
 }

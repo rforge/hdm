@@ -56,8 +56,8 @@ rlassoIVselectZ <- function(x, d, y, z, post=TRUE, ...) {
   Dhat <- cbind(Dhat, x)
   d <- cbind(d,x)
   # calculation coefficients
-  #alpha.hat <- solve(t(Dhat)%*%d)%*%(t(Dhat)%*%y)
-  alpha.hat <- MASS::ginv(t(Dhat)%*%d)%*%(t(Dhat)%*%y)
+  alpha.hat <- solve(t(Dhat)%*%d)%*%(t(Dhat)%*%y)
+  #alpha.hat <- MASS::ginv(t(Dhat)%*%d)%*%(t(Dhat)%*%y)
   # calcualtion of the variance-covariance matrix
   residuals <- y - d%*%alpha.hat
   Omega.hat <- t(Dhat)%*%diag(as.vector(residuals^2))%*%Dhat #  Dhat.e <- Dhat*as.vector(residuals);  Omega.hat <- t(Dhat.e)%*%Dhat.e
@@ -72,7 +72,7 @@ rlassoIVselectZ <- function(x, d, y, z, post=TRUE, ...) {
 
 
 rlassoIVselectZ2 <- function(x, d, y, z, post=TRUE, ...) {
-  
+  browser()
   d <- as.matrix(d)
   if(is.vector(x)) x <-  as.matrix(x)
   kx <- dim(x)[2]
@@ -97,7 +97,7 @@ rlassoIVselectZ2 <- function(x, d, y, z, post=TRUE, ...) {
   }
   TSLS <- solve((t(Md)%*%zt)%*%solve(t(zt)%*%zt)%*%(t(zt)%*%Md))%*%((t(Md)%*%zt)%*%solve(t(zt)%*%zt)%*%(t(zt)%*%My))
   et = My-Md%*%TSLS
-  sTSLS = sqrt((n-1)/(n-kx-1))*hetero_se(zt,et, solve((t(Md)%*%zt)%*%solve(t(zt)%*%zt)%*%(t(zt)%*%Md))%*%((t(Md)%*%zt)%*%solve(t(zt)%*%zt)))[[1]]
+  sTSLS = hetero_se(zt,et, solve((t(Md)%*%zt)%*%solve(t(zt)%*%zt)%*%(t(zt)%*%Md))%*%((t(Md)%*%zt)%*%solve(t(zt)%*%zt)))[[1]]
   res <- list(coefficients=TSLS, se=sTSLS, vcov=sTSLS^2, residuals=et, samplesize=n, call=match.call())
   class(res) <- "rlassoIVselectZ"
   return(res)
