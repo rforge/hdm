@@ -31,7 +31,7 @@ selection on the exogenous variables is required.
 The function returns an element of class \code{rlassoIVselectX}
 }
 \details{
-The implementation is a special casof of Chernozhukov et al. (2015).
+The implementation is a special case of of Chernozhukov et al. (2015).
 The option \code{post=TRUE} conducts post-lasso estimation for the Lasso estimations, i.e. a refit of the
 model with the selected variables. If variables of the exogenous variables in
 \code{x} should be used as instruments, they have to be added to the

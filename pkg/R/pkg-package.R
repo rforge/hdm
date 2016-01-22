@@ -1,14 +1,15 @@
 #' hdm: High-Dimensional Metrics
 #'
-#' This packages implements high-dimensional methods with a focus on
-#' Econometrics.
+#' This packages implements methods for estimation and inference in a high-dimensional setting.
 #'
 #' \tabular{ll}{ Package: \tab hdm\cr Type: \tab Package\cr Version: \tab
-#' 0.1\cr Date: \tab 2015-05-25\cr License: \tab GPL-3\cr } The package
-#' includes functions for fitting a heteroskedastic robust Lasso regression and
+#' 0.1\cr Date: \tab 2015-05-25\cr License: \tab GPL-3\cr } This package provides efficient estimators 
+#' and  uniformly valid confidence intervals for various low-dimensional causal/structural parameters  
+#' appearing in high-dimensional approximately sparse models. The package
+#' includes functions for fitting heteroskedastic robust Lasso regressions with non-Gaussian erros and 
 #' for instrumental variable (IV) and treatment effect estimation in a
 #' high-dimensional setting. Moreover, the methods enable valid post-selection
-#' inference.
+#' inference. Moreover, a theoretically grounded, data-driven choice of the penalty level is provided.
 #'
 #' @name hdm-package
 #' @aliases hdm-package hdm
@@ -16,7 +17,16 @@
 #' @author Victor Chernozhukov, Christian Hansen, Martin Spindler\cr
 #'
 #' Maintainer: Martin Spindler <spindler@@mea.mpisoc.mpg.de>
-#' @references TBD
+#' @references A. Belloni, D. Chen, V. Chernozhukov and C. Hansen (2012).
+#' Sparse models and methods for optimal instruments with an application to
+#' eminent domain. \emph{Econometrica} 80 (6), 2369-2429.
+#' @references A. Belloni, V. Chernozhukov and C. Hansen (2013). Inference for
+#' high-dimensional sparse econometric models. In Advances in Economics and
+#' Econometrics: 10th World Congress, Vol. 3: Econometrics, Cambirdge
+#' University Press: Cambridge, 245-295.
+#' @references A. Belloni, V. Chernozhukov, C. Hansen (2014). Inference on
+#' treatment effects after selection among high-dimensional controls. The
+#' Review of Economic Studies 81(2), 608-650.
 #' @keywords package Lasso Instrumental Variables Endogeneity Microeconometrics
 #' Program Evaluation treatment effects
 NULL
@@ -41,8 +51,8 @@ NULL
 #' @docType data
 #' @format \describe{Dataframe with the following variables:
 #' \item{outcome}{dependent variable: national growth rates in GDP per capita
-#' for the periods 1965-1975 and 1975-1985} \item{x}{covariates which might
-#' influence growth} }
+#' for the periods 1965-1975 and 1975-1985}
+#' \item{x}{covariates which might influence growth}}
 #' @references R.J. Barro, J.W. Lee (1994). Data set for a panel of 139
 #' countries. NBER.
 #'
@@ -64,7 +74,7 @@ NULL
 #' self-employed. The data set was analyzed in Chernozhukov and Hansen (2004)
 #' and Belloni et al. (2014) where further details can be found. They examine
 #' the effects of 401(k) plans on wealth using data from the Survey of Income
-#' and Program Participation. Using 401(k) eligibility as an instrument for
+#' and Program Participation using 401(k) eligibility as an instrument for
 #' 401(k) participation
 #'
 #' @name pension
@@ -134,11 +144,11 @@ NULL
 #'
 #' Dataset on judicial eminent domain decisions.
 #'
-#' Data set was analyzed in Belloni et al. (2012).  They estimate the effect of judicial eminent domain decisions on economic outcomes with instrumental variable (IV) in a setting high a large set of potential IVs. 
+#' Data set was analyzed in Belloni et al. (2012).  They estimate the effect of judicial eminent domain decisions on economic outcomes with instrumental variables (IV) in a setting high a large set of potential IVs. 
 #' A detailed decription of the data can be found at 
 #' \url{https://www.econometricsociety.org/publications/econometrica/2012/11/01/sparse-models-and-methods-optimal-instruments-application} 
 #' The data set contains four "sub-data sets" which differ mainly in the dependent variables: repeat-sales FHFA/OFHEO house price index for metro (FHFA) and non-metro (NM), the Case-Shiller home price index (CS), 
-#' and state-level GDP from the Bureau of Economic Analysis - all transformed with the logarithm. The structure of each subdata set is comparable and given below in the decriptions.
+#' and state-level GDP from the Bureau of Economic Analysis - all transformed with the logarithm. The structure of each subdata set is comparable and given above.
 #'
 #' @name EminentDomain
 #' @docType data

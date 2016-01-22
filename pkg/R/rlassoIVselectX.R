@@ -5,7 +5,7 @@
 #' selection on the exogenous variables is required.
 #' The function returns an element of class \code{rlassoIVselectX}
 #'
-#' The implementation is a special casof of Chernozhukov et al. (2015).
+#' The implementation is a special case of of Chernozhukov et al. (2015).
 #' The option \code{post=TRUE} conducts post-lasso estimation for the Lasso estimations, i.e. a refit of the
 #' model with the selected variables. If variables of the exogenous variables in
 #' \code{x} should be used as instruments, they have to be added to the
@@ -60,7 +60,7 @@ rlassoIVselectX <- function(x,d,y,z, post=TRUE, ...) {
 
 #' Methods for S3 object \code{rlassoIVselectX}
 #'
-#' Objects of class \code{rlassoIVselectX} are constructed by \code{rlassoIVselectX.formula} or \code{rlassoIVselectX.default}.
+#' Objects of class \code{rlassoIVselectX} are constructed by \code{rlassoIVselectX}. 
 #' \code{print.rlassoIVselectX} prints and displays some information about fitted \code{rlassoIVselectX} objects.
 #' \code{summary.rlassoIVselectX} summarizes information of a fitted \code{rlassoIVselectX} object.
 #' \code{confint.rlassoIVselectX} extracts the confidence intervals.

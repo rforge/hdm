@@ -51,7 +51,7 @@ Functions return an object of class \code{rlassoTE} with estimated effects, stan
 individual effects in the form of a \code{list}.
 }
 \description{
-The functions estimate the average treatment effect (ATE), the ATE of the tretated (ATET), the local average treatment effects (LATE) and the LATE of
+This class of functions estimates the average treatment effect (ATE), the ATE of the tretated (ATET), the local average treatment effects (LATE) and the LATE of
 the tretated (LATET). The estimation methods rely on immunized / orthogonal moment
 conditions which guarantee valid post-selection inference in a high-dimensional setting. Further details can be found in Belloni et al. (2014).
 }

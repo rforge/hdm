@@ -11,14 +11,15 @@ globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "sele
 #' The function estimates the coefficients of a Lasso regression with
 #' data-driven penalty under homoscedasticity / heteroscedasticity and non-Gaussian noise. The options \code{homoscedastic} is a logical with \code{FALSE} by default.
 #' Moreover, for the calculation of the penalty parameter it can be chosen, if the penalization parameter depends on the  design matrix (\code{X.dependent.lambda=TRUE}) or \code{independent} (default, \code{X.dependent.lambda=FALSE}).
-#' A \emph{special} option is to set \code{homoscedastic} to \code{none} and to supply a values \code{lambda.start}. Then this value is used as penalty parameter with independent design and heteroscedastic errors to weight the regressors.
+#' The default value of the constant \code{c} is \code{1.1} in the post-Lasso case and \code{0.5} in the Lasso case. 
+# #' A \emph{special} option is to set \code{homoscedastic} to \code{none} and to supply a values \code{lambda.start}. Then this value is used as penalty parameter with independent design and heteroscedastic errors to weight the regressors.
 #' For details of the
 #' implementation of the Algorithm for estimation of the data-driven penalty,
 #' in particular the regressor-independent loadings, we refer to Appendix A in
-#' Belloni et al.~(2012). When the option "none" is chosen (together with
+#' Belloni et al.~(2012). When the option "none" is chosen for \code{homoscedastic} (together with
 #' \code{lambda.start}), lambda is set to \code{lambda.start} and the
 #' regressor-independent loadings und heteroscedasticity are used. The options "X-dependent" and
-#' "X-independent" under homoscedasticity are described in Belloni et al.~(2013). 
+#' "X-independent" under homoscedasticity are described in Belloni et al. (2013). 
 #' \code{lambda.start} can be component-specific. When used with one of the
 #' other option, the values are used as starting values.
 #'
@@ -33,16 +34,16 @@ globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "sele
 #' by as.data.frame to a data frame) containing the variables in the model. If
 #' not found in data, the variables are taken from environment(formula),
 #' typically the environment from which \code{rlasso} is called.
-#' @param post logical. If \code{TRUE}, post-lasso estimation is conducted.
+#' @param post logical. If \code{TRUE}, post-Lasso estimation is conducted.
 #' @param intercept logical. If \code{TRUE}, intercept is included which is not
 #' penalized.
 #' @param penalty list with options for the calculation of the penalty. 
 #' \itemize{
-#' \item{\code{c} and \code{gama}}{constants for the penalty with default \code{c=1.1} and \code{gamma=0.1}}
-#' \item{\code{homoscedastic}}{logical, if homoscedastic errors are considered (default \code{FALSE}). Option \code{none} is described below.}
-#' \item{\code{X.dependent.lambda}}{logical,  \code{TRUE}, if the penalization parameter depends on the the design of the matrix \code{x}. \code{FALSE}, if independent of the design matrix  (default).}
-#' \item{\code{numSim}}{number of simulations for the dependent methods, default=5000}
-#' \item{\code{lambda.start}}{initial penalization value, compulsory for method "none"}
+#' \item{\code{c} and \code{gamma}}{ constants for the penalty with default \code{c=1.1} and \code{gamma=0.1}}
+#' \item{\code{homoscedastic}}{ logical, if homoscedastic errors are considered (default \code{FALSE}). Option \code{none} is described below.}
+#' \item{\code{X.dependent.lambda}}{ logical,  \code{TRUE}, if the penalization parameter depends on the the design of the matrix \code{x}. \code{FALSE}, if independent of the design matrix  (default).}
+#' \item{\code{numSim}}{ number of simulations for the dependent methods, default=5000}
+#' \item{\code{lambda.start}}{ initial penalization value, compulsory for method "none"}
 #' }
 #' @param control list with control values.
 #' \code{numIter} number of iterations for the algorithm for
@@ -51,7 +52,7 @@ globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "sele
 #'\code{threshold} is applied to the final estimated lasso
 #' coefficients. Absolute values below the threshold are set to zero.
 #' @param ... further arguments (only for consistent defintion of methods)
-#' @return \code{rlasso} returns an object of class \code{rlasso} An object of
+#' @return \code{rlasso} returns an object of class \code{rlasso}. An object of
 #' class "rlasso" is a list containing at least the following components:
 #' \item{coefficients}{parameter estimates (named vector of coefficients without intercept)}
 #' \item{intercept.value}{value of the intercept}
@@ -269,14 +270,14 @@ rlasso.fit <- function(x, y, post = TRUE, intercept = TRUE,
 
 #' Function for Calculation of the penalty parameter
 #'
-#' This function implements different methods for calculation of the parameter lambda. Further details can be found under \link{rlasso}.
+#' This function implements different methods for calculation of the penalization parameter \eqn{\lambda}. Further details can be found under \link{rlasso}.
 #'
 #' @param penalty list with options for the calculation of the penalty. 
 #' \itemize{
 #' \item{\code{c} and \code{gamma}}{ constants for the penalty with default \code{c=1.1} and \code{gamma=0.1}}
 #' \item{\code{homoscedastic}}{ logical, if homoscedastic errors are considered (default \code{FALSE}). Option \code{none} is described below.}
-#' \item{\code{X.dependent.lambda}}{ if \code{independent} or \code{dependent} design matrix \code{X}}
-#' \item{\code{numSim}}{ number of simulations for the dependent methods}
+#' \item{\code{X.dependent.lambda}}{ if \code{independent} or \code{dependent} design matrix \code{X} is assumed for calculation of the parameter \eqn{\lambda}}
+#' \item{\code{numSim}}{ number of simulations for the X-dependent methods}
 #' \item{\code{lambda.start}}{ initial penalization value, compulsory for method "none"}
 #' }
 #' @param x matrix of regressor variables
@@ -550,42 +551,7 @@ predict.rlasso <- function (object, newdata = NULL, ...){
   return(yhat)
 }
 
-# predict.rlasso <- function (object, newdata = NULL, ...)
-# {
-#   if (missing(newdata) || is.null(newdata)) {
-#     X <- model.matrix(object)
-#   }
-#   else {
-#     if (object$call[[1]]=="lasso.formula") {
-#       f <- as.formula(object$call[[2]])
-#       X <- model.matrix(f,newdata)[,-1]
-#     } else {
-#     X <- as.matrix(newdata)
-#     }
-#   }
-#
-#   n <- length(object$residuals)
-#   beta <- object$coefficients
-#   #if (object$options[["intercept"]]) {
-#   #  if (is.null(object$options$mu))  object$options$mu <-0
-#   #  if (is.null(object$options$meanx))  object$options$meanx <-0
-#   #  yhat <- X %*% beta + object$options$mu - sum(object$options$meanx *
-#   #                                                 beta)
-#   #}
-#   if(sum(object$options$ind.scale)!=0) {
-#     X <- X[,-object$options$ind.scale]
-#   }
-#
-#   if (object$options[["intercept"]]) {
-#     yhat <- X %*% beta + object$intercept.value
-#   }
-#   if (!object$options[["intercept"]]) {
-#     yhat <- X %*% beta
-#   }
-#   return(yhat)
-# }
 
-#######################
 
 
 

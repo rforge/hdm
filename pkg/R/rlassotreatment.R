@@ -7,7 +7,7 @@
 
 #' Functions for estimation of treatment effects
 #'
-#' The functions estimate the average treatment effect (ATE), the ATE of the tretated (ATET), the local average treatment effects (LATE) and the LATE of
+#' This class of functions estimates the average treatment effect (ATE), the ATE of the tretated (ATET), the local average treatment effects (LATE) and the LATE of
 #' the tretated (LATET). The estimation methods rely on immunized / orthogonal moment
 #' conditions which guarantee valid post-selection inference in a high-dimensional setting. Further details can be found in Belloni et al. (2014).
 #'
@@ -213,8 +213,8 @@ rlassoLATET <- function(x, d, y, z, bootstrap = "none", nRep = 500, post = TRUE,
 #' \code{print.rlassoTE} prints and displays some information about fitted \code{rlassoTE} objects.
 #' \code{summary.rlassoTE} summarizes information of a fitted \code{rlassoTE} object.
 #' \code{confint.rlassoTE} extracts the confidence intervals.
-#' @param object An object of class \code{rlassoTE}
-#' @param x An object of class \code{rlassoTE}
+#' @param object an object of class \code{rlassoTE}
+#' @param x an object of class \code{rlassoTE}
 #' @param digits number of significant digits in printout
 #' @param ... arguments passed to the print function and other methods
 #' @param parm a specification of which parameters are to be given confidence intervals, either a vector of numbers or a vector of names. If missing, all parameters are considered.

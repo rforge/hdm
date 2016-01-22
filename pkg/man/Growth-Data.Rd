@@ -10,8 +10,8 @@
 \title{Growth data set}
 \format{\describe{Dataframe with the following variables:
 \item{outcome}{dependent variable: national growth rates in GDP per capita
-for the periods 1965-1975 and 1975-1985} \item{x}{covariates which might
-influence growth} }}
+for the periods 1965-1975 and 1975-1985}
+\item{x}{covariates which might influence growth}}}
 \source{
 The full data set and further details can be found at
 \url{http://www.nber.org/pub/barro.lee}, \url{http://www.barrolee.com}, and,

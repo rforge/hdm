@@ -20,7 +20,7 @@ treatments}
 \item{index}{vector of integers, logicals or variables names indicating the position (column) of
 variables (integer case), logical vector of length of the variables (TRUE or FALSE) or the variable names of \code{x} which should be used for inference / as treatment variables.}
 
-\item{method}{meethod for inference, either 'partialling out' or 'double selection'.}
+\item{method}{method for inference, either 'partialling out' or 'double selection'.}
 
 \item{I3}{For the 'double selection'-method the logical vector \code{I3} has same length as the number of variables in \code{x};
 indicates if variables (TRUE) should be included in any case to the model and they are exempt from selection. These variables should not be included in the \code{index}; hence the intersection with \code{index} must be the empty set.
@@ -44,11 +44,11 @@ Estimation and inference of selected (low-dimensional) coefficients in a high-di
 The functions estimates selected (low-dimensional) coefficients in a high-dimensional linear model.
 An application is e.g. estimation of a treatment effect \eqn{\alpha_0} in a
 setting of high-dimensional controls. The user can choose between the so-called post-double-selection method and partialling-out.
-The idea of the double selection method is to select variables by regression of
+The idea of the double selection method is to select variables by Lasso regression of
 the outcome variable on the control variables and the treatment variable on
 the control variables. The final estimation is done by a regression of the
 outcome on the treatment effect and the union of the selected variables in
-the first two steps. In partialling-out first the effect of the regressors on the outcome and the treatment variable is taken out and then a regression of the residuals is conducted. The resulting estimator for \eqn{\alpha_0} is normal
+the first two steps. In partialling-out first the effect of the regressors on the outcome and the treatment variable is taken out by Lasso and then a regression of the residuals is conducted. The resulting estimator for \eqn{\alpha_0} is normal
 distributed which allows inference on the treatment effect. It presents a wrap function for \code{rlassoEffect}
 which does inference for a single variable.
 }

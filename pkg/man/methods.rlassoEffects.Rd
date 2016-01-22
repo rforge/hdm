@@ -17,7 +17,7 @@
   xlim = NULL, ...)
 }
 \arguments{
-\item{x}{An object of class \code{rlassoEffects}}
+\item{x}{an object of class \code{rlassoEffects}}
 
 \item{digits}{significant digits in printout}
 

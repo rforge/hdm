@@ -33,7 +33,7 @@ instruments to estimate the parameter vector. The function returns an element of
 }
 \details{
 The implementation follows the procedure described in Belloni et al. (2012).
-option \code{post=TRUE} conducts post-lasso estimation, i.e. a refit of the
+Option \code{post=TRUE} conducts post-lasso estimation, i.e. a refit of the
 model with the selected variables, to estimate the optimal instruments. The
 parameter vector of the structural equation is then fitted by two-stage
 least square (tsls) estimation. If variables of the exogenous variables in

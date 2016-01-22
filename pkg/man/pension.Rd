@@ -40,7 +40,7 @@ included in the sample if at least one person is employed and no one is
 self-employed. The data set was analyzed in Chernozhukov and Hansen (2004)
 and Belloni et al. (2014) where further details can be found. They examine
 the effects of 401(k) plans on wealth using data from the Survey of Income
-and Program Participation. Using 401(k) eligibility as an instrument for
+and Program Participation using 401(k) eligibility as an instrument for
 401(k) participation
 }
 \examples{

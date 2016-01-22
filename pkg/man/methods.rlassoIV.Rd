@@ -15,7 +15,7 @@
 \method{confint}{rlassoIV}(object, parm, level = 0.95, ...)
 }
 \arguments{
-\item{x}{An object of class \code{rlassoIV}}
+\item{x}{an object of class \code{rlassoIV}}
 
 \item{digits}{significant digits in printout}
 

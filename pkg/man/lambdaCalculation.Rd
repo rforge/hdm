@@ -12,8 +12,8 @@ lambdaCalculation(penalty = list(homoscedastic = FALSE, X.dependent.lambda =
 \itemize{
 \item{\code{c} and \code{gamma}}{ constants for the penalty with default \code{c=1.1} and \code{gamma=0.1}}
 \item{\code{homoscedastic}}{ logical, if homoscedastic errors are considered (default \code{FALSE}). Option \code{none} is described below.}
-\item{\code{X.dependent.lambda}}{ if \code{independent} or \code{dependent} design matrix \code{X}}
-\item{\code{numSim}}{ number of simulations for the dependent methods}
+\item{\code{X.dependent.lambda}}{ if \code{independent} or \code{dependent} design matrix \code{X} is assumed for calculation of the parameter \eqn{\lambda}}
+\item{\code{numSim}}{ number of simulations for the X-dependent methods}
 \item{\code{lambda.start}}{ initial penalization value, compulsory for method "none"}
 }}
 
@@ -26,6 +26,6 @@ The functions returns a list with the penalty \code{lambda} which is the product
 denotes either the variance (\code{independent} case) or the data-dependent loadings for the regressors. \code{method} gives the selected method for the calculation.
 }
 \description{
-This function implements different methods for calculation of the parameter lambda. Further details can be found under \link{rlasso}.
+This function implements different methods for calculation of the penalization parameter \eqn{\lambda}. Further details can be found under \link{rlasso}.
 }
 

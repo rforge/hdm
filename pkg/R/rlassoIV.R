@@ -179,12 +179,12 @@ rlassoIVmult <- function(x, d, y, z, select.Z = TRUE, select.X = TRUE,
 
 #' Methods for S3 object \code{rlassoIV}
 #'
-#' Objects of class \code{rlassoIV} are constructed by \code{rlassoIV}.
+#' Objects of class \code{rlassoIV} are constructed by \code{rlassoIV}. 
 #' \code{print.rlassoIV} prints and displays some information about fitted \code{rlassoIV} objects.
 #' \code{summary.rlassoIV} summarizes information of a fitted \code{rlassoIV} object.
 #' \code{confint.rlassoIV} extracts the confidence intervals.
 #' @param object An object of class \code{rlassoIV}
-#' @param x An object of class \code{rlassoIV}
+#' @param x an object of class \code{rlassoIV}
 #' @param digits significant digits in printout
 #' @param ... arguments passed to the print function and other methods
 #' @param parm a specification of which parameters are to be given confidence intervals, either a vector of numbers or a vector of names. If missing, all parameters are considered.

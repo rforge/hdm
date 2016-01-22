@@ -38,7 +38,7 @@ coefficients. Absolute values below the threshold are set to zero.}
 }
 \value{
 \code{rlassologit} returns an object of class
-\code{rlassologit} An object of class \code{rlassologit} is a list
+\code{rlassologit}. An object of class \code{rlassologit} is a list
 containing at least the following components: \item{coefficients}{parameter
 estimates (without intercept)} \item{a0}{value of intercept} \item{index}{index of selected variables (logicals)}
 \item{lambda}{penalty term}

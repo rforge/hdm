@@ -24,7 +24,7 @@
 #' coefficients. Absolute values below the threshold are set to zero.
 #' @param ... further parameters passed to glmnet
 #' @return \code{rlassologit} returns an object of class
-#' \code{rlassologit} An object of class \code{rlassologit} is a list
+#' \code{rlassologit}. An object of class \code{rlassologit} is a list
 #' containing at least the following components: \item{coefficients}{parameter
 #' estimates (without intercept)} \item{a0}{value of intercept} \item{index}{index of selected variables (logicals)}
 #' \item{lambda}{penalty term}
@@ -95,7 +95,11 @@ rlassologit.fit <- function(x, y, post = TRUE, intercept = TRUE, penalty = list(
   ind.names <- 1:p
   
   if (!exists("c", where = penalty)) {
-    penalty$c = 1.1
+    if (post==TRUE) {
+      penalty$c = 1.1
+    } else {
+      penalty$c = 0.5
+    }
   }
   
   if (!exists("gamma", where = penalty)) {

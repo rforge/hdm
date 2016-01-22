@@ -17,13 +17,13 @@
   joint = FALSE, ...)
 }
 \arguments{
-\item{x}{An object of class \code{rlassologitEffects}}
+\item{x}{an object of class \code{rlassologitEffects}}
 
 \item{digits}{number of significant digits in printout}
 
 \item{...}{arguments passed to the print function and other methods}
 
-\item{object}{An object of class \code{rlassologitEffects}}
+\item{object}{an object of class \code{rlassologitEffects}}
 
 \item{parm}{a specification of which parameters are to be given confidence intervals, either a vector of numbers or a vector of names. If missing, all parameters are considered.}
 
