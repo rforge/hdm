@@ -13,5 +13,6 @@ Imports: MASS,
     ggplot2,
     checkmate
 Suggests: testthat,
-    knitr
+    knitr,
+    xtable
 VignetteBuilder: knitr

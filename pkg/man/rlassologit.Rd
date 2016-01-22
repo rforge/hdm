@@ -13,7 +13,7 @@ rlassologit.fit(x, y, post = TRUE, intercept = TRUE, penalty = list(lambda
   = NULL, c = 1.1, gamma = NULL), control = list(threshold = NULL), ...)
 }
 \arguments{
-\item{formula}{an object of class "formula" (or one that can be coerced to
+\item{formula}{an object of class 'formula' (or one that can be coerced to
 that class): a symbolic description of the model to be fitted in the form
 \code{y~x}}
 
@@ -79,7 +79,7 @@ for(i in 1:n){
  ## methods
 summary(rlassologit.reg, all=F)
 print(rlassologit.reg)
-predict(rlassologit.reg, type="response")
+predict(rlassologit.reg, type='response')
 X3 <- matrix(rnorm(n*p), ncol=p)
 predict(rlassologit.reg, newdata=X3)
 }

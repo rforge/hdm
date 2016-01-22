@@ -135,7 +135,21 @@ rlasso.fit <- function(x, y, post = TRUE, intercept = TRUE,
   }
   
   normx <- sqrt(apply(x, 2, var))
-  ind <- which(normx < eps) #TBD: check for those variables
+  ind <- rep(FALSE, p) #
+  
+  # variables with low variation are taken out, because normalization is not reliable
+  #ind <- which(normx < eps)
+  #if (length(ind) != 0) {
+  #  x <- x[, -ind]
+  #  normx <- normx[-ind]
+  #  ind.names <- ind.names[-ind]
+  #  p <- dim(x)[2]
+  #  if (!is.null(penalty$lambda.start)) {
+  #    penalty$lambda.start <- penalty$lambda.start[-ind]
+  #  }
+  #}
+  
+  #
   
   XX <- crossprod(x)
   Xy <- crossprod(x, y)

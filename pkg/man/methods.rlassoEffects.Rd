@@ -27,7 +27,7 @@
 
 \item{parm}{a specification of which parameters are to be given confidence intervals among the variables for which inference was done, either a vector of numbers or a vector of names. If missing, all parameters are considered.}
 
-\item{level}{the confidence level required}
+\item{level}{confidence level required}
 
 \item{joint}{logical, if \code{TRUE} joint confidence intervals are calculated.}
 

@@ -20,9 +20,9 @@ treatments}
 \item{index}{vector of integers, logicals or variables names indicating the position (column) of
 variables (integer case), logical vector of length of the variables (TRUE or FALSE) or the variable names of \code{x} which should be used for inference / as treatment variables.}
 
-\item{method}{meethod for inference, either "partialling out" or "double selection".}
+\item{method}{meethod for inference, either 'partialling out' or 'double selection'.}
 
-\item{I3}{For the "double selection"-method the logical vector \code{I3} has same length as the number of variables in \code{x};
+\item{I3}{For the 'double selection'-method the logical vector \code{I3} has same length as the number of variables in \code{x};
 indicates if variables (TRUE) should be included in any case to the model and they are exempt from selection. These variables should not be included in the \code{index}; hence the intersection with \code{index} must be the empty set.
 In the case of partialling out it is ignored.}
 

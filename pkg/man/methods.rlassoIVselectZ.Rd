@@ -26,7 +26,7 @@
 
 \item{parm}{a specification of which parameters are to be given confidence intervals, either a vector of numbers or a vector of names. If missing, all parameters are considered.}
 
-\item{level}{the confidence level required.}
+\item{level}{confidence level required.}
 }
 \description{
 Objects of class \code{rlassoIVselectZ} are constructed by \code{rlassoIVselectZ.formula} or \code{rlassoIVselectZ.default}.

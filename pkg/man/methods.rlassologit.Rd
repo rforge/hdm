@@ -24,7 +24,7 @@
 
 \item{newdata}{new data set for prediction}
 
-\item{type}{the type of prediction required. The default ("response) is on the scale of the response variable; the alternative "link" is on the scale of the linear predictors.}
+\item{type}{the type of prediction required. The default ('response) is on the scale of the response variable; the alternative 'link' is on the scale of the linear predictors.}
 
 \item{...}{arguments passed to the print function and other methods}
 

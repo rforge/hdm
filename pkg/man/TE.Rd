@@ -32,8 +32,8 @@ rlassoLATET(x, d, y, z, bootstrap = "none", nRep = 500, post = TRUE,
 
 \item{y}{outcome variable / dependent variable}
 
-\item{bootstrap}{boostrap method which should be employed: "none", "Bayes",
-"normal", "wild"}
+\item{bootstrap}{boostrap method which should be employed: 'none', 'Bayes',
+'normal', 'wild'}
 
 \item{nRep}{number of replications for the bootstrap}
 

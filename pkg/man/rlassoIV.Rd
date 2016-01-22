@@ -38,7 +38,7 @@ controls and very many instruments (even larger than the sample size).
 }
 \details{
 The implementation follows the procedure described in Chernozhukov et al.
-(2015) and is built on "triple selection" to achieve an orthogonal moment
+(2015) and is built on 'triple selection' to achieve an orthogonal moment
 function. The function returns an object of S3 class \code{rlassoIV}.
 Moreover, it is wrap function for the case that selection should be done only with the instruments Z (\code{rlassoIVselectZ}) or with
 the control variables X (\code{rlassoIVselectX}) or without selection (\code{tsls}).

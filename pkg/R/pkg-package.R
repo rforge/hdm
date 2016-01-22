@@ -102,32 +102,6 @@ NULL
 #' data(pension)
 NULL
 
-
-
-
-
-#' Riboflavin data set
-#'
-#' Dataset of riboflavin production by Bacillus subtilis containing \eqn{n=71}
-#' observations of \eqn{p=4088} predictors (gene expressions) and a
-#' one-dimensional response (riboflavin production).
-#'
-#' Data was made available by DSM (Switzerland). The data set was introduced in
-#' Buehlmann et al. (2014).
-#'
-#' @name riboflavin
-#' @docType data
-#' @format \describe{ \item{y}{Log-transformed riboflavin production rate
-#' (original name: q_RIBFLV).} \item{x}{(Co-)variables measuring the logarithm
-#' of the expression level of 4088 genes.} }
-#' @references P. Buehlmann, M. Kalisch, L- Meier (2014). High-dimensional
-#' statistics with a view towards applications in biology. Annual Review of
-#' Statistics and its Applications Vol. 1, 255--278.
-#' @keywords datasets
-#' @examples
-#' data(riboflavin)
-NULL
-
 #' AJR data set
 #'
 #' Dataset on settler mortality.

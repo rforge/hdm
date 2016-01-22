@@ -1,4 +1,3 @@
-
 #' Instrumental Variable Estimation with Selection on the exogenous Variables by Lasso   
 #'
 #'

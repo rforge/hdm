@@ -18,8 +18,8 @@
 #' @param y outcome variable (vector or matrix)
 #' @param index vector of integers, logicals or variables names indicating the position (column) of
 #' variables (integer case), logical vector of length of the variables (TRUE or FALSE) or the variable names of \code{x} which should be used for inference / as treatment variables.
-#' @param method meethod for inference, either "partialling out" or "double selection". 
-#' @param I3 For the "double selection"-method the logical vector \code{I3} has same length as the number of variables in \code{x};
+#' @param method meethod for inference, either 'partialling out' or 'double selection'. 
+#' @param I3 For the 'double selection'-method the logical vector \code{I3} has same length as the number of variables in \code{x};
 #' indicates if variables (TRUE) should be included in any case to the model and they are exempt from selection. These variables should not be included in the \code{index}; hence the intersection with \code{index} must be the empty set.
 #' In the case of partialling out it is ignored.
 #' @param post logical, if post Lasso is conducted with default \code{TRUE}.
@@ -48,73 +48,76 @@
 #' ## methods
 #' summary(rlassoEffects.reg)
 #' confint(rlassoEffects.reg, level=0.9)
-rlassoEffects <- function(x, y, index=c(1:ncol(x)), method="double selection" , I3=NULL, post=TRUE, ...) {
+rlassoEffects <- function(x, y, index = c(1:ncol(x)), method = "double selection", 
+                          I3 = NULL, post = TRUE, ...) {
   
   checkmate::checkChoice(method, c("partialling out", "double selection"))
   
-  if(is.logical(index)){
+  if (is.logical(index)) {
     k <- p1 <- sum(index)
   } else {
     k <- p1 <- length(index)
   }
   n <- dim(x)[1]
   x <- as.matrix(x)
-  # preprocessing index
-  # numerischer Vektor
-  if (is.numeric(index)){
+  # preprocessing index numerischer Vektor
+  if (is.numeric(index)) {
     index <- as.integer(index)
-    stopifnot(all(index<=ncol(x)) && length(index)<=ncol(x))
+    stopifnot(all(index <= ncol(x)) && length(index) <= ncol(x))
   } else {
     # logical Vektor
-    if (is.logical(index)){
-      stopifnot(length(index)==ncol(x))
-      index <- which(index==T)
+    if (is.logical(index)) {
+      stopifnot(length(index) == ncol(x))
+      index <- which(index == T)
     } else {
       # character Vektor
-      if(is.character(index)){
-        stopifnot(all(is.element(index,colnames(x))))
-        index <- which(is.element(colnames(x),index))
+      if (is.character(index)) {
+        stopifnot(all(is.element(index, colnames(x))))
+        index <- which(is.element(colnames(x), index))
       } else {
         stop("argument index has an invalid type")
       }
     }
   }
-  if (method=="double selection") {
+  if (method == "double selection") {
     # check validity of I3
-    I3ind <- which(I3==T)
-    if (length(intersect(index, I3ind)!=0)) stop("I3 and index must not overlap!")
+    I3ind <- which(I3 == T)
+    if (length(intersect(index, I3ind) != 0)) 
+      stop("I3 and index must not overlap!")
   }
   
-  if (is.null(colnames(x))) colnames(x) <- paste("V", 1:dim(x)[2], sep="")
-  coefficients <- as.vector(rep(NA_real_,k))
-  se <-  rep(NA_real_,k)
-  t <-  rep(NA_real_,k)
-  pval <-  rep(NA_real_,k)
+  if (is.null(colnames(x))) 
+    colnames(x) <- paste("V", 1:dim(x)[2], sep = "")
+  coefficients <- as.vector(rep(NA_real_, k))
+  se <- rep(NA_real_, k)
+  t <- rep(NA_real_, k)
+  pval <- rep(NA_real_, k)
   lasso.regs <- vector("list", k)
-  reside <- matrix(NA, nrow=n, ncol=p1)
-  residv <- matrix(NA, nrow=n, ncol=p1)
-  names(coefficients) <- names(se) <- names(t) <- names(pval) <- names(lasso.regs) <- colnames(reside) <- colnames(residv) <-colnames(x)[index]
+  reside <- matrix(NA, nrow = n, ncol = p1)
+  residv <- matrix(NA, nrow = n, ncol = p1)
+  names(coefficients) <- names(se) <- names(t) <- names(pval) <- names(lasso.regs) <- colnames(reside) <- colnames(residv) <- colnames(x)[index]
   
-  for (i in 1:k)
-  {
-    d <- x[,index[i], drop=FALSE]
-    Xt <- x[,-index[i], drop=FALSE]
+  for (i in 1:k) {
+    d <- x[, index[i], drop = FALSE]
+    Xt <- x[, -index[i], drop = FALSE]
     
-    lasso.regs[[i]] <- try(col <- rlassoEffect(Xt,y,d, method=method, I3=I3, post=post, ...))
-    if(class(lasso.regs[[i]]) == "try-error") {
+    lasso.regs[[i]] <- try(col <- rlassoEffect(Xt, y, d, method = method, 
+                                               I3 = I3, post = post, ...))
+    if (class(lasso.regs[[i]]) == "try-error") {
       next
-    }
-    else {
+    } else {
       coefficients[i] <- col$alpha
       se[i] <- col$se
       t[i] <- col$t
       pval[i] <- col$pval
-      reside[,i] <- col$residuals$epsilon
-      residv[,i] <- col$residuals$v
+      reside[, i] <- col$residuals$epsilon
+      residv[, i] <- col$residuals$v
     }
   }
-  residuals <- list(e=reside, v=residv)
-  res <- list(coefficients=coefficients, se=se, t=t, pval=pval, lasso.regs=lasso.regs, index=index, call=match.call(), samplesize=n, residuals=residuals)
+  residuals <- list(e = reside, v = residv)
+  res <- list(coefficients = coefficients, se = se, t = t, pval = pval, 
+              lasso.regs = lasso.regs, index = index, call = match.call(), samplesize = n, 
+              residuals = residuals)
   class(res) <- "rlassoEffects"
   return(res)
 }
@@ -122,65 +125,82 @@ rlassoEffects <- function(x, y, index=c(1:ncol(x)), method="double selection" , 
 #' @rdname rlassoEffects
 #' @param d variable for which inference is conducted (treatment variable)
 #' @export
-rlassoEffect <- function(x, y, d, method="double selection", I3=NULL,  post=TRUE, ...) {
-  d <- as.matrix(d, ncol=1)
-  y <- as.matrix(y, ncol=1)
+rlassoEffect <- function(x, y, d, method = "double selection", I3 = NULL, 
+                         post = TRUE, ...) {
+  d <- as.matrix(d, ncol = 1)
+  y <- as.matrix(y, ncol = 1)
   kx <- dim(x)[2]
-  if (is.null(colnames(d))) colnames(d) <- "d1"
-  if (is.null(colnames(x)) & !is.null(x)) colnames(x) <- paste("x", 1:kx, sep="")
-  if (method=="double selection") {
-    I1 <- rlasso(d ~ x, post=post, ...)$index
-    I2 <- rlasso(y ~ x, post=post, ...)$index
+  if (is.null(colnames(d))) 
+    colnames(d) <- "d1"
+  if (is.null(colnames(x)) & !is.null(x)) 
+    colnames(x) <- paste("x", 1:kx, sep = "")
+  if (method == "double selection") {
+    I1 <- rlasso(d ~ x, post = post, ...)$index
+    I2 <- rlasso(y ~ x, post = post, ...)$index
     n <- dim(x)[1]
     
     if (is.logical(I3)) {
-      I <- I1+I2+I3
+      I <- I1 + I2 + I3
       I <- as.logical(I)
     } else {
-      I <- I1+I2
+      I <- I1 + I2
       I <- as.logical(I)
     }
-    if (sum(I)==0) {I <- NULL}
-    x <- cbind(d,x[,I, drop=FALSE])
-    reg1 <- lm(y~x)
+    if (sum(I) == 0) {
+      I <- NULL
+    }
+    x <- cbind(d, x[, I, drop = FALSE])
+    reg1 <- lm(y ~ x)
     alpha <- coef(reg1)[2]
-    xi<-reg1$residuals*sqrt(n/(n-sum(I)-1))
-    if(is.null(I)) {reg2 <- lm(d~1)}
-    if(!is.null(I)) {reg2 <- lm(d~x[,-1, drop=FALSE])}
+    xi <- reg1$residuals * sqrt(n/(n - sum(I) - 1))
+    if (is.null(I)) {
+      reg2 <- lm(d ~ 1)
+    }
+    if (!is.null(I)) {
+      reg2 <- lm(d ~ x[, -1, drop = FALSE])
+    }
     v <- reg2$residuals
-    var <- 1/n*1/mean(v^2)*mean(v^2*xi^2)*1/mean(v^2)
+    var <- 1/n * 1/mean(v^2) * mean(v^2 * xi^2) * 1/mean(v^2)
     se <- sqrt(var)
     tval <- alpha/sqrt(var)
-    pval <- 2*pnorm(-abs(tval))
+    pval <- 2 * pnorm(-abs(tval))
     if (is.null(I)) {
       no.selected <- 1
     } else {
       no.selected <- 0
     }
-    res <- list(epsilon = xi, v=v)
-    #results <- list(alpha=unname(alpha), se=drop(se), t=unname(tval), pval=unname(pval), no.selected=no.selected, coefficients=unname(alpha),  coefficient=unname(alpha), coefficients.reg=coef(reg1), residuals=res, call=match.call(), samplesize=n)
-    results <- list(alpha=alpha, se=drop(se), t=tval, pval=pval, no.selected=no.selected, coefficients=alpha,  coefficient=alpha, coefficients.reg=coef(reg1), residuals=res, call=match.call(), samplesize=n)
-    }
+    res <- list(epsilon = xi, v = v)
+    # results <- list(alpha=unname(alpha), se=drop(se), t=unname(tval),
+    # pval=unname(pval), no.selected=no.selected,
+    # coefficients=unname(alpha), coefficient=unname(alpha),
+    # coefficients.reg=coef(reg1), residuals=res, call=match.call(),
+    # samplesize=n)
+    results <- list(alpha = alpha, se = drop(se), t = tval, pval = pval, 
+                    no.selected = no.selected, coefficients = alpha, coefficient = alpha, 
+                    coefficients.reg = coef(reg1), residuals = res, call = match.call(), 
+                    samplesize = n)
+  }
   
-  if (method=="partialling out") {
-    yr <- rlasso(y~x, post=post, ...)$residuals
-    dr <- rlasso(d~x, post=post, ...)$residuals
+  if (method == "partialling out") {
+    yr <- rlasso(y ~ x, post = post, ...)$residuals
+    dr <- rlasso(d ~ x, post = post, ...)$residuals
     reg1 <- lm(yr ~ dr)
     alpha <- coef(reg1)[2]
-    var <- vcov(reg1)[2,2]
+    var <- vcov(reg1)[2, 2]
     se <- sqrt(var)
     tval <- alpha/sqrt(var)
-    pval <- 2*pnorm(-abs(tval))
-    res <- list(epsilon = reg1$residuals, v=dr)
-    results <- list(alpha=unname(alpha), se=drop(se), t=unname(tval), pval=unname(pval), coefficients=unname(alpha), coefficient=unname(alpha), coefficients.reg=coef(reg1), residuals=res, call=match.call(), samplesize=n)
+    pval <- 2 * pnorm(-abs(tval))
+    res <- list(epsilon = reg1$residuals, v = dr)
+    results <- list(alpha = unname(alpha), se = drop(se), t = unname(tval), 
+                    pval = unname(pval), coefficients = unname(alpha), coefficient = unname(alpha), 
+                    coefficients.reg = coef(reg1), residuals = res, call = match.call(), 
+                    samplesize = n)
   }
   class(results) <- "rlassoEffects"
   return(results)
 }
 
-###################################################################################################################################
-################# Methods for rlassoEffects
-###################################################################################################################################
+################################################################################################################################### Methods for rlassoEffects
 
 #' Methods for S3 object \code{rlassoEffects}
 #'
@@ -198,14 +218,15 @@ rlassoEffect <- function(x, y, d, method="double selection", I3=NULL,  post=TRUE
 #' @aliases methods.rlassoEffects print.rlassoEffects confint.rlassoEffects plot.rlassoEffects
 #' @export
 
-print.rlassoEffects <- function(x, digits = max(3L, getOption("digits") - 3L), ...) {
-  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), "\n\n", sep = "")
+print.rlassoEffects <- function(x, digits = max(3L, getOption("digits") - 
+                                                  3L), ...) {
+  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
+      "\n\n", sep = "")
   if (length(coef(x))) {
     cat("Coefficients:\n")
-    print.default(format(coef(x), digits = digits), print.gap = 2L,
+    print.default(format(coef(x), digits = digits), print.gap = 2L, 
                   quote = FALSE)
-  }
-  else cat("No coefficients\n")
+  } else cat("No coefficients\n")
   cat("\n")
   invisible(coef(x))
 }
@@ -213,52 +234,52 @@ print.rlassoEffects <- function(x, digits = max(3L, getOption("digits") - 3L), .
 #' @rdname methods.rlassoEffects
 #' @param object an object of class \code{rlassoEffects}
 #' @param parm a specification of which parameters are to be given confidence intervals among the variables for which inference was done, either a vector of numbers or a vector of names. If missing, all parameters are considered.
-#' @param level	the confidence level required
+#' @param level confidence level required
 #' @param joint logical, if \code{TRUE} joint confidence intervals are calculated.
 #' @export
 
-confint.rlassoEffects <- function(object, parm, level=0.95, joint=FALSE, ...) {
-  B <- 500 # number of bootstrap repitions
+confint.rlassoEffects <- function(object, parm, level = 0.95, joint = FALSE, 
+                                  ...) {
+  B <- 500  # number of bootstrap repitions
   n <- object$samplesize
   k <- p1 <- length(object$coefficients)
   cf <- coef(object)
   pnames <- names(cf)
-  if (missing(parm))
-    parm <- pnames
-  else if (is.numeric(parm))
-    parm <- pnames[parm]
+  if (missing(parm)) 
+    parm <- pnames else if (is.numeric(parm)) 
+      parm <- pnames[parm]
   if (!joint) {
     a <- (1 - level)/2
     a <- c(a, 1 - a)
-    #fac <- qt(a, n-k)
+    # fac <- qt(a, n-k)
     fac <- qnorm(a)
     pct <- format.perc(a, 3)
-    ci <- array(NA, dim = c(length(parm), 2L), dimnames = list(parm,
+    ci <- array(NA, dim = c(length(parm), 2L), dimnames = list(parm, 
                                                                pct))
     ses <- object$se[parm]
     ci[] <- cf[parm] + ses %o% fac
   }
   
   if (joint) {
-    phi <- object$residuals$e*object$residuals$v
+    phi <- object$residuals$e * object$residuals$v
     m <- 1/sqrt(colMeans(phi^2))
     phi <- t(t(phi)/m)
     sigma <- sqrt(colMeans(phi^2))
-    sim <- vector("numeric", length=B)
+    sim <- vector("numeric", length = B)
     for (i in 1:B) {
       xi <- rnorm(n)
-      phi_temp <- phi*xi
-      Nstar <- 1/sqrt(n)*colSums(phi_temp)
+      phi_temp <- phi * xi
+      Nstar <- 1/sqrt(n) * colSums(phi_temp)
       sim[i] <- max(abs(Nstar))
     }
     a <- (1 - level)/2
     ab <- c(a, 1 - a)
     pct <- format.perc(ab, 3)
-    ci <- array(NA, dim = c(length(parm), 2L), dimnames = list(parm,
+    ci <- array(NA, dim = c(length(parm), 2L), dimnames = list(parm, 
                                                                pct))
-    hatc <- quantile(sim, probs=1-a)
-    ci[,1] <- cf[parm] - hatc*1/sqrt(n)*sigma
-    ci[,2] <- cf[parm] + hatc*1/sqrt(n)*sigma
+    hatc <- quantile(sim, probs = 1 - a)
+    ci[, 1] <- cf[parm] - hatc * 1/sqrt(n) * sigma
+    ci[, 2] <- cf[parm] + hatc * 1/sqrt(n) * sigma
   }
   return(ci)
 }
@@ -269,50 +290,53 @@ confint.rlassoEffects <- function(object, parm, level=0.95, joint=FALSE, ...) {
 #' @param xlab a title for the x axis
 #' @param ylab a title for the y axis
 #' @param xlim vector of length two giving lower and upper bound of x axis
-plot.rlassoEffects <- function(x, main="", xlab="coef", ylab="", xlim=NULL,...){
+plot.rlassoEffects <- function(x, main = "", xlab = "coef", ylab = "", 
+                               xlim = NULL, ...) {
   
   # generate ordered KI-matrix
   coefmatrix <- cbind(summary(x)$coef, confint(x))[, c(1, 5, 6)]
   if (is.null(dim(coefmatrix))) {
-  vec <- coefmatrix
-  coefmatrix <- matrix(vec, ncol=3)
-  colnames(coefmatrix) <- names(vec)
+    vec <- coefmatrix
+    coefmatrix <- matrix(vec, ncol = 3)
+    colnames(coefmatrix) <- names(vec)
   }
   
   rownames(coefmatrix) <- names(x$coefficients)
   coefmatrix <- as.data.frame(coefmatrix)
-  coefmatrix <- cbind(rownames(coefmatrix),coefmatrix)
-  colnames(coefmatrix) <- c("names","coef","lower","upper")
+  coefmatrix <- cbind(rownames(coefmatrix), coefmatrix)
+  colnames(coefmatrix) <- c("names", "coef", "lower", "upper")
   coefmatrix <- coefmatrix[order(abs(coefmatrix[, 2])), ]
   
   col <- "#000099"
   # scale
-  if(missing(xlim)){
-    low <- min(coefmatrix[,-1])
-    up <- max(coefmatrix[,-1])
-  } else{
+  if (missing(xlim)) {
+    low <- min(coefmatrix[, -1])
+    up <- max(coefmatrix[, -1])
+  } else {
     low <- xlim[1]
     up <- xlim[2]
   }
-  # generate points 
-  plotobject <- ggplot2::ggplot(coefmatrix,ggplot2::aes(y=coef,x=factor(names,levels=names))) + ggplot2::geom_point(colour=col, size=0.75)+ggplot2::geom_hline(h=0, colour=col, width=0.1)
+  # generate points
+  plotobject <- ggplot2::ggplot(coefmatrix, ggplot2::aes(y = coef, x = factor(names, 
+                                                                              levels = names))) + ggplot2::geom_point(colour = col, size = 0.75) + 
+    ggplot2::geom_hline(h = 0, colour = col, width = 0.1)
   
   # generate errorbars (KIs)
-  plotobject <- plotobject + ggplot2::geom_errorbar(ymin=coefmatrix$lower,ymax=coefmatrix$upper,colour=col, width=0.4, size=0.2)
+  plotobject <- plotobject + ggplot2::geom_errorbar(ymin = coefmatrix$lower, 
+                                                    ymax = coefmatrix$upper, colour = col, width = 0.4, size = 0.2)
   
   # further graphic parameter
-  plotobject <- plotobject + ggplot2::ggtitle(main) + ggplot2::ylim(low,up) + ggplot2::xlab(ylab) + ggplot2::ylab(xlab) 
+  plotobject <- plotobject + ggplot2::ggtitle(main) + ggplot2::ylim(low, 
+                                                                    up) + ggplot2::xlab(ylab) + ggplot2::ylab(xlab)
   
-  # var.names xlim(0.5,nrow(coefmatrix)+0.5)
-  #plotobject <- plotobject + scale_x_discrete(limits=rownames(coefmatrix)[1:nrow(coefmatrix)])
+  # var.names xlim(0.5,nrow(coefmatrix)+0.5) plotobject <- plotobject +
+  # scale_x_discrete(limits=rownames(coefmatrix)[1:nrow(coefmatrix)])
   
-  ## invert x and y axis
-  #plotobject <- plotobject + ggplot2::coord_flip()
+  ## invert x and y axis plotobject <- plotobject + ggplot2::coord_flip()
   
   # layout
-  plotobject <- plotobject + ggplot2::theme_bw() + ggplot2::geom_blank() +
-    ggplot2::theme(panel.grid.major.x = element_blank(),
-                   panel.grid.minor.x = element_blank()) 
+  plotobject <- plotobject + ggplot2::theme_bw() + ggplot2::geom_blank() + 
+    ggplot2::theme(panel.grid.major.x = element_blank(), panel.grid.minor.x = element_blank())
   # plot
   plotobject
 }
@@ -327,19 +351,19 @@ plot.rlassoEffects <- function(x, main="", xlab="coef", ylab="", xlim=NULL,...){
 #' Summary of objects of class \code{rlassoEffects}
 #' 
 #' @param object an object of class \code{rlassoEffects}, usually a result of a call to \code{rlassoEffects}
-#' @param ...	further arguments passed to or from other methods.
+#' @param ... further arguments passed to or from other methods.
 #' @rdname summary.rlassoEffects
 #' @export 
-summary.rlassoEffects  <- function(object, ...) {
+summary.rlassoEffects <- function(object, ...) {
   ans <- NULL
   k <- length(object$coefficients)
-  table <- matrix(NA,ncol=4,nrow=k)
+  table <- matrix(NA, ncol = 4, nrow = k)
   rownames(table) <- names(object$coefficient)
   colnames(table) <- c("Estimate.", "Std. Error", "t value", "Pr(>|t|)")
-  table[,1] <- object$coefficients
-  table[,2] <- object$se
-  table[,3] <- object$t
-  table[,4] <- object$pval
+  table[, 1] <- object$coefficients
+  table[, 2] <- object$se
+  table[, 3] <- object$t
+  table[, 4] <- object$pval
   ans$coefficients <- table
   ans$object <- object
   class(ans) <- "summary.rlassoEffects"
@@ -352,12 +376,13 @@ summary.rlassoEffects  <- function(object, ...) {
 #' @method print summary.rlassoEffects
 #' @rdname summary.rlassoEffects
 #' @export
-print.summary.rlassoEffects <- function(x,  digits = max(3L, getOption("digits") - 3L), ...) {
+print.summary.rlassoEffects <- function(x, digits = max(3L, getOption("digits") - 
+                                                          3L), ...) {
   if (length(coef(x$object))) {
     k <- dim(x$coefficients)[1]
     table <- x$coefficients
     print("Estimation of the effect of selected variables in a high-dimensional regression")
-    printCoefmat(table, digits=digits, P.values=TRUE, has.Pvalue=TRUE)
+    printCoefmat(table, digits = digits, P.values = TRUE, has.Pvalue = TRUE)
     cat("\n")
   } else {
     cat("No coefficients\n")
