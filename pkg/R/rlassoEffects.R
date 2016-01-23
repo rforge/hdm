@@ -130,6 +130,7 @@ rlassoEffect <- function(x, y, d, method = "double selection", I3 = NULL,
   d <- as.matrix(d, ncol = 1)
   y <- as.matrix(y, ncol = 1)
   kx <- dim(x)[2]
+  n <- dim(x)[1]
   if (is.null(colnames(d))) 
     colnames(d) <- "d1"
   if (is.null(colnames(x)) & !is.null(x)) 
@@ -137,7 +138,7 @@ rlassoEffect <- function(x, y, d, method = "double selection", I3 = NULL,
   if (method == "double selection") {
     I1 <- rlasso(d ~ x, post = post, ...)$index
     I2 <- rlasso(y ~ x, post = post, ...)$index
-    n <- dim(x)[1]
+    
     
     if (is.logical(I3)) {
       I <- I1 + I2 + I3
