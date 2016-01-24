@@ -32,7 +32,7 @@
 
 \begin{document}
 \begin{abstract}
-The package High-dimensional Metrics (\Rpackage{hdm}) is an evolving collection of statistical methods for estimating and drawing inferences in high-dimensional approximately sparse models.  This vignette offers a brief introduction and a tutorial to the implemented methods.  \R and the package \Rpackage{hdm} are open-source software projects and can be freely downloaded from CRAN:
+The package High-dimensional Metrics (\Rpackage{hdm}) is an evolving collection of statistical methods for estimation and quantification of uncertainty in high-dimensional approximately sparse models. It focuses on providing confidence intervals and significance testing for low-dimensional subcomponents of the high-dimensional parameter vector. This vignette offers a brief introduction and a tutorial to the implemented methods.  \R and the package \Rpackage{hdm} are open-source software projects and can be freely downloaded from CRAN:
 \texttt{http://cran.r-project.org}.
 \end{abstract}
 
