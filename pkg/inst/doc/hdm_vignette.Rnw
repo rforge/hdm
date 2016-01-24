@@ -215,7 +215,7 @@ The four data sets differ mainly in the dependent variable wich is some kind of 
 
 \subsection{Prediction in Linear Models using Approximate Sparsity}
 
-We consider linear high dimensional approximate sparse regression models. These models have a large number of regressors $p$, possibly much larger than the sample size $n$, but only a relatively small number $s =o(n)$ of these regressors are important for capturing accurately the main features of the regression function. The latter assumption makes it possible to estimate these models effectively by searching for approximately the right set of the regressors, using $\ell_1$-based penalization methods.
+Consider linear high dimensional approximate sparse regression models. These models have a large number of regressors $p$, possibly much larger than the sample size $n$, but only a relatively small number $s =o(n)$ of these regressors are important for capturing accurately the main features of the regression function. The latter assumption makes it possible to estimate these models effectively by searching for approximately the right set of the regressors, using $\ell_1$-based penalization methods.
 
 The model reads: \[ y_i = x_i' \beta_0  + \varepsilon_i, \quad \mathbb{E}[\varepsilon_i x_i]=0, \quad \beta_0 \in \mathbb{R}^p, i=1,\ldots,n \]
 where $y_i$ are observations of the response variable, $x_i=(x_{i,j}, \ldots, x_{i,p})$'s are observations of $p-$dimensional fixed regressors, and $\varepsilon_i$'s are iid, mean-zero centered disturbances, where possibly $p \gg n$.    An important point is that the errors $\varepsilon_i$ are \textit{not} restricted to be Gaussian or homoscedastic. This means that we allow for both non-Gaussian and heteroscedastic errors. 
@@ -806,8 +806,7 @@ tab
 \section{Conclusion}
 
 An introduction to some of the capabilities of the \R package \texttt{hdm}
-package has been given with some examples describing its basic functionality. Inevitably, new applications will
-demand new features and, as the project is in its initial phase, unforeseen bugs will show up. In either case comments and suggestions of users are highly appreciated. It is intended to update the documentation (including this vignette) and the package periodically. The most current version of the \R package and its accompanying vignette will be made available at the homepage of the maintainer and \texttt{cran.r-project.org}. See the \R command \texttt{vignette()} for details on how to find
+package has been given with some examples describing its basic functionality. Inevitably, new applications will demand new features and, as the project is in its initial phase, unforeseen bugs will show up. In either case comments and suggestions of users are highly appreciated. It is intended to update the documentation (including this vignette) and the package periodically. The most current version of the \R package and its accompanying vignette will be made available at the homepage of the maintainer and \texttt{cran.r-project.org}. See the \R command \texttt{vignette()} for details on how to find
 and view vignettes from within \R.
 \footnotesize
 \bibliographystyle{econometrica}
