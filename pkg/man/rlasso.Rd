@@ -91,6 +91,23 @@ other option, the values are used as starting values.
 The option \code{post=TRUE} conducts post-lasso estimation, i.e. a refit of
 the model with the selected variables.
 }
+\examples{
+set.seed(1)
+n = 100 #sample size
+p = 100 # number of variables
+s = 3 # nubmer of non-zero variables
+X = matrix(rnorm(n*p), ncol=p)
+beta = c(rep(3,s), rep(0,p-s))
+y = 1 + X\%*\%beta + rnorm(n)
+lasso.reg = rlasso(y~X, post=TRUE, intercept=TRUE)
+lasso.reg = rlasso(y~X,post=FALSE)  # use Lasso, not-Post-Lasso
+print(lasso.reg, all=FALSE)
+summary(lasso.reg, all=FALSE) # use this option to summarize results
+yhat.lasso = predict(lasso.reg)   #in-sample prediction
+Xnew = matrix(rnorm(n*p), ncol=p)  # new X
+Ynew =  Xnew\%*\%beta + rnorm(n)  #new Y
+yhat.lasso.new = predict(lasso.reg, newdata=Xnew)  #out-of-sample prediction
+}
 \references{
 A. Belloni, D. Chen, V. Chernozhukov and C. Hansen (2012).
 Sparse models and methods for optimal instruments with an application to
