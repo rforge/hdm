@@ -8,9 +8,7 @@
 #' Option \code{post=TRUE} conducts post-lasso estimation, i.e. a refit of the
 #' model with the selected variables, to estimate the optimal instruments. The
 #' parameter vector of the structural equation is then fitted by two-stage
-#' least square (tsls) estimation. If variables of the exogenous variables in
-#' \code{x} should be used as instruments, they have to be added to the
-#' instrument set \code{z} explicitly.
+#' least square (tsls) estimation.
 #'
 #' @param x exogenous variables in the structural equation (matrix)
 #' @param d endogenous variables in the structural equation (vector or matrix)
@@ -32,27 +30,30 @@
 rlassoIVselectZ <- function(x, d, y, z, post = TRUE, ...) {
   
   d <- as.matrix(d)
-  if (is.vector(x)) 
-    x <- as.matrix(x)
+  if (is.vector(x)) x <- as.matrix(x)
   n <- length(y)
   kex <- dim(x)[2]
   ke <- dim(d)[2]
-  kiv <- dim(z)[2]
+  
   
   if (is.null(colnames(d))) 
     colnames(d) <- paste("d", 1:ke, sep = "")
   if (is.null(colnames(x)) & !is.null(x)) 
     colnames(x) <- paste("x", 1:kex, sep = "")
+  
+  Z <- cbind(z,x) # including the x-variables as instruments
+  kiv <- dim(Z)[2]
+  
   # first stage regression
   Dhat <- NULL
   for (i in 1:ke) {
     di <- d[, i]
-    lasso.fit <- rlasso(di ~ z, post = post, ...)
+    lasso.fit <- rlasso(di ~ Z, post = post, ...)
     if (sum(lasso.fit$ind) == 0) {
       dihat <- rep(mean(di), n)  #dihat <- mean(di)
     } else {
       # dihat <- z%*%lasso.fit$coefficients
-      dihat <- predict(lasso.fit, newdata = z)
+      dihat <- predict(lasso.fit, newdata = Z)
     }
     Dhat <- cbind(Dhat, dihat)
   }
