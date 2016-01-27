@@ -363,7 +363,7 @@ lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.dependent.
     n <- dim(x)[1]
     R <- penalty$numSim
     sim <- vector("numeric", length = R)
-    lasso.x.y <- rlasso(x,y)
+    lasso.x.y <- rlasso(y ~ x)
     eh <- lasso.x.y$residuals
     ehat <- matrix(rep(eh, each = p), ncol = p, byrow = TRUE) # might be improved by initial estimator or passed through
     for (l in 1:R) {
