@@ -8,8 +8,8 @@ disturbances}
 \usage{
 rlasso(formula, data, post = TRUE, intercept = TRUE,
   penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE,
-  lambda.start = NULL, c = 1.1, gamma = 0.1), control = list(numIter = 15, tol
-  = 10^-5, threshold = NULL), ...)
+  lambda.start = NULL, c = 1.1, gamma = 0.1/log(n)), control = list(numIter =
+  15, tol = 10^-5, threshold = NULL), ...)
 
 rlasso.fit(x, y, post = TRUE, intercept = TRUE,
   penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE,
@@ -49,9 +49,9 @@ coefficients. Absolute values below the threshold are set to zero.}
 
 \item{...}{further arguments (only for consistent defintion of methods)}
 
-\item{x}{regressors (vector, matrix or data.frame)}
+\item{x}{regressors (vector, matrix or object can be coerced to matrix)}
 
-\item{y}{dependent variable (vector or matrix)}
+\item{y}{dependent variable (vector, matrix or object can be coerced to matrix)}
 }
 \value{
 \code{rlasso} returns an object of class \code{rlasso}. An object of

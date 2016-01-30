@@ -14,7 +14,7 @@
 #' which does inference for a single variable.
 #'
 #' @param x matrix of regressor variables serving as controls and potential
-#' treatments
+#' treatments. For \code{rlassoEffect} it contains only controls, for \code{rlassoEffects} both controls and potential treatments. For \code{rlassoEffects} it must have at least two columns.
 #' @param y outcome variable (vector or matrix)
 #' @param index vector of integers, logicals or variables names indicating the position (column) of
 #' variables (integer case), logical vector of length of the variables (TRUE or FALSE) or the variable names of \code{x} which should be used for inference / as treatment variables.
@@ -100,9 +100,9 @@ rlassoEffects <- function(x, y, index = c(1:ncol(x)), method = "partialling out"
   for (i in 1:k) {
     d <- x[, index[i], drop = FALSE]
     Xt <- x[, -index[i], drop = FALSE]
-    
+    I3m <- I3[-index[i]]
     lasso.regs[[i]] <- try(col <- rlassoEffect(Xt, y, d, method = method, 
-                                               I3 = I3, post = post, ...))
+                                               I3 = I3m, post = post, ...))
     if (class(lasso.regs[[i]]) == "try-error") {
       next
     } else {
@@ -207,7 +207,7 @@ rlassoEffect <- function(x, y, d, method = "double selection", I3 = NULL,
 #'
 #' Objects of class \code{rlassoEffects} are constructed by  \code{rlassoEffects}.
 #' \code{print.rlassoEffects} prints and displays some information about fitted \code{rlassoEffect} objects.
-#' summary.rlassoEffects summarizes information of a fitted \code{rlassoEffect} object and is described at summary.rlassoEffects.
+#' summary.rlassoEffects summarizes information of a fitted \code{rlassoEffect} object and is described at \code{\link{summary.rlassoEffects}}.
 #' \code{confint.rlassoEffects} extracts the confidence intervals.
 #' \code{plot.rlassoEffects} plots the estimates with confidence intervals.
 #'
@@ -319,7 +319,7 @@ plot.rlassoEffects <- function(x, main = "", xlab = "coef", ylab = "",
   }
   # generate points
   plotobject <- ggplot2::ggplot(coefmatrix, ggplot2::aes(y = coef, x = factor(names, 
-                                                                              levels = names))) + ggplot2::geom_point(colour = col, size = 0.75) + 
+                                                                              levels = names))) + ggplot2::geom_point(colour = col, size = 1.75) + 
     ggplot2::geom_hline(h = 0, colour = col, width = 0.1)
   
   # generate errorbars (KIs)
@@ -330,14 +330,13 @@ plot.rlassoEffects <- function(x, main = "", xlab = "coef", ylab = "",
   plotobject <- plotobject + ggplot2::ggtitle(main) + ggplot2::ylim(low, 
                                                                     up) + ggplot2::xlab(ylab) + ggplot2::ylab(xlab)
   
-  # var.names xlim(0.5,nrow(coefmatrix)+0.5) plotobject <- plotobject +
-  # scale_x_discrete(limits=rownames(coefmatrix)[1:nrow(coefmatrix)])
   
-  ## invert x and y axis plotobject <- plotobject + ggplot2::coord_flip()
+  ## invert x and y axis
+  #plotobject <- plotobject + ggplot2::coord_flip()
   
   # layout
   plotobject <- plotobject + ggplot2::theme_bw() + ggplot2::geom_blank() + 
-    ggplot2::theme(panel.grid.major.x = element_blank(), panel.grid.minor.x = element_blank())
+    ggplot2::theme(panel.grid.major.x = ggplot2::element_blank(), panel.grid.minor.x = ggplot2::element_blank())
   # plot
   plotobject
 }
@@ -382,7 +381,7 @@ print.summary.rlassoEffects <- function(x, digits = max(3L, getOption("digits") 
   if (length(coef(x$object))) {
     k <- dim(x$coefficients)[1]
     table <- x$coefficients
-    print("Estimation of the effect of selected variables in a high-dimensional regression")
+    print("Estimates and significance testing of the effect of target variables")
     printCoefmat(table, digits = digits, P.values = TRUE, has.Pvalue = TRUE)
     cat("\n")
   } else {

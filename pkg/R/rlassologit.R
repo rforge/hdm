@@ -63,7 +63,7 @@
 #' }
 #' @export
 rlassologit <- function(formula, data, post = TRUE, intercept = TRUE, penalty = list(lambda = NULL, 
-                                                                                     c = 1.1, gamma = NULL), control = list(threshold = NULL), ...) {
+                                                                                     c = 1.1, gamma = 0.1/log(n)), control = list(threshold = NULL), ...) {
   cl <- match.call()
   mf <- match.call(expand.dots = FALSE)
   m <- match(c("formula", "data"), names(mf), 0L)
@@ -74,6 +74,7 @@ rlassologit <- function(formula, data, post = TRUE, intercept = TRUE, penalty = 
   mt <- attr(mf, "terms")
   attr(mt, "intercept") <- 0
   y <- model.response(mf, "numeric")
+  n <- length(y)
   x <- model.matrix(mt, mf)
   
   est <- rlassologit.fit(x, y, post = post, intercept = intercept, penalty = penalty, 
@@ -87,7 +88,7 @@ rlassologit <- function(formula, data, post = TRUE, intercept = TRUE, penalty = 
 #' @export
 
 rlassologit.fit <- function(x, y, post = TRUE, intercept = TRUE, penalty = list(lambda = NULL, 
-                                                                                c = 1.1, gamma = NULL), control = list(threshold = NULL), ...) {
+                                                                                c = 1.1, gamma =  0.1/log(n)), control = list(threshold = NULL), ...) {
   n <- dim(x)[1]
   p <- dim(x)[2]
   if (is.null(colnames(x))) 

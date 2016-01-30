@@ -122,7 +122,7 @@ summary.rlassoIVselectZ <- function(object, digits = max(3L, getOption("digits")
     table[, 2] <- sqrt(diag(as.matrix(object$vcov)))
     table[, 3] <- table[, 1]/table[, 2]
     table[, 4] <- 2 * pnorm(-abs(table[, 3]))
-    print("Estimation of the effect of selected variables in a high-dimensional regression")
+    print("Estimates and significance testing of the effect of target variables in the IV regression model")
     printCoefmat(table, digits = digits, P.values = TRUE, has.Pvalue = TRUE)
     cat("\n")
   } else {

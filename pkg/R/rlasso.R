@@ -90,7 +90,7 @@ globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "sele
 #' Ynew =  Xnew%*%beta + rnorm(n)  #new Y
 #' yhat.lasso.new = predict(lasso.reg, newdata=Xnew)  #out-of-sample prediction
  rlasso <- function(formula, data, post = TRUE, intercept = TRUE, 
-                           penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = 0.1),
+                           penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = .1/log(n)),
                           control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...) {
   cl <- match.call()
   mf <- match.call(expand.dots = FALSE)
@@ -102,8 +102,8 @@ globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "sele
   mt <- attr(mf, "terms")
   attr(mt, "intercept") <- 0
   y <- model.response(mf, "numeric")
+  n <- length(y)
   x <- model.matrix(mt, mf)
-
   est <- rlasso.fit(x, y, post = post, intercept = intercept, penalty=penalty,
                control = control)
   est$call <- cl
@@ -112,8 +112,8 @@ globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "sele
 
 #' @rdname rlasso
 #' @export
-#' @param y dependent variable (vector or matrix)
-#' @param x regressors (vector, matrix or data.frame)
+#' @param y dependent variable (vector, matrix or object can be coerced to matrix)
+#' @param x regressors (vector, matrix or object can be coerced to matrix)
 rlasso.fit <- function(x, y, post = TRUE, intercept = TRUE,
                            penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = 0.1),
                            control = list(numIter = 15, tol = 10^-5, threshold = NULL),...) {
@@ -126,7 +126,13 @@ rlasso.fit <- function(x, y, post = TRUE, intercept = TRUE,
   if (is.null(colnames(x)))
     colnames(x) <- paste("V", 1:p, sep = "")
   ind.names <- 1:p
-  eps <- 10^-9  # precision for scaling
+  
+  # set options to default values if missing
+  if (!exists("homoscedastic", where = penalty))  penalty$homoscedastic = "FALSE"
+  if (!exists("X.dependent.lambda", where = penalty))  penalty$X.dependent.lambda = "FALSE"
+  if (!exists("gamma", where = penalty))  penalty$gamma = 0.1/log(n)
+  
+  if (penalty$homoscedastic=="none" & !exists("lambda.start", where=penalty)) error("lambda.start must be provided!")
   # checking input numIter, tol
   if (!exists("numIter", where = control)) {
     control$numIter = 15
@@ -155,6 +161,7 @@ rlasso.fit <- function(x, y, post = TRUE, intercept = TRUE,
   ind <- rep(FALSE, p) #
   
   # variables with low variation are taken out, because normalization is not reliable
+  # eps <- 10^-9  # precision for scaling
   #ind <- which(normx < eps)
   #if (length(ind) != 0) {
   #  x <- x[, -ind]
@@ -307,6 +314,8 @@ lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.dependent.
                               y = NULL, x = NULL) {
   checkmate::checkChoice(penalty$X.dependent.lambda, c(TRUE, FALSE, NULL))
   checkmate::checkChoice(penalty$homoscedastic, c(TRUE, FALSE, "none"))
+  if (!exists("homoscedastic", where = penalty))  penalty$homoscedastic = "FALSE"
+  if (!exists("X.dependent.lambda", where = penalty))  penalty$X.dependent.lambda = "FALSE"
   if (!exists("c", where = penalty) & penalty$homoscedastic!="none") {
     penalty$c = 1.1
   }
@@ -494,40 +503,6 @@ model.matrix.rlasso <- function(object, ...) {
   return(mm)
 }
 
-# old version: to be deleted
-# model.matrix.rlasso <- function(object, ...) {
-#   if (is.call(object$call[[2]])) {
-#     X <- model.frame(object$call[[2]])
-#     mt <- attr(X, "terms")
-#     attr(mt, "intercept") <- 0
-#     mm <- model.matrix(mt, X)
-#   } else {
-#     mm <- eval(object$call[[2]])
-#   }
-#   return(mm)
-# }
-
-# predict.lasso <- function (object, newdata=NULL) {
-#   if (missing(newdata) || is.null(newdata)) {
-#     X <- model.matrix(object)
-#   }
-#   else {
-#     #mt <- attr(newdata, "terms")
-#     #attr(mt, "intercept") <- 0
-#     #m <- model.frame(mt, newdata)
-#     #X <- model.matrix(mt, m)
-#     X <- newdata
-#   }
-#   n <- length(object$residuals)
-#   beta <- object$coefficients
-#   if (object$options[["intercept"]]) {
-#     yhat <- X%*%beta + object$options$mu - sum(object$options$meanx*beta) # (??)
-#   }
-#   if (!object$options[["intercept"]]) {
-#     yhat <- X%*%beta
-#   }
-#   return(yhat)
-# }
 
 #' @rdname methods.rlasso
 #' @export

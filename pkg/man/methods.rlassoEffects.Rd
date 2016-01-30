@@ -42,7 +42,7 @@
 \description{
 Objects of class \code{rlassoEffects} are constructed by  \code{rlassoEffects}.
 \code{print.rlassoEffects} prints and displays some information about fitted \code{rlassoEffect} objects.
-summary.rlassoEffects summarizes information of a fitted \code{rlassoEffect} object and is described at summary.rlassoEffects.
+summary.rlassoEffects summarizes information of a fitted \code{rlassoEffect} object and is described at \code{\link{summary.rlassoEffects}}.
 \code{confint.rlassoEffects} extracts the confidence intervals.
 \code{plot.rlassoEffects} plots the estimates with confidence intervals.
 }

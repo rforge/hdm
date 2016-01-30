@@ -13,7 +13,7 @@ rlassoEffect(x, y, d, method = "double selection", I3 = NULL, post = TRUE,
 }
 \arguments{
 \item{x}{matrix of regressor variables serving as controls and potential
-treatments}
+treatments. For \code{rlassoEffect} it contains only controls, for \code{rlassoEffects} both controls and potential treatments. For \code{rlassoEffects} it must have at least two columns.}
 
 \item{y}{outcome variable (vector or matrix)}
 

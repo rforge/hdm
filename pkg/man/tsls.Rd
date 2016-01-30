@@ -30,7 +30,8 @@ The function does Two-Stage Least Squares Estimation (TSLS).
 \details{
 The function computes tsls estimate (coefficients) and variance-covariance-matrix assuming homoskedasticity
 for outcome variable \code{y} where \code{d} are endogenous variables in structural equation, \code{x} are exogensous variables in
-structural equation and z are instruments.
+structural equation and z are instruments. It returns an object of class \code{tsls} for which the methods \code{print} and \code{summary}
+are provided.
 }
 \keyword{2SLS}
 \keyword{Endogeneity}

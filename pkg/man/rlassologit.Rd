@@ -6,11 +6,11 @@
 \title{rlassologit: Function for logistic Lasso estimation}
 \usage{
 rlassologit(formula, data, post = TRUE, intercept = TRUE,
-  penalty = list(lambda = NULL, c = 1.1, gamma = NULL),
+  penalty = list(lambda = NULL, c = 1.1, gamma = 0.1/log(n)),
   control = list(threshold = NULL), ...)
 
 rlassologit.fit(x, y, post = TRUE, intercept = TRUE, penalty = list(lambda
-  = NULL, c = 1.1, gamma = NULL), control = list(threshold = NULL), ...)
+  = NULL, c = 1.1, gamma = 0.1/log(n)), control = list(threshold = NULL), ...)
 }
 \arguments{
 \item{formula}{an object of class 'formula' (or one that can be coerced to

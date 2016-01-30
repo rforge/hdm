@@ -255,7 +255,7 @@ summary.rlassoTE <- function(object, digits = max(3L, getOption("digits") -
     }
     table[, 3] <- table[, 1]/table[, 2]
     table[, 4] <- 2 * pnorm(-abs(table[, 3]))
-    cat("Estimation of the treatment effect in a high-dimensional setting", 
+    cat("Estimation and significance testing of the treatment effect", 
         "\n")
     cat(paste("Type:", object$type), "\n")
     cat(paste("Bootstrap:", ifelse(is.null(object$type_boot), "not applicable", 

@@ -11,7 +11,7 @@ rlassologitEffect(x, y, d, I3 = NULL)
 }
 \arguments{
 \item{x}{matrix of regressor variables serving as controls and potential
-treatments}
+treatments.  For \code{rlassologitEffect} it contains only controls, for \code{rlassologitEffects} both controls and potential treatments. For  \code{rlassologitEffects} it must have at least two columns.}
 
 \item{y}{outcome variable}
 

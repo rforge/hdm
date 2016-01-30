@@ -221,7 +221,7 @@ summary.rlassoIV <- function(object, digits = max(3L, getOption("digits") -
     table[, 2] <- object$se
     table[, 3] <- table[, 1]/table[, 2]
     table[, 4] <- 2 * pnorm(-abs(table[, 3]))
-    cat("Estimation of the effect of selected variables in a high-dimensional IV regression", 
+    cat("Estimates and Significance Testing of the effect of target variables in the IV regression model", 
         "\n")
     printCoefmat(table, digits = digits, P.values = TRUE, has.Pvalue = TRUE)
     cat("\n")

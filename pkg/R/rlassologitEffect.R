@@ -7,7 +7,7 @@
 #' setting of high-dimensional controls. The function is a wrap function for \code{rlassologitEffect} which does inference for only one variable (d).
 #'
 #' @param x matrix of regressor variables serving as controls and potential
-#' treatments
+#' treatments.  For \code{rlassologitEffect} it contains only controls, for \code{rlassologitEffects} both controls and potential treatments. For  \code{rlassologitEffects} it must have at least two columns.
 #' @param y outcome variable
 #' @param index vector of integers, logical or names indicating the position (column) or name of
 #' variables of x which should be used as treatment variables.
@@ -68,8 +68,8 @@ rlassologitEffects <- function(x, y, index = c(1:ncol(x)), I3 = NULL, ...) {
   for (i in 1:k) {
     d <- x[, index[i], drop = FALSE]
     Xt <- x[, -index[i], drop = FALSE]
-    
-    lasso.regs[[i]] <- try(col <- rlassologitEffect(Xt, y, d, I3 = I3))
+    I3m <- I3[-index[i]]
+    lasso.regs[[i]] <- try(col <- rlassologitEffect(Xt, y, d, I3 = I3m))
     if (class(lasso.regs[[i]]) == "try-error") {
       next
     } else {
@@ -210,7 +210,7 @@ summary.rlassologitEffects <- function(object, digits = max(3L, getOption("digit
     table[, 2] <- object$se
     table[, 3] <- object$t
     table[, 4] <- object$pval
-    print("Estimation of the effect of selected variables in a high-dimensional regression")
+    print("Estimates and significance testing of the effect of target variables")
     printCoefmat(table, digits = digits, P.values = TRUE, has.Pvalue = TRUE)
     cat("\n")
   } else {
