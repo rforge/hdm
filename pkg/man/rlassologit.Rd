@@ -85,7 +85,7 @@ predict(rlassologit.reg, newdata=X3)
 }
 }
 \references{
-TBD
+Belloni, A., Chernozhukov and Y. Wei (2013). Honest confidence regions for logistic regression with a large number of controls. arXiv preprint arXiv:1304.3969.
 }
 \keyword{lasso}
 \keyword{logistic}

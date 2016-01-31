@@ -3,7 +3,7 @@
 \name{rlasso}
 \alias{rlasso}
 \alias{rlasso.fit}
-\title{rlasso: Function for Lasso estimation under homoscedastic and heteroskeadstic non-Gaussian
+\title{rlasso: Function for Lasso estimation under homoscedastic and heterosceadstic non-Gaussian
 disturbances}
 \usage{
 rlasso(formula, data, post = TRUE, intercept = TRUE,
@@ -77,16 +77,14 @@ The function estimates the coefficients of a Lasso regression with
 data-driven penalty under homoscedasticity / heteroscedasticity and non-Gaussian noise. The options \code{homoscedastic} is a logical with \code{FALSE} by default.
 Moreover, for the calculation of the penalty parameter it can be chosen, if the penalization parameter depends on the  design matrix (\code{X.dependent.lambda=TRUE}) or \code{independent} (default, \code{X.dependent.lambda=FALSE}).
 The default value of the constant \code{c} is \code{1.1} in the post-Lasso case and \code{0.5} in the Lasso case.
-#A \emph{special} option is to set \code{homoscedastic} to \code{none} and to supply a values \code{lambda.start}. Then this value is used as penalty parameter with independent design and heteroscedastic errors to weight the regressors.
+ A \emph{special} option is to set \code{homoscedastic} to \code{none} and to supply a values \code{lambda.start}. Then this value is used as penalty parameter with independent design and heteroscedastic errors to weight the regressors.
 For details of the
 implementation of the Algorithm for estimation of the data-driven penalty,
 in particular the regressor-independent loadings, we refer to Appendix A in
-Belloni et al.~(2012). When the option "none" is chosen for \code{homoscedastic} (together with
+Belloni et al. (2012). When the option "none" is chosen for \code{homoscedastic} (together with
 \code{lambda.start}), lambda is set to \code{lambda.start} and the
 regressor-independent loadings und heteroscedasticity are used. The options "X-dependent" and
 "X-independent" under homoscedasticity are described in Belloni et al. (2013).
-\code{lambda.start} can be component-specific. When used with one of the
-other option, the values are used as starting values.
 
 The option \code{post=TRUE} conducts post-lasso estimation, i.e. a refit of
 the model with the selected variables.

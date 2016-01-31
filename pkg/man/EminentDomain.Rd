@@ -17,7 +17,7 @@ Dataset on judicial eminent domain decisions.
 Data set was analyzed in Belloni et al. (2012).  They estimate the effect of judicial eminent domain decisions on economic outcomes with instrumental variables (IV) in a setting high a large set of potential IVs.
 A detailed decription of the data can be found at
 \url{https://www.econometricsociety.org/publications/econometrica/2012/11/01/sparse-models-and-methods-optimal-instruments-application}
-The data set contains four "sub-data sets" which differ mainly in the dependent variables: repeat-sales FHFA/OFHEO house price index for metro (FHFA) and non-metro (NM), the Case-Shiller home price index (CS),
+The data set contains four "sub-data sets" which differ mainly in the dependent variables: repeat-sales FHFA/OFHEO house price index for metro (FHFA) and non-metro (NM) area, the Case-Shiller home price index (CS),
 and state-level GDP from the Bureau of Economic Analysis - all transformed with the logarithm. The structure of each subdata set is comparable and given above.
 }
 \examples{

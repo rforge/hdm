@@ -4,7 +4,7 @@
 #' The function estimates a treatment effect in a setting with very many
 #' controls and very many instruments (even larger than the sample size).
 #'
-#' The implementation follows the procedure described in Chernozhukov et al.
+#' The implementation for selection on x and z follows the procedure described in Chernozhukov et al.
 #' (2015) and is built on 'triple selection' to achieve an orthogonal moment
 #' function. The function returns an object of S3 class \code{rlassoIV}.
 #' Moreover, it is wrap function for the case that selection should be done only with the instruments Z (\code{rlassoIVselectZ}) or with 
@@ -19,12 +19,12 @@
 #' @param select.Z logical, indicating selection on the instruments
 #' @param select.X logical, indicating selection on the exogenous variables
 #' @param \dots arguments passed to the function \code{rlasso}
-#' @return An object of class \code{rlassoIV} containing at least the following
+#' @return an object of class \code{rlassoIV} containing at least the following
 #' components: \item{coefficients}{estimated parameter value}
 #' \item{se}{variance-covariance matrix}
 #' @references V. Chernozhukov, C. Hansen, M. Spindler (2015). Post-selection
 #' and post-regularization inference in linear models with many controls and
-#' instruments. American Economic Review: Paper & Proceedings 105(5), 1--7.
+#' instruments. American Economic Review: Paper & Proceedings 105(5), 486--490.
 #' @keywords Lasso Many controls and instruments Instrumental Variable
 #' @rdname rlassoIV
 #' @export

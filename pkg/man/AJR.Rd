@@ -21,13 +21,13 @@
 Dataset on settler mortality.
 }
 \details{
-Data set was analyzed in Acemoglu et al. (2001). A detailed decription of the data can be found at \url{http://economics.mit.edu/faculty/acemoglu/data/ajr2001}
+Data set was analysed in Acemoglu et al. (2001). A detailed description of the data can be found at \url{http://economics.mit.edu/faculty/acemoglu/data/ajr2001}
 }
 \examples{
 data(AJR)
 }
 \references{
-D. Acemoglu, S. Johnson, J. A. Robinson  (2001). Colonial Origins of Comparative Development: An Empirical Investigation.
+D. Acemoglu, S. Johnson, J. A. Robinson  (2001). Colonial origins of comparative development: an empirical investigation.
 American Economic Review, 91, 1369--1401.
 }
 \keyword{datasets}

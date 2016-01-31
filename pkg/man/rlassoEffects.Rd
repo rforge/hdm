@@ -38,10 +38,10 @@ values of the coefficients for each selected variable} \item{se}{standard error 
 \item{t}{t-statistic} \item{pval}{p-value} \item{samplesize}{sample size of the data set} \item{index}{index of the variables for which inference is performed}
 }
 \description{
-Estimation and inference of selected (low-dimensional) coefficients in a high-dimensional linear model.
+Estimation and inference of (low-dimensional) target coefficients in a high-dimensional linear model.
 }
 \details{
-The functions estimates selected (low-dimensional) coefficients in a high-dimensional linear model.
+The functions estimates (low-dimensional) target coefficients in a high-dimensional linear model.
 An application is e.g. estimation of a treatment effect \eqn{\alpha_0} in a
 setting of high-dimensional controls. The user can choose between the so-called post-double-selection method and partialling-out.
 The idea of the double selection method is to select variables by Lasso regression of

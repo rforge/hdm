@@ -26,15 +26,15 @@ indicates if variables (TRUE) should be included in any case.}
 \item{\dots}{additional parameters}
 }
 \value{
-The function returns an object of class \code{rlassologitEffect} with the following entries: \item{coefficients}{estimated
+The function returns an object of class \code{rlassologitEffects} with the following entries: \item{coefficients}{estimated
 value of the coefficients} \item{se}{standard errors}
 \item{t}{t-statistics} \item{pval}{p-values} \item{samplesize}{sample size of the data set} \item{I}{index of variables of the union of the lasso regressions}
 }
 \description{
-The function estimates selected (low-dimensional) coefficients in a high-dimensional logistic model.
+The function estimates (low-dimensional) target coefficients in a high-dimensional logistic model.
 }
 \details{
-The functions estimates selected (low-dimensional) coefficients in a high-dimensional logistic model.
+The functions estimates (low-dimensional) target coefficients in a high-dimensional logistic model.
 An application is e.g. estimation of a treatment effect \eqn{\alpha_0} in a
 setting of high-dimensional controls. The function is a wrap function for \code{rlassologitEffect} which does inference for only one variable (d).
 }

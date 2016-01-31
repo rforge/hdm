@@ -37,11 +37,11 @@ The sample is drawn from the 1991 Survey of Income and Program Participation
 (SIPP) and consists of 9,915 observations. The observational units are
 household reference persons aged 25-64 and spouse if present. Households are
 included in the sample if at least one person is employed and no one is
-self-employed. The data set was analyzed in Chernozhukov and Hansen (2004)
+self-employed. The data set was analysed in Chernozhukov and Hansen (2004)
 and Belloni et al. (2014) where further details can be found. They examine
 the effects of 401(k) plans on wealth using data from the Survey of Income
 and Program Participation using 401(k) eligibility as an instrument for
-401(k) participation
+401(k) participation.
 }
 \examples{
 data(pension)

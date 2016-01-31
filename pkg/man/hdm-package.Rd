@@ -6,7 +6,7 @@
 \alias{hdm-package}
 \title{hdm: High-Dimensional Metrics}
 \description{
-This packages implements methods for estimation and inference in a high-dimensional setting.
+This package implements methods for estimation and inference in a high-dimensional setting.
 }
 \details{
 \tabular{ll}{ Package: \tab hdm\cr Type: \tab Package\cr Version: \tab

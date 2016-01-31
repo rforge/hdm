@@ -1,8 +1,8 @@
 #' rigorous Lasso for Logistic Models: Inference
 #'
-#' The function estimates selected (low-dimensional) coefficients in a high-dimensional logistic model.
+#' The function estimates (low-dimensional) target coefficients in a high-dimensional logistic model.
 #'
-#' The functions estimates selected (low-dimensional) coefficients in a high-dimensional logistic model.
+#' The functions estimates (low-dimensional) target coefficients in a high-dimensional logistic model.
 #' An application is e.g. estimation of a treatment effect \eqn{\alpha_0} in a
 #' setting of high-dimensional controls. The function is a wrap function for \code{rlassologitEffect} which does inference for only one variable (d).
 #'
@@ -14,7 +14,7 @@
 #' @param I3 logical vector with same length as the number of controls;
 #' indicates if variables (TRUE) should be included in any case.
 #' @param \dots additional parameters
-#' @return The function returns an object of class \code{rlassologitEffect} with the following entries: \item{coefficients}{estimated
+#' @return The function returns an object of class \code{rlassologitEffects} with the following entries: \item{coefficients}{estimated
 #' value of the coefficients} \item{se}{standard errors}
 #' \item{t}{t-statistics} \item{pval}{p-values} \item{samplesize}{sample size of the data set} \item{I}{index of variables of the union of the lasso regressions}
 #' @references A. Belloni, V. Chernozhukov, Y. Wei (2013). Honest confidence regions for a regression parameter in logistic regression with a loarge number of controls.

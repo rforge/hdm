@@ -32,7 +32,7 @@
 #' \item{sigma}{root of the variance of the residuals}
 #' \item{call}{function call}
 #' \item{options}{options}
-#' @references TBD
+#' @references Belloni, A., Chernozhukov and Y. Wei (2013). Honest confidence regions for logistic regression with a large number of controls. arXiv preprint arXiv:1304.3969.
 #' @keywords logistic lasso lasso logistic regression
 #' @export
 #' @rdname rlassologit
@@ -211,7 +211,7 @@ rlassologit.fit <- function(x, y, post = TRUE, intercept = TRUE, penalty = list(
 #' @param x an object of class \code{rlassologit}
 #' @param all logical, indicates if coefficients of all variables (TRUE) should be displayed or only the non-zero ones (FALSE)
 #' @param digits significant digits in printout
-#' @param type the type of prediction required. The default ('response) is on the scale of the response variable; the alternative 'link' is on the scale of the linear predictors.
+#' @param type type of prediction required. The default ('response) is on the scale of the response variable; the alternative 'link' is on the scale of the linear predictors.
 #' @param newdata new data set for prediction
 #' @param ... arguments passed to the print function and other methods
 #' @keywords methods rlassologit

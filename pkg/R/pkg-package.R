@@ -1,6 +1,6 @@
 #' hdm: High-Dimensional Metrics
 #'
-#' This packages implements methods for estimation and inference in a high-dimensional setting.
+#' This package implements methods for estimation and inference in a high-dimensional setting.
 #'
 #' \tabular{ll}{ Package: \tab hdm\cr Type: \tab Package\cr Version: \tab
 #' 0.1\cr Date: \tab 2015-05-25\cr License: \tab GPL-3\cr } This package provides efficient estimators 
@@ -36,7 +36,7 @@ NULL
 #' Data set of growth compiled by Barro Lee.
 #'
 #' The data set contains growth data of Barro-Lee. The Barro Lee data consists
-#' of a panel of 138 countries for the period 1960 to 1985. The depenent
+#' of a panel of 138 countries for the period 1960 to 1985. The dependent
 #' variable is national growth rates in GDP per capita for the periods
 #' 1965-1975 and 1975-1985. The growth rate in GDP over a period from \eqn{t_1} to \eqn{t_2}
 #' is commonly defined as \eqn{\log(GDP_{t_1}/GDP_{t_2})}. The number of covariates is p=62.
@@ -71,11 +71,11 @@ NULL
 #' (SIPP) and consists of 9,915 observations. The observational units are
 #' household reference persons aged 25-64 and spouse if present. Households are
 #' included in the sample if at least one person is employed and no one is
-#' self-employed. The data set was analyzed in Chernozhukov and Hansen (2004)
+#' self-employed. The data set was analysed in Chernozhukov and Hansen (2004)
 #' and Belloni et al. (2014) where further details can be found. They examine
 #' the effects of 401(k) plans on wealth using data from the Survey of Income
 #' and Program Participation using 401(k) eligibility as an instrument for
-#' 401(k) participation
+#' 401(k) participation.
 #'
 #' @name pension
 #' @aliases 401(k) plans wealth data pension
@@ -116,7 +116,7 @@ NULL
 #'
 #' Dataset on settler mortality.
 #'
-#' Data set was analyzed in Acemoglu et al. (2001). A detailed decription of the data can be found at \url{http://economics.mit.edu/faculty/acemoglu/data/ajr2001} 
+#' Data set was analysed in Acemoglu et al. (2001). A detailed description of the data can be found at \url{http://economics.mit.edu/faculty/acemoglu/data/ajr2001} 
 #'
 #' @name AJR
 #' @docType data
@@ -133,7 +133,7 @@ NULL
 #' \item{GDP}{GDP}
 #' \item{Exprop}{Average protection against expropriation risk} 
 #' }
-#' @references D. Acemoglu, S. Johnson, J. A. Robinson  (2001). Colonial Origins of Comparative Development: An Empirical Investigation.
+#' @references D. Acemoglu, S. Johnson, J. A. Robinson  (2001). Colonial origins of comparative development: an empirical investigation.
 #' American Economic Review, 91, 1369--1401.
 #' @keywords datasets
 #' @examples
@@ -147,7 +147,7 @@ NULL
 #' Data set was analyzed in Belloni et al. (2012).  They estimate the effect of judicial eminent domain decisions on economic outcomes with instrumental variables (IV) in a setting high a large set of potential IVs. 
 #' A detailed decription of the data can be found at 
 #' \url{https://www.econometricsociety.org/publications/econometrica/2012/11/01/sparse-models-and-methods-optimal-instruments-application} 
-#' The data set contains four "sub-data sets" which differ mainly in the dependent variables: repeat-sales FHFA/OFHEO house price index for metro (FHFA) and non-metro (NM), the Case-Shiller home price index (CS), 
+#' The data set contains four "sub-data sets" which differ mainly in the dependent variables: repeat-sales FHFA/OFHEO house price index for metro (FHFA) and non-metro (NM) area, the Case-Shiller home price index (CS), 
 #' and state-level GDP from the Bureau of Economic Analysis - all transformed with the logarithm. The structure of each subdata set is comparable and given above.
 #'
 #' @name EminentDomain

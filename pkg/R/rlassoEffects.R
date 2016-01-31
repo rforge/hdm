@@ -1,8 +1,8 @@
 #' rigorous Lasso for Linear Models: Inference
 #'
-#' Estimation and inference of selected (low-dimensional) coefficients in a high-dimensional linear model.
+#' Estimation and inference of (low-dimensional) target coefficients in a high-dimensional linear model.
 #'
-#' The functions estimates selected (low-dimensional) coefficients in a high-dimensional linear model.
+#' The functions estimates (low-dimensional) target coefficients in a high-dimensional linear model.
 #' An application is e.g. estimation of a treatment effect \eqn{\alpha_0} in a
 #' setting of high-dimensional controls. The user can choose between the so-called post-double-selection method and partialling-out.
 #' The idea of the double selection method is to select variables by Lasso regression of
