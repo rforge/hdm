@@ -199,7 +199,7 @@ where $c_W(1-\gamma)$ is the $1-\gamma$-quantile of the random variable $W$, con
 \[ W:= \sqrt{n} \max_{1 \leq j \leq p} |2\mathbb{E}_n [x_{ij} \hat{\varepsilon}_i e_i]|,\]
 where $e_i$ are iid standard normal variables distributed independently from the data, and $ \hat{\varepsilon}_i$ denotes an estimate of the residuals.
 
-stimation proceeds by iteration.  The estimates of residuals $\hat \varepsilon_i$ are initialized by running least squares of $y_i$ on five regressors that are most correlated to $y_i$. This implies conservative starting values for $\lambda$ and the penalty loadings, and leads to the initial Lasso and Post-Lasso estimates, which are then further updated by iteration.  The resulting iterative procedure is fully justified in the theoretical literature.
+estimation proceeds by iteration.  The estimates of residuals $\hat \varepsilon_i$ are initialized by running least squares of $y_i$ on five regressors that are most correlated to $y_i$. This implies conservative starting values for $\lambda$ and the penalty loadings, and leads to the initial Lasso and Post-Lasso estimates, which are then further updated by iteration.  The resulting iterative procedure is fully justified in the theoretical literature.
 
   
 \subsection*{R implementation}  The function \texttt{rlasso} implements Lasso and post-Lasso, where the prefix ``r" signifies that these are theoretically rigorous versions of Lasso and post-Lasso. The default option is post-Lasso, \code{post=TRUE}.  This function returns an object of S3 class \code{rlasso} for which methods like \code{predict}, \code{print}, \code{summary} are provided.
