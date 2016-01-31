@@ -5,7 +5,11 @@ Version: 0.1
 Date: 2015-10-08
 Authors@R: c(person("Martin", "Spindler", email="spindler@mea.mpisoc.mpg.de", role=c("cre", "aut")), person("Victor", "Chernozhukov", role="aut"), person("Christian", "Hansen", role="aut"))
 Depends: R (>= 3.0.0)
-Description: This package provides the implementation of selected high-dimensional statistical and econometric methods.
+Description: Implementation of selected high-dimensional statistical and econometric methods for estimation and inference. 
+This package provides efficient estimators and  uniformly valid confidence intervals for various low-dimensional causal/structural parameters 
+appearing in high-dimensional approximately sparse models. The package includes functions for fitting heteroscedastic robust Lasso regressions 
+with non-Gaussian erros and for instrumental variable (IV) and treatment effect estimation in a high-dimensional setting. Moreover, the methods enable 
+valid post-selection inference and rely on a theoretically grounded, data-driven choice of the penalty.
 License: GPL-3
 LazyData: TRUE
 Imports: MASS,
