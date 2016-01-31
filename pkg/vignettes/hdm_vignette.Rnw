@@ -276,7 +276,7 @@ is first-order equivalent to the infeasible estimator $\tilde \alpha$ solving
 $$
 \mathbb{E}_n \psi(w_i, \tilde \alpha, \eta_0) = 0,
 $$
-where we use the true value of the nuisance parameter.  The equivalence holds in a variety of models under plausible conditions. A recent survey on the orthogonality principle in high-dimensions is given in \citet{CHS2015}. 
+where we use the true value of the nuisance parameter.  The equivalence holds in a variety of models under plausible conditions. The systematic development of the orthogonality condition for inference on low-dimensional parameters in modern high-dimensional settings is given in \citet{CHS2015}. 
 
 
 
