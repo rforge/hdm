@@ -5,7 +5,7 @@
 ## R CMD check results
 There were no ERRORs, WARNINGs or NOTEs on the local test enivornment.
 
-## Coments
+## Comments
 On R-Forge the following note is shown:
 "* checking package dependencies ... NOTE
   No repository set, so cyclic dependency check skipped"
