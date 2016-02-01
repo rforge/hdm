@@ -29,6 +29,25 @@
 #' Review of Economic Studies 81(2), 608-650.
 #' @keywords package Lasso Instrumental Variables Endogeneity Microeconometrics
 #' Program Evaluation treatment effects
+#' @importFrom stats binomial
+#' @importFrom stats coef
+#' @importFrom stats confint 
+#' @importFrom stats cor
+#' @importFrom stats glm
+#' @importFrom stats lm
+#' @importFrom stats model.frame
+#' @importFrom stats model.matrix
+#' @importFrom stats model.response
+#' @importFrom stats pnorm
+#' @importFrom stats predict
+#' @importFrom stats printCoefmat
+#' @importFrom stats qnorm
+#' @importFrom stats qt
+#' @importFrom stats quantile
+#' @importFrom stats rexp
+#' @importFrom stats rnorm
+#' @importFrom stats var
+#' @importFrom stats vcov
 NULL
 
 #' Growth data set
