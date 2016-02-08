@@ -71,7 +71,7 @@ LassoShooting.fit <- function(x, y, lambda, control = list(maxIter = 1000,
     # Update
     wp <- cbind(wp, beta)
     # Check termination
-    if (sum(abs(beta - beta_old)) < control$optTol) {
+    if (sum(abs(beta - beta_old), na.rm = TRUE) < control$optTol) {
       break
     }
     m <- m + 1

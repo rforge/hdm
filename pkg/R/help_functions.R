@@ -16,6 +16,7 @@ init_values <- function(X, y, number = 5, intercept = TRUE) {
     reg <- lm(y ~ -1 + X[, index])
     coefficients[index] <- coef(reg)
   }
+  coefficients[is.na( coefficients)] <- 0
   res <- list(residuals = reg$residuals, coefficients = coefficients)
   return(res)
 }
