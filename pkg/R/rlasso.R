@@ -73,22 +73,22 @@ globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "sele
 #' @keywords Lasso data-driven penalty non-Gaussian heteroscedasticity
 #' @export
 #' @rdname rlasso
-#' @examples
-#' set.seed(1)
-#' n = 100 #sample size
-#' p = 100 # number of variables
-#' s = 3 # nubmer of non-zero variables
-#' X = matrix(rnorm(n*p), ncol=p)
-#' beta = c(rep(3,s), rep(0,p-s))
-#' y = 1 + X%*%beta + rnorm(n)
-#' lasso.reg = rlasso(y~X, post=TRUE, intercept=TRUE)
-#' lasso.reg = rlasso(y~X,post=FALSE)  # use Lasso, not-Post-Lasso
-#' print(lasso.reg, all=FALSE)
-#' summary(lasso.reg, all=FALSE) # use this option to summarize results
-#' yhat.lasso = predict(lasso.reg)   #in-sample prediction
-#' Xnew = matrix(rnorm(n*p), ncol=p)  # new X
-#' Ynew =  Xnew%*%beta + rnorm(n)  #new Y
-#' yhat.lasso.new = predict(lasso.reg, newdata=Xnew)  #out-of-sample prediction
+# #' @examples
+# #' set.seed(1)
+# #' n = 100 #sample size
+# #' p = 100 # number of variables
+# #' s = 3 # nubmer of non-zero variables
+# #' X = matrix(rnorm(n*p), ncol=p)
+# #' beta = c(rep(3,s), rep(0,p-s))
+# #' y = 1 + X%*%beta + rnorm(n)
+# #' lasso.reg = rlasso(y~X, post=TRUE, intercept=TRUE)
+# #' lasso.reg = rlasso(y~X,post=FALSE)  # use Lasso, not-Post-Lasso
+# #' print(lasso.reg, all=FALSE)
+# #' summary(lasso.reg, all=FALSE) # use this option to summarize results
+# #' yhat.lasso = predict(lasso.reg)   #in-sample prediction
+# #' Xnew = matrix(rnorm(n*p), ncol=p)  # new X
+# #' Ynew =  Xnew%*%beta + rnorm(n)  #new Y
+# #' yhat.lasso.new = predict(lasso.reg, newdata=Xnew)  #out-of-sample prediction
  rlasso <- function(formula, data, post = TRUE, intercept = TRUE, 
                            penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = .1/log(n)),
                           control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...) {
