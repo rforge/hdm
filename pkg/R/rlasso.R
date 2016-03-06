@@ -100,10 +100,10 @@ globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "sele
   mf[[1L]] <- quote(stats::model.frame)
   mf <- eval(mf, parent.frame())
   mt <- attr(mf, "terms")
-  attr(mt, "intercept") <- 0
+  attr(mt, "intercept") <- 1
   y <- model.response(mf, "numeric")
   n <- length(y)
-  x <- model.matrix(mt, mf)
+  x <- model.matrix(mt, mf)[,-1, drop=FALSE]
   est <- rlasso.fit(x, y, post = post, intercept = intercept, penalty=penalty,
                control = control)
   est$call <- cl
@@ -117,11 +117,13 @@ globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "sele
 rlasso.fit <- function(x, y, post = TRUE, intercept = TRUE,
                            penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = 0.1),
                            control = list(numIter = 15, tol = 10^-5, threshold = NULL),...) {
+  x <- as.matrix(x)
+  y <- as.matrix(y)
+  
   n <- dim(x)[1]
   p <- dim(x)[2]
   
-  x <- as.matrix(x)
-  y <- as.matrix(y)
+
   
   if (is.null(colnames(x)))
     colnames(x) <- paste("V", 1:p, sep = "")
@@ -279,6 +281,13 @@ rlasso.fit <- function(x, y, post = TRUE, intercept = TRUE,
   } else {
     intercept.value <- NA
   }
+  
+  #if (intercept) {
+  #  e1 <- y - x1 %*% coefTemp[ind1] - intercept.value 
+  #} else {
+  #  e1 <- y - x1 %*% coefTemp[ind1]
+  #}
+  s1 <- sqrt(var(e1))
   est <- list(coefficients = coefTemp, intercept.value=intercept.value, index = ind1, lambda = lambda,
               lambda0 = lambda0, loadings = Ups1, residuals = as.vector(e1), sigma = s1,
               iter = mm, call = match.call(), options = list(post = post, intercept = intercept,
@@ -509,7 +518,8 @@ model.matrix.rlasso <- function(object, ...) {
 
 predict.rlasso <- function (object, newdata = NULL, ...){
   if (missing(newdata) || is.null(newdata)) {
-    X <- model.matrix(object)
+    form <- eval(model.matrix(object))
+    X <- model.matrix(form)[,-1, drop=FALSE]
 
     if(sum(object$options$ind.scale)!=0) {
       X <- X[,-object$options$ind.scale]
@@ -520,8 +530,9 @@ predict.rlasso <- function (object, newdata = NULL, ...){
     if(all(is.element(varcoef,colnames(newdata)))){
       X <- as.matrix(newdata[,varcoef])
     } else {
-      X <- as.matrix(newdata)
-
+      #X <- as.matrix(newdata)
+      formula <- eval(object$call[[2]])
+      X <- model.matrix(formula, data=newdata)[,-1, drop=FALSE]
       if(sum(object$options$ind.scale)!=0) {
         X <- X[,-object$options$ind.scale]
       }

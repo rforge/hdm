@@ -72,11 +72,10 @@ rlassologit <- function(formula, data, post = TRUE, intercept = TRUE, penalty = 
   mf[[1L]] <- quote(stats::model.frame)
   mf <- eval(mf, parent.frame())
   mt <- attr(mf, "terms")
-  attr(mt, "intercept") <- 0
+  attr(mt, "intercept") <- 1
   y <- model.response(mf, "numeric")
   n <- length(y)
-  x <- model.matrix(mt, mf)
-  
+  x <- model.matrix(mt, mf)[,-1, drop=FALSE]
   est <- rlassologit.fit(x, y, post = post, intercept = intercept, penalty = penalty, 
                          control = control)
   est$call <- cl
@@ -222,14 +221,21 @@ rlassologit.fit <- function(x, y, post = TRUE, intercept = TRUE, penalty = list(
 predict.rlassologit <- function(object, newdata = NULL, type = "response", 
                                 ...) {
   if (missing(newdata) || is.null(newdata)) {
-    X <- model.matrix(object)
+    form <- eval(model.matrix(object))
+    X <- model.matrix(form)[,-1, drop=FALSE]
   } else {
     varcoef <- names(object$coefficients)
     if (all(is.element(varcoef, colnames(newdata)))) {
       X <- as.matrix(newdata[, varcoef])
     } else {
-      X <- as.matrix(newdata)
-      stopifnot(ncol(X) == length(object$coefficients))
+      #X <- as.matrix(newdata)
+      formula <- eval(object$call[[2]])
+      X <- model.matrix(formula, data=newdata)[,-1, drop=FALSE]
+      if(sum(object$options$ind.scale)!=0) {
+        X <- X[,-object$options$ind.scale]
+      }
+      stopifnot(ncol(X)==length(object$coefficients))
+      
     }
   }
   n <- dim(X)[1]  #length(object$residuals)
