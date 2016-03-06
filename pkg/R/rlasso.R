@@ -502,9 +502,13 @@ model.matrix.rlasso <- function(object, ...) {
 
 predict.rlasso <- function (object, newdata = NULL, ...){
   if (missing(newdata) || is.null(newdata)) {
+    if (is.matrix(model.matrix(object))) {
+      X <- model.matrix(object)
+    }
+    if (class(model.matrix(object))=="formula") {
     form <- eval(model.matrix(object))
     X <- model.matrix(form)[,-1, drop=FALSE]
-
+    }
     if(sum(object$options$ind.scale)!=0) {
       X <- X[,-object$options$ind.scale]
     }
@@ -514,9 +518,13 @@ predict.rlasso <- function (object, newdata = NULL, ...){
     if(all(is.element(varcoef,colnames(newdata)))){
       X <- as.matrix(newdata[,varcoef])
     } else {
+      if (is.matrix(newdata)) {
+        X <- as.matrix(newdata)
+      } else {
       #X <- as.matrix(newdata)
       formula <- eval(object$call[[2]])
       X <- model.matrix(formula, data=newdata)[,-1, drop=FALSE]
+      }
       if(sum(object$options$ind.scale)!=0) {
         X <- X[,-object$options$ind.scale]
       }

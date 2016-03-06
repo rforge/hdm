@@ -221,8 +221,13 @@ rlassologit.fit <- function(x, y, post = TRUE, intercept = TRUE, penalty = list(
 predict.rlassologit <- function(object, newdata = NULL, type = "response", 
                                 ...) {
   if (missing(newdata) || is.null(newdata)) {
-    form <- eval(model.matrix(object))
-    X <- model.matrix(form)[,-1, drop=FALSE]
+    if (is.matrix(model.matrix(object))) {
+      X <- model.matrix(object)
+    }
+    if (class(model.matrix(object))=="formula") {
+      form <- eval(model.matrix(object))
+      X <- model.matrix(form)[,-1, drop=FALSE]
+    }
   } else {
     varcoef <- names(object$coefficients)
     if (all(is.element(varcoef, colnames(newdata)))) {
