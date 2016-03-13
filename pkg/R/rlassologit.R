@@ -235,7 +235,7 @@ predict.rlassologit <- function(object, newdata = NULL, type = "response",
     } else {
       #X <- as.matrix(newdata)
       formula <- eval(object$call[[2]])
-      X <- model.matrix(formula, data=newdata)[,-1, drop=FALSE]
+      X <- model.matrix(formula, data=as.data.frame(newdata))[,-1, drop=FALSE]
       if(sum(object$options$ind.scale)!=0) {
         X <- X[,-object$options$ind.scale]
       }
@@ -275,7 +275,7 @@ model.matrix.rlassologit <- function(object, ...) {
   # falls formula
   if (is.call(object$call[[2]])) { # problem when formula handed as expression
     # falls kein Datensatz uebergeben
-    if (!is.null(object$call$data)) { # added "!"
+    if (is.null(object$call$data)) { # added "!"
       X <- model.frame(object$call[[2]])
       mt <- attr(X, "terms")
       attr(mt, "intercept") <- 0
