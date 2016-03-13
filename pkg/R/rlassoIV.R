@@ -8,7 +8,9 @@
 #' (2015) and is built on 'triple selection' to achieve an orthogonal moment
 #' function. The function returns an object of S3 class \code{rlassoIV}.
 #' Moreover, it is wrap function for the case that selection should be done only with the instruments Z (\code{rlassoIVselectZ}) or with 
-#' the control variables X (\code{rlassoIVselectX}) or without selection (\code{tsls}).
+#' the control variables X (\code{rlassoIVselectX}) or without selection (\code{tsls}). Exogenous variables 
+#' \code{x} are automatically used as instruments and added to the
+#' instrument set \code{z}.
 #'
 #' @aliases rlassoIV rlassoIVmult
 #' @param x matrix of exogenous variables
@@ -96,8 +98,6 @@ rlassoIV <- function(x, d, y, z, select.Z = TRUE, select.X = TRUE, post = TRUE,
     class(res) <- "rlassoIV"
     return(res)
   }
-  
-  
 }
 
 #' @rdname rlassoIV

@@ -77,7 +77,7 @@ rlassologit <- function(formula, data, post = TRUE, intercept = TRUE, penalty = 
   n <- length(y)
   x <- model.matrix(mt, mf)[,-1, drop=FALSE]
   est <- rlassologit.fit(x, y, post = post, intercept = intercept, penalty = penalty, 
-                         control = control)
+                         control = control, ...)
   est$call <- cl
   return(est)
 }
@@ -121,8 +121,8 @@ rlassologit.fit <- function(x, y, post = TRUE, intercept = TRUE, penalty = list(
   
   s0 <- sqrt(var(y))
   # calculation parameters
-  xs <- scale(x, center = FALSE, scale = TRUE)
-  log.lasso <- glmnet::glmnet(xs, y, family = c("binomial"), alpha = 1, 
+  #xs <- scale(x, center = FALSE, scale = TRUE) # to prevent "double" scaling, removed also from next line
+  log.lasso <- glmnet::glmnet(x, y, family = c("binomial"), alpha = 1,
                               lambda = lambda[1], standardize = TRUE, intercept = intercept)
   coefTemp <- as.vector(log.lasso$beta)
   coefTemp[is.na(coefTemp)] <- 0
@@ -136,7 +136,7 @@ rlassologit.fit <- function(x, y, post = TRUE, intercept = TRUE, penalty = list(
     
     if (intercept == FALSE) {
       a0 <- 0  # or NA?
-      res <- rep(y - 0.5, n)
+      res <- y - 0.5
       message("Residuals not defined, set to 0.5")
     }
     est <- list(coefficients = rep(0, p), a0 = a0, index = rep(FALSE, 
@@ -273,9 +273,9 @@ predict.rlassologit <- function(object, newdata = NULL, type = "response",
 model.matrix.rlassologit <- function(object, ...) {
   
   # falls formula
-  if (is.call(object$call[[2]])) {
+  if (is.call(object$call[[2]])) { # problem when formula handed as expression
     # falls kein Datensatz uebergeben
-    if (is.null(object$call$data)) {
+    if (!is.null(object$call$data)) { # added "!"
       X <- model.frame(object$call[[2]])
       mt <- attr(X, "terms")
       attr(mt, "intercept") <- 0
@@ -283,7 +283,7 @@ model.matrix.rlassologit <- function(object, ...) {
       # falls Datensatz uebergeben
     } else {
       dataev <- eval(object$call$data)
-      mm <- as.matrix(dataev[, names(object$coefficients)])
+      mm <- as.matrix(dataev[, names(object$coefficients)]) # here problem when no formula!!
     }
   } else {
     # falls default
