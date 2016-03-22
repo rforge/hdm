@@ -33,9 +33,9 @@ The function returns an element of class \code{rlassoIVselectX}
 \details{
 The implementation is a special case of of Chernozhukov et al. (2015).
 The option \code{post=TRUE} conducts post-lasso estimation for the Lasso estimations, i.e. a refit of the
-model with the selected variables. If variables of the exogenous variables in
-\code{x} should be used as instruments, they have to be added to the
-instrument set \code{z} explicitly.
+model with the selected variables. Exogenous variables
+\code{x} are automatically used as instruments and added to the
+instrument set \code{z}.
 }
 \references{
 Chernozhukov, V., Hansen, C. and M. Spindler (2015). Post-Selection and Post-Regularization Inference in Linear

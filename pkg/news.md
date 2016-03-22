@@ -5,3 +5,6 @@
 * rlassoIVselectX / rlassoIV: change in man pages (exogenous variables are automatically used as instruments)
 * rlassologit.fit: remove "double scaling"
 * predict.rlassologit: force as data.frame
+* 22/03/2016: added significance test, R^2, adjusted R^2 to summary.rlasso (description in vignette)
+* 22/03/2016: vignette: changes in treatment effect example
+* 22/03/2016: rlasso with option model

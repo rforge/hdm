@@ -6,12 +6,12 @@
 \title{rlasso: Function for Lasso estimation under homoscedastic and heterosceadstic non-Gaussian
 disturbances}
 \usage{
-rlasso(formula, data, post = TRUE, intercept = TRUE,
+rlasso(formula, data, post = TRUE, intercept = TRUE, model = TRUE,
   penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE,
   lambda.start = NULL, c = 1.1, gamma = 0.1/log(n)), control = list(numIter =
   15, tol = 10^-5, threshold = NULL), ...)
 
-rlasso.fit(x, y, post = TRUE, intercept = TRUE,
+rlasso.fit(x, y, post = TRUE, intercept = TRUE, model = TRUE,
   penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE,
   lambda.start = NULL, c = 1.1, gamma = 0.1), control = list(numIter = 15, tol
   = 10^-5, threshold = NULL), ...)
@@ -30,6 +30,8 @@ typically the environment from which \code{rlasso} is called.}
 
 \item{intercept}{logical. If \code{TRUE}, intercept is included which is not
 penalized.}
+
+\item{model}{logical. If \code{TRUE} (default), model matrix is returned.}
 
 \item{penalty}{list with options for the calculation of the penalty.
 \itemize{
@@ -88,23 +90,6 @@ regressor-independent loadings und heteroscedasticity are used. The options "X-d
 
 The option \code{post=TRUE} conducts post-lasso estimation, i.e. a refit of
 the model with the selected variables.
-}
-\examples{
-set.seed(1)
-n = 100 #sample size
-p = 100 # number of variables
-s = 3 # nubmer of non-zero variables
-X = matrix(rnorm(n*p), ncol=p)
-beta = c(rep(3,s), rep(0,p-s))
-y = 1 + X\%*\%beta + rnorm(n)
-lasso.reg = rlasso(y~X, post=TRUE, intercept=TRUE)
-lasso.reg = rlasso(y~X,post=FALSE)  # use Lasso, not-Post-Lasso
-print(lasso.reg, all=FALSE)
-summary(lasso.reg, all=FALSE) # use this option to summarize results
-yhat.lasso = predict(lasso.reg)   #in-sample prediction
-Xnew = matrix(rnorm(n*p), ncol=p)  # new X
-Ynew =  Xnew\%*\%beta + rnorm(n)  #new Y
-yhat.lasso.new = predict(lasso.reg, newdata=Xnew)  #out-of-sample prediction
 }
 \references{
 A. Belloni, D. Chen, V. Chernozhukov and C. Hansen (2012).

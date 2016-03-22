@@ -26,5 +26,31 @@ pred6 <- predict(lasso.reg, newdata=data)
 
 rhs <- paste("V", 1:100, sep="", collapse="+")
 form <- as.formula(paste("y", "~", rhs))
-lasso <- rlasso(form, data=frame)
+lasso <- rlasso(form, data=data)
 pred7 <- predict(lasso.reg)
+
+
+#### Test significance test:
+
+head(lasso.reg$dev)
+lasso.reg = rlasso(y~X, post=TRUE, intercept=TRUE, model=FALSE)
+summary(lasso.reg, all=FALSE)
+lasso.reg = rlasso(y~X, post=TRUE, intercept=TRUE, model=TRUE)
+summary(lasso.reg, all=FALSE)
+
+lasso.reg = rlasso(y~X, post=TRUE, intercept=FALSE, model=TRUE)
+summary(lasso.reg, all=FALSE)
+
+set.seed(123456)
+R <- 500
+pvalues <- rep(NA, R)
+n = 100 #sample size
+p = 20 # number of variables
+s = 0 # nubmer of non-zero variables
+beta = c(rep(3,s), rep(0,p-s))
+for (i in 1:R) {
+X = matrix(rnorm(n*p), ncol=p)
+y = 1 + X%*%beta + rnorm(n)
+lasso.reg = rlasso(y~X, post=TRUE, intercept=TRUE, model=TRUE)
+pvalues[i] <- summary(lasso.reg)$pval
+}

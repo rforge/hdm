@@ -1,7 +1,13 @@
 ## Reported Bugs and new Features
 
-* Formula interface for all functions
-* Quantile Effects
-* Improvement speed and performance
-* Support of Sparse Matrix
-* Formula for rlasso/rlassologit and predict (Bug 2)
+* short-run goals:  
++ Formula interface for all functions (treatment family)  
++ Quantile Effects  
++ Improvement speed and performance  
++ Formula for rlasso/rlassologit and predict (Bug 2) (revise predict function)  
+
+
+* long-term goals:  
++ Support of Sparse Matrix  
++ glm-family (logit own implementation, Poisson, ...)
++ Treatment effects: "functional implementation"

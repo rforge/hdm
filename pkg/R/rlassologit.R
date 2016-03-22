@@ -230,8 +230,22 @@ predict.rlassologit <- function(object, newdata = NULL, type = "response",
     }
   } else {
     varcoef <- names(object$coefficients)
-    if (all(is.element(varcoef, colnames(newdata)))) {
+    varcoefbasis <- NULL
+    if (!is.null(varcoef)) {
+    matname <- as.character(object$call$formula[[3]])
+    varcoefbasis <- sub(matname, "", varcoef)
+    }
+    if (all(is.element(varcoef, colnames(newdata))) || (all(is.element(varcoefbasis, colnames(newdata))))) {
+    #if (all(is.element(varcoef, colnames(newdata)))) {
+    #  X <- as.matrix(newdata[, varcoef])
+    #  test <- try(X <- as.matrix(newdata[, varcoef]), silent=TRUE)
+    #  if (class(test)=="error") X <- as.matrix(newdata[, varcoefbasis])
+    if (is.null(varcoefbasis)) {
       X <- as.matrix(newdata[, varcoef])
+    } else {
+      X <- as.matrix(newdata[, varcoefbasis])
+    }
+      
     } else {
       #X <- as.matrix(newdata)
       formula <- eval(object$call[[2]])
@@ -246,7 +260,7 @@ predict.rlassologit <- function(object, newdata = NULL, type = "response",
   n <- dim(X)[1]  #length(object$residuals)
   beta <- object$coefficients
   if (object$options[["intercept"]]) {
-    yp <- object$a0 + X %*% as.vector(beta)
+    yp <- object$a0 + as.matrix(X) %*% as.vector(beta)
     if (dim(X)[2] == 0) 
       yp <- rep(object$a0, n)
     if (type == "response") 
