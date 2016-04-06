@@ -287,6 +287,7 @@ rlasso.fit <- function(x, y, post = TRUE, intercept = TRUE, model=TRUE,
                                                              control = control, penalty = penalty, ind.scale=ind,
                                                              mu = mu, meanx = meanx), model=model)
   if (model) {
+    x <- scale(x, -meanx, FALSE)
     est$model <- x
   } else {
     est$model <- NULL
