@@ -1,4 +1,3 @@
-
 #' rlassologit: Function for logistic Lasso estimation
 #'
 #' The function estimates the coefficients of a logistic Lasso regression with
@@ -13,15 +12,15 @@
 #' that class): a symbolic description of the model to be fitted in the form
 #' \code{y~x}
 #' @param data an optional data frame, list or environment
-#' @param x regressors (matrix)
-#' @param y dependent variable (vector or matrix)
 #' @param post logical. If \code{TRUE}, post-lasso estimation is conducted.
 #' @param intercept logical. If \code{TRUE}, intercept is included which is not
 #' penalized.
+#' @param model logical. If \code{TRUE} (default), model matrix is returned.
 #' @param penalty list with options for the calculation of the penalty.  \code{c} and \code{gamma} constants for the penalty.
 #' @param control list with control values.
 #' \code{threshold} is applied to the final estimated lasso
 #' coefficients. Absolute values below the threshold are set to zero.
+#' @param model logical. If \code{TRUE} (default), model matrix is returned.
 #' @param ... further parameters passed to glmnet
 #' @return \code{rlassologit} returns an object of class
 #' \code{rlassologit}. An object of class \code{rlassologit} is a list
@@ -32,6 +31,7 @@
 #' \item{sigma}{root of the variance of the residuals}
 #' \item{call}{function call}
 #' \item{options}{options}
+# #' \item{model}{model matrix (if \code{model = TRUE} in function call)}
 #' @references Belloni, A., Chernozhukov and Y. Wei (2013). Honest confidence regions for logistic regression with a large number of controls. arXiv preprint arXiv:1304.3969.
 #' @keywords logistic lasso lasso logistic regression
 #' @export
@@ -62,8 +62,8 @@
 #' predict(rlassologit.reg, newdata=X3)
 #' }
 #' @export
-rlassologit <- function(formula, data, post = TRUE, intercept = TRUE, penalty = list(lambda = NULL, 
-                                                                                     c = 1.1, gamma = 0.1/log(n)), control = list(threshold = NULL), ...) {
+rlassologit <- function(formula, data, post = TRUE, intercept = TRUE,  model = TRUE, penalty = list(lambda = NULL, 
+                                                                                     c = 1.1, gamma = 0.1/log(n)), control = list(threshold = NULL),  ...) {
   cl <- match.call()
   mf <- match.call(expand.dots = FALSE)
   m <- match(c("formula", "data"), names(mf), 0L)
@@ -76,8 +76,8 @@ rlassologit <- function(formula, data, post = TRUE, intercept = TRUE, penalty = 
   y <- model.response(mf, "numeric")
   n <- length(y)
   x <- model.matrix(mt, mf)[,-1, drop=FALSE]
-  est <- rlassologit.fit(x, y, post = post, intercept = intercept, penalty = penalty, 
-                         control = control, ...)
+  est <- rlassologit.fit(x, y, post = post, intercept = intercept, model = model, penalty = penalty,  
+                         control = control,  ...)
   est$call <- cl
   return(est)
 }
@@ -85,8 +85,9 @@ rlassologit <- function(formula, data, post = TRUE, intercept = TRUE, penalty = 
 
 #' @rdname rlassologit
 #' @export
-
-rlassologit.fit <- function(x, y, post = TRUE, intercept = TRUE, penalty = list(lambda = NULL, 
+#' @param x regressors (matrix)
+#' @param y dependent variable (vector or matrix)
+rlassologit.fit <- function(x, y, post = TRUE, intercept = TRUE,  model = TRUE, penalty = list(lambda = NULL, 
                                                                                 c = 1.1, gamma =  0.1/log(n)), control = list(threshold = NULL), ...) {
   n <- dim(x)[1]
   p <- dim(x)[2]
@@ -143,6 +144,7 @@ rlassologit.fit <- function(x, y, post = TRUE, intercept = TRUE, penalty = list(
                                                                p), s0 = s0, lambda0 = lambda0, residuals = res, sigma = sqrt(var(res)), 
                 call = match.call(), options = list(post = post, intercept = intercept, 
                                                     control = control))
+    if (model) est$model <- x
     class(est) <- c("rlassologit")
     return(est)
   }
@@ -190,6 +192,7 @@ rlassologit.fit <- function(x, y, post = TRUE, intercept = TRUE, penalty = list(
   est <- list(coefficients = coefTemp, a0 = a0, index = ind1, lambda0 = lambda0, 
               residuals = e1, sigma = sqrt(var(e1)), call = match.call(), options = list(post = post, 
                                                                                          intercept = intercept, control = control))
+  if (model) est$model <- x
   class(est) <- c("rlassologit")
   return(est)
 }

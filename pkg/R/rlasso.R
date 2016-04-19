@@ -64,6 +64,7 @@ globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "sele
 #' \item{residuals}{residuals, response minus fitted values} \item{sigma}{root of the variance of
 #' the residuals} \item{iter}{number of iterations} \item{call}{function call}
 #' \item{options}{options}
+#' \item{model}{model matrix (if \code{model = TRUE} in function call)}
 #' @references A. Belloni, D. Chen, V. Chernozhukov and C. Hansen (2012).
 #' Sparse models and methods for optimal instruments with an application to
 #' eminent domain. \emph{Econometrica} 80 (6), 2369-2429.
@@ -74,7 +75,7 @@ globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "sele
 #' @keywords Lasso data-driven penalty non-Gaussian heteroscedasticity
 #' @export
 #' @rdname rlasso
-rlasso <- function(formula, data, post = TRUE, intercept = TRUE, model=TRUE, 
+rlasso <- function(formula, data, post = TRUE, intercept = TRUE, model = TRUE, 
                            penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = .1/log(n)),
                           control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...) {
   cl <- match.call()
@@ -99,7 +100,7 @@ rlasso <- function(formula, data, post = TRUE, intercept = TRUE, model=TRUE,
 #' @export
 #' @param y dependent variable (vector, matrix or object can be coerced to matrix)
 #' @param x regressors (vector, matrix or object can be coerced to matrix)
-rlasso.fit <- function(x, y, post = TRUE, intercept = TRUE, model=TRUE,
+rlasso.fit <- function(x, y, post = TRUE, intercept = TRUE, model = TRUE,
                            penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = 0.1),
                            control = list(numIter = 15, tol = 10^-5, threshold = NULL),...) {
   x <- as.matrix(x)
