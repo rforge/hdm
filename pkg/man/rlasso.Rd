@@ -67,6 +67,7 @@ variable, product of lambda0 (the penalization parameter) and the loadings}
 \item{residuals}{residuals, response minus fitted values} \item{sigma}{root of the variance of
 the residuals} \item{iter}{number of iterations} \item{call}{function call}
 \item{options}{options}
+\item{model}{model matrix (if \code{model = TRUE} in function call)}
 }
 \description{
 The function estimates the coefficients of a Lasso regression with

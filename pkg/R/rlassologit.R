@@ -20,7 +20,6 @@
 #' @param control list with control values.
 #' \code{threshold} is applied to the final estimated lasso
 #' coefficients. Absolute values below the threshold are set to zero.
-#' @param model logical. If \code{TRUE} (default), model matrix is returned.
 #' @param ... further parameters passed to glmnet
 #' @return \code{rlassologit} returns an object of class
 #' \code{rlassologit}. An object of class \code{rlassologit} is a list

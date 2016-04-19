@@ -252,7 +252,7 @@ and restriction can be tested using the sup-score statistic:
  
 $$S = \| \sqrt{n} \mathbb{E}_n \left[ (y_i - \hat a_0) x_i \right] \|_\infty,$$
 
-where $\hat a_i = \En [y_i]$.  The critical value for this statistic can be approximated  by the multiplier bootstrap procedure, which simulates the statistic:
+where $\hat a_i =  \mathbb{E}_n [y_i]$.  The critical value for this statistic can be approximated  by the multiplier bootstrap procedure, which simulates the statistic:
  
 $$ S^* = \| \sqrt{n} \mathbb{E}_n \left[ (y_i - \hat a_0) x_i g_i \right] \|_\infty,$$
  

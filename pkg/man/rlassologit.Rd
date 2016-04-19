@@ -5,12 +5,13 @@
 \alias{rlassologit.fit}
 \title{rlassologit: Function for logistic Lasso estimation}
 \usage{
-rlassologit(formula, data, post = TRUE, intercept = TRUE,
+rlassologit(formula, data, post = TRUE, intercept = TRUE, model = TRUE,
   penalty = list(lambda = NULL, c = 1.1, gamma = 0.1/log(n)),
   control = list(threshold = NULL), ...)
 
-rlassologit.fit(x, y, post = TRUE, intercept = TRUE, penalty = list(lambda
-  = NULL, c = 1.1, gamma = 0.1/log(n)), control = list(threshold = NULL), ...)
+rlassologit.fit(x, y, post = TRUE, intercept = TRUE, model = TRUE,
+  penalty = list(lambda = NULL, c = 1.1, gamma = 0.1/log(n)),
+  control = list(threshold = NULL), ...)
 }
 \arguments{
 \item{formula}{an object of class 'formula' (or one that can be coerced to
@@ -23,6 +24,8 @@ that class): a symbolic description of the model to be fitted in the form
 
 \item{intercept}{logical. If \code{TRUE}, intercept is included which is not
 penalized.}
+
+\item{model}{logical. If \code{TRUE} (default), model matrix is returned.}
 
 \item{penalty}{list with options for the calculation of the penalty.  \code{c} and \code{gamma} constants for the penalty.}
 
@@ -46,6 +49,7 @@ estimates (without intercept)} \item{a0}{value of intercept} \item{index}{index 
 \item{sigma}{root of the variance of the residuals}
 \item{call}{function call}
 \item{options}{options}
+#\item{model}{model matrix (if \code{model = TRUE} in function call)}
 }
 \description{
 The function estimates the coefficients of a logistic Lasso regression with
