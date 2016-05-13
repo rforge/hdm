@@ -24,7 +24,8 @@
 #' @return \code{rlassologit} returns an object of class
 #' \code{rlassologit}. An object of class \code{rlassologit} is a list
 #' containing at least the following components: \item{coefficients}{parameter
-#' estimates (without intercept)} \item{a0}{value of intercept} \item{index}{index of selected variables (logicals)}
+#' estimates} \item{beta}{parameter
+#' estimates (without intercept)} \item{intercept}{value of intercept} \item{index}{index of selected variables (logicals)}
 #' \item{lambda}{penalty term}
 #' \item{residuals}{residuals}
 #' \item{sigma}{root of the variance of the residuals}
@@ -75,6 +76,13 @@ rlassologit <- function(formula, data, post = TRUE, intercept = TRUE,  model = T
   y <- model.response(mf, "numeric")
   n <- length(y)
   x <- model.matrix(mt, mf)[,-1, drop=FALSE]
+  if (missing(data)) {
+    if (is.call(formula[[3]])) {
+      colnames(x) <- gsub(re.escape(format(formula[[3]])), "", colnames(x))
+    } else {
+      colnames(x) <- gsub(re.escape(formula[[3]]), "", colnames(x))  
+    }
+  }
   est <- rlassologit.fit(x, y, post = post, intercept = intercept, model = model, penalty = penalty,  
                          control = control,  ...)
   est$call <- cl
@@ -114,8 +122,8 @@ rlassologit.fit <- function(x, y, post = TRUE, intercept = TRUE,  model = TRUE, 
     lambda <- penalty$lambda/(2 * n)
     lambda0 <- lambda * (2 * n)
   } else {
-    lambda0 <- penalty$c/2 * sqrt(n) * qnorm(1 - penalty$gamma/(2 * 
-                                                                  p))
+    lambda0 <- penalty$c/2 * sqrt(n) * qnorm(1 - penalty$gamma/(2 * p))
+    #lambda0 <- penalty$c/2 * sqrt(n) * qnorm(1 - penalty$gamma/(max(n, p*log(n))))
     lambda <- lambda0/(2 * n)
   }
   
@@ -132,14 +140,20 @@ rlassologit.fit <- function(x, y, post = TRUE, intercept = TRUE,  model = TRUE, 
     if (intercept == TRUE) {
       a0 <- log(mean(y)/(1 - mean(y)))
       res <- y - mean(y)
+      coefs <- c(a0, rep(0,p))
+      names(coefTemp) <- names(ind1) <- colnames(x)
+      names(coefs) <- c("(Intercept)", names(coefTemp))
     }
     
     if (intercept == FALSE) {
       a0 <- 0  # or NA?
       res <- y - 0.5
       message("Residuals not defined, set to 0.5")
+      coefs <- rep(0,p)
+      names(coefTemp) <- names(ind1) <- colnames(x)
+      names(coefs) <- names(coefTemp)
     }
-    est <- list(coefficients = rep(0, p), a0 = a0, index = rep(FALSE, 
+    est <- list(coefficients = coefs, beta = coefTemp, intercept = a0, index = rep(FALSE, 
                                                                p), s0 = s0, lambda0 = lambda0, residuals = res, sigma = sqrt(var(res)), 
                 call = match.call(), options = list(post = post, intercept = intercept, 
                                                     control = control))
@@ -172,23 +186,28 @@ rlassologit.fit <- function(x, y, post = TRUE, intercept = TRUE,  model = TRUE, 
     e1 <- y - predict(log.lasso, newx = x, type = "response")
   }
   
+  coefTemp <- as.vector(coefTemp)
+  coefTemp[abs(coefTemp) < control$threshold] <- 0
+  ind1 <- as.vector(ind1)
+  names(coefTemp) <- names(ind1) <- colnames(x)
+  
   
   if (intercept == TRUE) {
     if (post == TRUE) 
       a0 <- coef(reg)[1]
     if (post == FALSE) 
       a0 <- coef(log.lasso)[1]
+    
+    coefs <- c(a0, coefTemp)
+    names(coefs)[1] <- "(Intercept)"
   }
   
   if (intercept == FALSE) {
     a0 <- 0  # or NA?
+    coefs <- coefTemp
   }
   
-  coefTemp <- as.vector(coefTemp)
-  coefTemp[abs(coefTemp) < control$threshold] <- 0
-  ind1 <- as.vector(ind1)
-  names(coefTemp) <- names(ind1) <- colnames(x)
-  est <- list(coefficients = coefTemp, a0 = a0, index = ind1, lambda0 = lambda0, 
+  est <- list(coefficients = coefs, beta = coefTemp, intercept=a0, index = ind1, lambda0 = lambda0, 
               residuals = e1, sigma = sqrt(var(e1)), call = match.call(), options = list(post = post, 
                                                                                          intercept = intercept, control = control))
   if (model) est$model <- x
@@ -220,51 +239,129 @@ rlassologit.fit <- function(x, y, post = TRUE, intercept = TRUE,  model = TRUE, 
 #' @aliases methods.rlassologit print.rlassologit summary.rlassologit predict.rlassologit model.matrix.rlassologit
 #' @export
 
-predict.rlassologit <- function(object, newdata = NULL, type = "response", 
-                                ...) {
+# predict.rlassologit <- function(object, newdata = NULL, type = "response", 
+#                                 ...) {
+#   if (missing(newdata) || is.null(newdata)) {
+#     if (is.matrix(model.matrix(object))) {
+#       X <- model.matrix(object)
+#     }
+#     if (class(model.matrix(object))=="formula") {
+#       form <- eval(model.matrix(object))
+#       X <- model.matrix(form)[,-1, drop=FALSE]
+#     }
+#   } else {
+#     varcoef <- names(object$coefficients)
+#     varcoefbasis <- NULL
+#     if (!is.null(varcoef)) {
+#     matname <- as.character(object$call$formula[[3]])
+#     varcoefbasis <- sub(matname, "", varcoef)
+#     }
+#     if (all(is.element(varcoef, colnames(newdata))) || (all(is.element(varcoefbasis, colnames(newdata))))) {
+#     #if (all(is.element(varcoef, colnames(newdata)))) {
+#     #  X <- as.matrix(newdata[, varcoef])
+#     #  test <- try(X <- as.matrix(newdata[, varcoef]), silent=TRUE)
+#     #  if (class(test)=="error") X <- as.matrix(newdata[, varcoefbasis])
+#     if (is.null(varcoefbasis)) {
+#       X <- as.matrix(newdata[, varcoef])
+#     } else {
+#       X <- as.matrix(newdata[, varcoefbasis])
+#     }
+#       
+#     } else {
+#       #X <- as.matrix(newdata)
+#       formula <- eval(object$call[[2]])
+#       X <- model.matrix(formula, data=as.data.frame(newdata))[,-1, drop=FALSE]
+#       if(sum(object$options$ind.scale)!=0) {
+#         X <- X[,-object$options$ind.scale]
+#       }
+#       stopifnot(ncol(X)==length(object$coefficients))
+#       
+#     }
+#   }
+#   n <- dim(X)[1]  #length(object$residuals)
+#   beta <- object$coefficients
+#   if (object$options[["intercept"]]) {
+#     yp <- object$a0 + as.matrix(X) %*% as.vector(beta)
+#     if (dim(X)[2] == 0) 
+#       yp <- rep(object$a0, n)
+#     if (type == "response") 
+#       yhat <- 1/(1 + exp(-yp))
+#     if (type == "link") 
+#       yhat <- yp
+#   }
+#   if (!object$options[["intercept"]]) {
+#     yp <- X %*% as.vector(beta)
+#     if (dim(X)[2] == 0) 
+#       yp <- rep(0, n)
+#     yhat <- 1/(1 + exp(-yp))
+#     if (type == "response") 
+#       yhat <- 1/(1 + exp(-yp))
+#     if (type == "link") 
+#       yhat <- yp
+#   }
+#   return(yhat)
+# }
+
+predict.rlassologit <- function (object, newdata = NULL, type = "response", ...){
+  # if (missing(newdata) || is.null(newdata)) {
+  #   X <- model.matrix(object)
+  #   if (sum(object$options$ind.scale) != 0) {
+  #     X <- X[, -object$options$ind.scale]
+  #   }
+  # } else {
+  #   varcoef <- names(object$beta)
+  #   if (all(is.element(varcoef, colnames(newdata)))){
+  #     X <- as.matrix(newdata[, varcoef])
+  #   } else {
+  #     if(!is.null(object$call$x)){
+  #       stop("newdata does not contain the required variables")
+  #     } else {
+  #       mod.frame <- cbind(rep(1, nrow(newdata)), newdata)
+  #       colnames(mod.frame)[1] <- as.character(object$call$formula[[2]])
+  #       X <- try(model.matrix(eval(object$call$formula), data = mod.frame)[, -1, drop = FALSE])
+  #       if(inherits(X, "try-error")){
+  #         stop("newdata does not contain the variables specified in formula")
+  #       }
+  #     }
+  #   }
+  # }
+  k <- length(object$beta)
   if (missing(newdata) || is.null(newdata)) {
-    if (is.matrix(model.matrix(object))) {
-      X <- model.matrix(object)
-    }
-    if (class(model.matrix(object))=="formula") {
-      form <- eval(model.matrix(object))
-      X <- model.matrix(form)[,-1, drop=FALSE]
+    X <- model.matrix(object)
+    if (sum(object$options$ind.scale) != 0) {
+      X <- X[, -object$options$ind.scale]
     }
   } else {
-    varcoef <- names(object$coefficients)
-    varcoefbasis <- NULL
-    if (!is.null(varcoef)) {
-    matname <- as.character(object$call$formula[[3]])
-    varcoefbasis <- sub(matname, "", varcoef)
-    }
-    if (all(is.element(varcoef, colnames(newdata))) || (all(is.element(varcoefbasis, colnames(newdata))))) {
-    #if (all(is.element(varcoef, colnames(newdata)))) {
-    #  X <- as.matrix(newdata[, varcoef])
-    #  test <- try(X <- as.matrix(newdata[, varcoef]), silent=TRUE)
-    #  if (class(test)=="error") X <- as.matrix(newdata[, varcoefbasis])
-    if (is.null(varcoefbasis)) {
-      X <- as.matrix(newdata[, varcoef])
-    } else {
-      X <- as.matrix(newdata[, varcoefbasis])
-    }
-      
-    } else {
-      #X <- as.matrix(newdata)
-      formula <- eval(object$call[[2]])
-      X <- model.matrix(formula, data=as.data.frame(newdata))[,-1, drop=FALSE]
-      if(sum(object$options$ind.scale)!=0) {
-        X <- X[,-object$options$ind.scale]
+    if (is.null(colnames(newdata))) {
+      X <- as.matrix(newdata)
+      if (dim(X)[2] != k) {
+        stop("No variable names provided in newdata and number of parameters does not fit!")
+      } else {
+        #message("No variable names provided in newdata. Prediction relies on right ordering of the variables.")
       }
-      stopifnot(ncol(X)==length(object$coefficients))
-      
+    } else {
+      varcoef <- names(object$beta)
+      if (all(is.element(varcoef, colnames(newdata)))){
+        X <- as.matrix(newdata[, varcoef])
+      } else {
+        mod.frame <- as.data.frame(cbind(rep(1, nrow(newdata)), newdata))
+        colnames(mod.frame)[1] <- as.character(eval(object$call$formula)[[2]])
+        X <- try(model.matrix(eval(object$call$formula), data = mod.frame)[, -1, drop = FALSE])
+        if(inherits(X, "try-error")){
+          stop("newdata does not contain the variables specified in formula")
+        } 
+      }
     }
   }
-  n <- dim(X)[1]  #length(object$residuals)
-  beta <- object$coefficients
+  if (sum(object$options$ind.scale) != 0) {
+    X <- X[, -object$options$ind.scale]
+  }
+  n <- dim(X)[1]
+  beta <- object$beta
   if (object$options[["intercept"]]) {
-    yp <- object$a0 + as.matrix(X) %*% as.vector(beta)
+    yp <- object$intercept + X %*% as.vector(beta)
     if (dim(X)[2] == 0) 
-      yp <- rep(object$a0, n)
+      yp <- rep(object$intercept, n)
     if (type == "response") 
       yhat <- 1/(1 + exp(-yp))
     if (type == "link") 
@@ -286,24 +383,41 @@ predict.rlassologit <- function(object, newdata = NULL, type = "response",
 #' @rdname methods.rlassologit
 #' @export
 
-model.matrix.rlassologit <- function(object, ...) {
-  
-  # falls formula
-  if (is.call(object$call[[2]])) { # problem when formula handed as expression
-    # falls kein Datensatz uebergeben
-    if (is.null(object$call$data)) { # added "!"
-      X <- model.frame(object$call[[2]])
-      mt <- attr(X, "terms")
-      attr(mt, "intercept") <- 0
-      mm <- model.matrix(mt, X)
-      # falls Datensatz uebergeben
+# model.matrix.rlassologit <- function(object, ...) {
+#   
+#   # falls formula
+#   if (is.call(object$call[[2]])) { # problem when formula handed as expression
+#     # falls kein Datensatz uebergeben
+#     if (is.null(object$call$data)) { # added "!"
+#       X <- model.frame(object$call[[2]])
+#       mt <- attr(X, "terms")
+#       attr(mt, "intercept") <- 0
+#       mm <- model.matrix(mt, X)
+#       # falls Datensatz uebergeben
+#     } else {
+#       dataev <- eval(object$call$data)
+#       mm <- as.matrix(dataev[, names(object$coefficients)]) # here problem when no formula!!
+#     }
+#   } else {
+#     # falls default
+#     mm <- eval(object$call[[2]])
+#   }
+#   return(mm)
+# }
+
+model.matrix.rlassologit <- function(object, ...){
+  if(is.null(object$model)){
+    if (!is.null(object$call$x)){
+      mm <- as.matrix(eval(object$call$x))
     } else {
-      dataev <- eval(object$call$data)
-      mm <- as.matrix(dataev[, names(object$coefficients)]) # here problem when no formula!!
+      if(!is.null(object$call$data)){
+        mm <- model.matrix(eval(object$call$formula), data = eval(object$call$data))[, -1, drop = FALSE]
+      } else {
+        mm <- model.matrix(eval(object$call$formula))[, -1, drop = FALSE]
+      }
     }
   } else {
-    # falls default
-    mm <- eval(object$call[[2]])
+    mm <- object$model
   }
   return(mm)
 }
@@ -318,18 +432,25 @@ print.rlassologit <- function(x, all = TRUE, digits = max(3L, getOption("digits"
       "\n\n", sep = "")
   if (length(coef(x))) {
     coeffs <- coef(x)
-    if (x$options$intercept) {
-      coeffs <- c(x$a0, coeffs)
-      names(coeffs)[1] <- "(Intercept)"
-      index <- cbind(1, x$index)
-    }
+    #if (x$options$intercept) {
+    #  coeffs <- c(x$intercept, coeffs)
+    #  names(coeffs)[1] <- "(Intercept)"
+    #  index <- cbind(1, x$index)
+    #}
     if (all) {
       cat("Coefficients:\n")
       print.default(format(coeffs, digits = digits), print.gap = 2L, 
                     quote = FALSE)
     } else {
-      print.default(format(coeffs[index], digits = digits), print.gap = 2L, 
-                    quote = FALSE)
+      #print.default(format(coeffs[index], digits = digits), print.gap = 2L, 
+      #              quote = FALSE)
+      if (x$options$intercept) {
+        print.default(format(coef(x)[c(TRUE,x$index)], digits = digits), print.gap = 2L,
+                      quote = FALSE)
+      } else {
+        print.default(format(beta$x[x$index], digits = digits), print.gap = 2L,
+                      quote = FALSE)
+      }
     }
   } else cat("No coefficients\n")
   cat("\n")
@@ -346,8 +467,8 @@ summary.rlassologit <- function(object, all = TRUE, digits = max(3L, getOption("
   cat("\nPost-Lasso Estimation: ", paste(deparse(object$options$post), 
                                          sep = "\n", collapse = "\n"), "\n", sep = " ")
   coefs <- object$coefficients
-  p <- length(coefs)
-  num.selected <- sum(abs(object$coefficients) > 0)
+  p <- length(object$beta)
+  num.selected <- sum(abs(object$beta) > 0)
   cat("\nTotal number of variables:", p)
   cat("\nNumber of selected variables:", num.selected, "\n", sep = " ")
   cat("\n")

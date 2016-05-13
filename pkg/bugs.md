@@ -3,10 +3,12 @@
 * short-run goals:  
 + Formula interface for all functions (treatment family)  
 + Quantile Effects  
-+ Improvement speed and performance  
-+ Formula for rlasso/rlassologit and predict (Bug 2) (revise predict function)  
++ Improvement speed and performance (rlasso -> use glmnet)
++ Formula for rlasso/rlassologit and predict (Bug 2) (revise predict function) ok
 + roxygen with bibtex
-+ init_values: fct corr (warnings)
++ init_values: fct corr (warnings) ok
++ deal with warnings ?
+
 
 * long-term goals:  
 + Support of Sparse Matrix  

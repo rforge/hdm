@@ -53,7 +53,7 @@ rlassoIVselectZ <- function(x, d, y, z, post = TRUE, ...) {
       dihat <- rep(mean(di), n)  #dihat <- mean(di)
     } else {
       # dihat <- z%*%lasso.fit$coefficients
-      dihat <- predict(lasso.fit, newdata = Z)
+      dihat <- predict(lasso.fit)
     }
     Dhat <- cbind(Dhat, dihat)
   }

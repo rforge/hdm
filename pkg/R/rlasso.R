@@ -1,6 +1,6 @@
-globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "select.Z" , "select.X", "aes", "element_blank"))
+globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "select.Z" , "select.X", "aes", "element_blank", "scale_x_discrete"))
 
-#' rlasso: Function for Lasso estimation under homoscedastic and heterosceadstic non-Gaussian
+#' rlasso: Function for Lasso estimation under homoscedastic and heteroscedastic non-Gaussian
 #' disturbances
 #'
 #' The function estimates the coefficients of a Lasso regression with
@@ -55,8 +55,9 @@ globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "sele
 #' @param ... further arguments (only for consistent defintion of methods)
 #' @return \code{rlasso} returns an object of class \code{rlasso}. An object of
 #' class "rlasso" is a list containing at least the following components:
-#' \item{coefficients}{parameter estimates (named vector of coefficients without intercept)}
-#' \item{intercept.value}{value of the intercept}
+#' \item{coefficients}{parameter estimates}
+#' \item{beta}{parameter estimates (named vector of coefficients without intercept)}
+#' \item{intercept}{value of the intercept}
 #' \item{index}{index of selected
 #' variables (logical vector)} \item{lambda}{data-driven penalty term for each
 #' variable, product of lambda0 (the penalization parameter) and the loadings}
@@ -90,6 +91,14 @@ rlasso <- function(formula, data, post = TRUE, intercept = TRUE, model = TRUE,
   y <- model.response(mf, "numeric")
   n <- length(y)
   x <- model.matrix(mt, mf)[,-1, drop=FALSE]
+  if (missing(data)) {
+    if (is.call(formula[[3]])) { 
+    #colnames(x) <- sub(format(formula[[3]]), "", colnames(x))
+    colnames(x) <- gsub(re.escape(format(formula[[3]])), "", colnames(x))
+    } else {
+      colnames(x) <- gsub(re.escape(formula[[3]]), "", colnames(x))  
+    }
+  }
   est <- rlasso.fit(x, y, post = post, intercept = intercept, penalty=penalty, model=model, 
                control = control)
   est$call <- cl
@@ -101,7 +110,7 @@ rlasso <- function(formula, data, post = TRUE, intercept = TRUE, model = TRUE,
 #' @param y dependent variable (vector, matrix or object can be coerced to matrix)
 #' @param x regressors (vector, matrix or object can be coerced to matrix)
 rlasso.fit <- function(x, y, post = TRUE, intercept = TRUE, model = TRUE,
-                           penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = 0.1),
+                           penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = .1/log(n)),
                            control = list(numIter = 15, tol = 10^-5, threshold = NULL),...) {
   x <- as.matrix(x)
   y <- as.matrix(y)
@@ -109,12 +118,9 @@ rlasso.fit <- function(x, y, post = TRUE, intercept = TRUE, model = TRUE,
   n <- dim(x)[1]
   p <- dim(x)[2]
   
-  
-  
   if (is.null(colnames(x)))
     colnames(x) <- paste("V", 1:p, sep = "")
   ind.names <- 1:p
-  
   # set options to default values if missing
   if (!exists("homoscedastic", where = penalty))  penalty$homoscedastic = "FALSE"
   if (!exists("X.dependent.lambda", where = penalty))  penalty$X.dependent.lambda = "FALSE"
@@ -177,17 +183,37 @@ rlasso.fit <- function(x, y, post = TRUE, intercept = TRUE, model = TRUE,
   
   while (mm <= control$numIter) {
     # calculation parameters
-    coefTemp <- LassoShooting.fit(x, y, lambda, XX = XX, Xy = Xy)$coefficients
+    #coefTemp <- LassoShooting.fit(x, y, lambda, XX = XX, Xy = Xy)$coefficients
+    #xn <- t(t(x)/as.vector(Ups1))
+    if (mm==1 && post) {
+      coefTemp <- LassoShooting.fit(x, y, lambda/2, XX = XX, Xy = Xy)$coefficients
+      #lasso.reg <- glmnet::glmnet(xn, y, family = c("gaussian"), alpha = 1,
+      #                            lambda = lambda0/(2*n)/2, standardize = FALSE, intercept = FALSE)
+      #lasso.reg <- glmnet::glmnet(x, y, family = c("gaussian"), alpha = 1,
+      #                           lambda = lambda0/(2*n)/2, standardize = FALSE, intercept = FALSE,  penalty.factor = Ups1)
+    } else {
+      coefTemp <- LassoShooting.fit(x, y, lambda, XX = XX, Xy = Xy)$coefficients
+      #lasso.reg <- glmnet::glmnet(xn, y, family = c("gaussian"), alpha = 1,
+      #                           lambda = lambda0/(2*n), standardize = FALSE, intercept = FALSE)
+      #lasso.reg <- glmnet::glmnet(x, y, family = c("gaussian"), alpha = 1,
+      #                           lambda = lambda0/(2*n), standardize = FALSE, intercept = FALSE,  penalty.factor = Ups1)
+    }
+    #coefTemp <- as.vector(lasso.reg$beta)
+    #names(coefTemp) <- colnames(x)
     coefTemp[is.na(coefTemp)] <- 0
     ind1 <- (abs(coefTemp) > 0)
     x1 <- as.matrix(x[, ind1, drop = FALSE])
     if (dim(x1)[2] == 0) {
       if (intercept) {
         intercept.value <- mean(y + mu)
+        coef <- rep(0,p+1)
+        names(coef) <- c("intercept", names(coefTemp))
       } else {
         intercept.value <- mean(y)
+        coef <- rep(0,p)
+        names(coef) <- names(coefTemp)
       }
-      est <- list(coefficients = rep(0, p), intercept.value=intercept.value, index = rep(FALSE, p),
+      est <- list(coefficients = coef, beta=rep(0,p), intercept=intercept.value, index = rep(FALSE, p),
                   lambda = lambda, lambda0 = lambda0, loadings = Ups0, residuals = y -
                     mean(y), sigma = var(y), iter = mm, call = match.call(),
                   options = list(post = post, intercept = intercept, ind.scale=ind, 
@@ -281,8 +307,15 @@ rlasso.fit <- function(x, y, post = TRUE, intercept = TRUE, model = TRUE,
   #} else {
   #  e1 <- y - x1 %*% coefTemp[ind1]
   #}
+  if (intercept) {
+    beta <- c(intercept.value, coefTemp)
+    names(beta)[1] <- "(Intercept)"
+  } else {
+    beta <- coefTemp
+  }
+  
   s1 <- sqrt(var(e1))
-  est <- list(coefficients = coefTemp, intercept.value=intercept.value, index = ind1, lambda = lambda,
+  est <- list(coefficients = beta, beta=coefTemp, intercept=intercept.value, index = ind1, lambda = lambda,
               lambda0 = lambda0, loadings = Ups1, residuals = as.vector(e1), sigma = s1,
               iter = mm, call = match.call(), options = list(post = post, intercept = intercept,
                                                              control = control, penalty = penalty, ind.scale=ind,
@@ -368,9 +401,9 @@ lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.dependent.
   if (penalty$homoscedastic==FALSE && penalty$X.dependent.lambda == FALSE) {
     p <- dim(x)[2]
     n <- dim(x)[1]
-    lambda0 <- 2*penalty$c*sqrt(n)*sqrt(2*log(2*p*log(n)/penalty$gamma))
-    #lambda0 <- 2 * penalty$c * sqrt(n) * qnorm(1 - penalty$gamma/(2 *
-    #                                                                p * 1))  # 1=num endogenous variables
+    #lambda0 <- 2*penalty$c*sqrt(n)*sqrt(2*log(2*p*log(n)/penalty$gamma))
+    lambda0 <- 2 * penalty$c * sqrt(n) * qnorm(1 - penalty$gamma/(2 *
+                                                                    p * 1))  # 1=num endogenous variables
     Ups0 <- 1/sqrt(n) * sqrt(t(t(y^2) %*% (x^2)))
     lambda <- lambda0 * Ups0
   }
@@ -450,8 +483,13 @@ print.rlasso <- function(x, all=TRUE ,digits = max(3L, getOption("digits") - 3L)
       print.default(format(coef(x), digits = digits), print.gap = 2L,
                     quote = FALSE)
     } else {
-      print.default(format(coef(x)[x$index], digits = digits), print.gap = 2L,
+      if (x$options$intercept) {
+      print.default(format(coef(x)[c(TRUE,x$index)], digits = digits), print.gap = 2L,
                     quote = FALSE)
+      } else {
+        print.default(format(beta$x[x$index], digits = digits), print.gap = 2L,
+                      quote = FALSE)
+      }
     }
   }
   else cat("No coefficients\n")
@@ -466,8 +504,8 @@ summary.rlasso <- function(object, all=TRUE, digits = max(3L, getOption("digits"
   cat("\nCall:\n", paste(deparse(object$call), sep = "\n", collapse = "\n"), "\n", sep = "")
   cat("\nPost-Lasso Estimation: ",  paste(deparse(object$options$post), sep = "\n", collapse = "\n"), "\n", sep = " ")
   coefs <- object$coefficients
-  p <- length(coefs)
-  num.selected <- sum(abs(object$coefficients)>0)
+  p <- length(object$beta)
+  num.selected <- sum(abs(object$beta)>0)
   n <- length(object$residuals)
   cat("\nTotal number of variables:", p)
   cat("\nNumber of selected variables:", num.selected, "\n", sep=" ")
@@ -527,71 +565,182 @@ summary.rlasso <- function(object, all=TRUE, digits = max(3L, getOption("digits"
 #' @rdname methods.rlasso
 #' @export
 
-model.matrix.rlasso <- function(object, ...) {
-  if (is.call(object$call[[2]])) {
-    if(is.null(object$call$data)){
-      X <- model.frame(object$call[[2]])
-      mt <- attr(X, "terms")
-      attr(mt, "intercept") <- 0
-      mm <- model.matrix(mt, X)
+# model.matrix.rlasso <- function(object, ...) {
+#   if (is.call(object$call[[2]])) {
+#     if(is.null(object$call$data)){
+#       X <- model.frame(object$call[[2]])
+#       mt <- attr(X, "terms")
+#       attr(mt, "intercept") <- 0
+#       mm <- model.matrix(mt, X)
+#     } else {
+#       dataev <- eval(object$call$data)
+#       mm <- as.matrix(dataev[,names(object$beta)])
+#     }
+#   } else {
+#     mm <- eval(object$call[[2]])
+#   }
+#   return(mm)
+# }
+model.matrix.rlasso <- function (object, ...) 
+{
+  if(is.null(object$model)){
+    if (!is.null(object$call$x)){
+      mm <- as.matrix(eval(object$call$x))
     } else {
-      dataev <- eval(object$call$data)
-      mm <- as.matrix(dataev[,names(object$coefficients)])
+      if(!is.null(object$call$data)){
+        mm <- model.matrix(eval(object$call$formula), data = eval(object$call$data))[, -1, drop = FALSE]
+      } else {
+        mm <- model.matrix(eval(object$call$formula))[, -1, drop = FALSE]
+      }
     }
   } else {
-    mm <- eval(object$call[[2]])
+    mm <- object$model
   }
   return(mm)
 }
 
 
+
 #' @rdname methods.rlasso
 #' @export
 
-predict.rlasso <- function (object, newdata = NULL, ...){
+# predict.rlasso <- function (object, newdata = NULL, ...){
+#   if (missing(newdata) || is.null(newdata)) {
+#     if (is.matrix(model.matrix(object))) {
+#       X <- model.matrix(object)
+#     }
+#     if (class(model.matrix(object))=="formula") {
+#       form <- eval(model.matrix(object))
+#       X <- model.matrix(form)[,-1, drop=FALSE]
+#     }
+#     if(sum(object$options$ind.scale)!=0) {
+#       X <- X[,-object$options$ind.scale]
+#     }
+#   }
+#   else {
+#     varcoef <- names(object$beta)
+#     if(all(is.element(varcoef,colnames(newdata)))){
+#       X <- as.matrix(newdata[,varcoef])
+#     } else {
+#       if (is.matrix(newdata)) {
+#         X <- as.matrix(newdata)
+#       } else {
+#         #X <- as.matrix(newdata)
+#         formula <- eval(object$call[[2]])
+#         X <- model.matrix(formula, data=newdata)[,-1, drop=FALSE]
+#       }
+#       if(sum(object$options$ind.scale)!=0) {
+#         X <- X[,-object$options$ind.scale]
+#       }
+#       stopifnot(ncol(X)==length(object$beta))
+#     }
+#   }
+#   n <- dim(X)[1] #length(object$residuals)
+#   beta <- object$beta
+#   
+#   if (object$options[["intercept"]]) {
+#     yhat <- X %*% beta + object$intercept
+#     if (dim(X)[2]==0) yhat <- rep(object$intercept, n)
+#   }
+#   if (!object$options[["intercept"]]) {
+#     yhat <- X %*% beta
+#     if (dim(X)[2]==0) yhat <- rep(0, n)
+#   }
+#   return(yhat)
+# }
+
+# predict.rlasso2 <- function (object, newdata = NULL, ...) 
+# {
+#   if (missing(newdata) || is.null(newdata)) {
+#     X <- model.matrix(object)
+#     if (sum(object$options$ind.scale) != 0) {
+#       X <- X[, -object$options$ind.scale]
+#     }
+#   } else {
+#     varcoef <- names(object$beta)
+#     if (all(is.element(varcoef, colnames(newdata)))){
+#       X <- as.matrix(newdata[, varcoef])
+#     } else {
+#       if(!is.null(object$call$x)){
+#         stop("newdata does not contain the correct variables")
+#       } else {
+#         mod.frame <- as.data.frame(cbind(rep(1, nrow(newdata)), newdata))
+#         colnames(mod.frame)[1] <- as.character(eval(object$call$formula)[[2]])
+#         X <- try(model.matrix(eval(object$call$formula), data = mod.frame)[, -1, drop = FALSE])
+#         if(inherits(X, "try-error")){
+#           stop("newdata does not contain the variables specified in formula")
+#         }
+#       }
+#     } 
+#     if (sum(object$options$ind.scale) != 0) {
+#       X <- X[, -object$options$ind.scale]
+#     }
+#   }
+#   n <- dim(X)[1]
+#   beta <- object$beta
+#   if (object$options[["intercept"]]) {
+#     yhat <- X %*% beta + object$intercept
+#     if (dim(X)[2] == 0) 
+#       yhat <- rep(object$intercept, n)
+#   }
+#   if (!object$options[["intercept"]]) {
+#     yhat <- X %*% beta
+#     if (dim(X)[2] == 0) 
+#       yhat <- rep(0, n)
+#   }
+#   return(yhat)
+# }
+
+
+predict.rlasso <- function (object, newdata = NULL, ...) 
+{
+  k <- length(object$beta)
   if (missing(newdata) || is.null(newdata)) {
-    if (is.matrix(model.matrix(object))) {
-      X <- model.matrix(object)
+    X <- model.matrix(object)
+    if (sum(object$options$ind.scale) != 0) {
+      X <- X[, -object$options$ind.scale]
     }
-    if (class(model.matrix(object))=="formula") {
-      form <- eval(model.matrix(object))
-      X <- model.matrix(form)[,-1, drop=FALSE]
-    }
-    if(sum(object$options$ind.scale)!=0) {
-      X <- X[,-object$options$ind.scale]
-    }
-  }
-  else {
-    varcoef <- names(object$coefficients)
-    if(all(is.element(varcoef,colnames(newdata)))){
-      X <- as.matrix(newdata[,varcoef])
-    } else {
-      if (is.matrix(newdata)) {
-        X <- as.matrix(newdata)
+  } else {
+    if (is.null(colnames(newdata))) {
+      X <- as.matrix(newdata)
+      if (dim(X)[2] != k) {
+        stop("No variable names provided in newdata and number of parameters does not fit!")
       } else {
-        #X <- as.matrix(newdata)
-        formula <- eval(object$call[[2]])
-        X <- model.matrix(formula, data=newdata)[,-1, drop=FALSE]
+        #message("No variable names provided in newdata. Prediction relies on right ordering of the variables.")
       }
-      if(sum(object$options$ind.scale)!=0) {
-        X <- X[,-object$options$ind.scale]
+    } else {
+      varcoef <- names(object$beta)
+      if (all(is.element(varcoef, colnames(newdata)))){
+        X <- as.matrix(newdata[, varcoef])
+      } else {
+        mod.frame <- as.data.frame(cbind(rep(1, nrow(newdata)), newdata))
+        colnames(mod.frame)[1] <- as.character(eval(object$call$formula)[[2]])
+        X <- try(model.matrix(eval(object$call$formula), data = mod.frame)[, -1, drop = FALSE])
+        if(inherits(X, "try-error")){
+          stop("newdata does not contain the variables specified in formula")
+        } 
       }
-      stopifnot(ncol(X)==length(object$coefficients))
     }
   }
-  n <- dim(X)[1] #length(object$residuals)
-  beta <- object$coefficients
+    if (sum(object$options$ind.scale) != 0) {
+      X <- X[, -object$options$ind.scale]
+    }
   
+  n <- dim(X)[1]
+  beta <- object$beta
   if (object$options[["intercept"]]) {
-    yhat <- X %*% beta + object$intercept.value
-    if (dim(X)[2]==0) yhat <- rep(object$intercept.value, n)
+    yhat <- X %*% beta + object$intercept
+    if (dim(X)[2] == 0) 
+      yhat <- rep(object$intercept, n)
   }
   if (!object$options[["intercept"]]) {
     yhat <- X %*% beta
-    if (dim(X)[2]==0) yhat <- rep(0, n)
+    if (dim(X)[2] == 0) 
+      yhat <- rep(0, n)
   }
   return(yhat)
 }
+
 
 
 

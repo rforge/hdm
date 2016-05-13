@@ -8,3 +8,8 @@
 * 22/03/2016: added significance test, R^2, adjusted R^2 to summary.rlasso (description in vignette)
 * 22/03/2016: vignette: changes in treatment effect example
 * 22/03/2016: rlasso with option model
+* 03/05/2016: revise model.matrix and predict for rlasso and rlassologit
+* 03/05/2016: change intercept handling for rlasso and rlassologit
+* 03/05/2016: add Citation
+* 03/05/2016: change plot function (test!)
+* 03/05/2016: change of penalty choice (mm=1 half penalty and change old rule)

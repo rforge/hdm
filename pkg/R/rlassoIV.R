@@ -74,7 +74,7 @@ rlassoIV <- function(x, d, y, z, select.Z = TRUE, select.X = TRUE, post = TRUE,
     if (sum(ind.PZx) == 0) {
       Dr <- d - mean(d)
     } else {
-      Dr <- d - predict(lasso.PZ.x, newdata = x)  #x[,ind.PZx]%*%MASS::ginv(t(x[,ind.PZx])%*%x[,ind.PZx])%*%t(x[,ind.PZx])%*%PZ
+      Dr <- d - predict(lasso.PZ.x)  #x[,ind.PZx]%*%MASS::ginv(t(x[,ind.PZx])%*%x[,ind.PZx])%*%t(x[,ind.PZx])%*%PZ
     }
     
     if (sum(lasso.y.x$index) == 0) {
