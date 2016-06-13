@@ -327,9 +327,9 @@ predict.rlassologit <- function (object, newdata = NULL, type = "response", ...)
   #     }
   #   }
   # }
-  mf <- match.call(expand.dots = FALSE)
+  mf <- match.call(expand.dots = TRUE)
   m <- match("newx", names(mf), 0L)
-  if (m==0L) stop("Please use argument \"newdata\" instead of \"newx\" to provide data for prediction.")
+  if (m!=0L) stop("Please use argument \"newdata\" instead of \"newx\" to provide data for prediction.")
   
   k <- length(object$beta)
   if (missing(newdata) || is.null(newdata)) {
