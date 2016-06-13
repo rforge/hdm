@@ -2,21 +2,28 @@
 % Please edit documentation in R/rlasso.R
 \name{rlasso}
 \alias{rlasso}
-\alias{rlasso.fit}
+\alias{rlasso.default}
+\alias{rlasso.formula}
 \title{rlasso: Function for Lasso estimation under homoscedastic and heteroscedastic non-Gaussian
 disturbances}
 \usage{
-rlasso(formula, data, post = TRUE, intercept = TRUE, model = TRUE,
-  penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE,
-  lambda.start = NULL, c = 1.1, gamma = 0.1/log(n)), control = list(numIter =
-  15, tol = 10^-5, threshold = NULL), ...)
+rlasso(x, ...)
 
-rlasso.fit(x, y, post = TRUE, intercept = TRUE, model = TRUE,
-  penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE,
-  lambda.start = NULL, c = 1.1, gamma = 0.1/log(n)), control = list(numIter =
-  15, tol = 10^-5, threshold = NULL), ...)
+\method{rlasso}{formula}(formula, data, post = TRUE, intercept = TRUE,
+  model = TRUE, penalty = list(homoscedastic = FALSE, X.dependent.lambda =
+  FALSE, lambda.start = NULL, c = 1.1, gamma = 0.1/log(n)),
+  control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...)
+
+\method{rlasso}{default}(x, y, post = TRUE, intercept = TRUE,
+  model = TRUE, penalty = list(homoscedastic = FALSE, X.dependent.lambda =
+  FALSE, lambda.start = NULL, c = 1.1, gamma = 0.1/log(n)),
+  control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...)
 }
 \arguments{
+\item{x}{regressors (vector, matrix or object can be coerced to matrix)}
+
+\item{...}{further arguments (only for consistent defintion of methods)}
+
 \item{formula}{an object of class "formula" (or one that can be coerced to
 that class): a symbolic description of the model to be fitted in the form
 \code{y~x}}
@@ -48,10 +55,6 @@ the estimation of the variance and data-driven penalty, ie. loadings,
 \code{tol} tolerance for improvement of the estimated variances.
 \code{threshold} is applied to the final estimated lasso
 coefficients. Absolute values below the threshold are set to zero.}
-
-\item{...}{further arguments (only for consistent defintion of methods)}
-
-\item{x}{regressors (vector, matrix or object can be coerced to matrix)}
 
 \item{y}{dependent variable (vector, matrix or object can be coerced to matrix)}
 }
@@ -93,6 +96,21 @@ regressor-independent loadings und heteroscedasticity are used. The options "X-d
 The option \code{post=TRUE} conducts post-lasso estimation, i.e. a refit of
 the model with the selected variables.
 }
+\examples{
+set.seed(1)
+n = 100 #sample size
+p = 100 # number of variables
+s = 3 # nubmer of variables with non-zero coefficients
+X = Xnames = matrix(rnorm(n*p), ncol=p)
+colnames(Xnames) <- paste("V", 1:p, sep="")
+beta = c(rep(5,s), rep(0,p-s))
+Y = X\%*\%beta + rnorm(n)
+reg.lasso <- rlasso(Y~Xnames)
+Xnew = matrix(rnorm(n*p), ncol=p)  # new X
+colnames(Xnew) <- paste("V", 1:p, sep="")
+Ynew =  Xnew\%*\%beta + rnorm(n)  #new Y
+yhat = predict(reg.lasso, newdata = Xnew)
+}
 \references{
 A. Belloni, D. Chen, V. Chernozhukov and C. Hansen (2012).
 Sparse models and methods for optimal instruments with an application to
@@ -103,9 +121,4 @@ high-dimensional sparse econometric models. In Advances in Economics and
 Econometrics: 10th World Congress, Vol. 3: Econometrics, Cambirdge
 University Press: Cambridge, 245-295.
 }
-\keyword{Lasso}
-\keyword{data-driven}
-\keyword{heteroscedasticity}
-\keyword{non-Gaussian}
-\keyword{penalty}
 

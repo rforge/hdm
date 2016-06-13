@@ -34,6 +34,4 @@ Objects of class \code{rlassoIVselectX} are constructed by \code{rlassoIVselectX
 \code{summary.rlassoIVselectX} summarizes information of a fitted \code{rlassoIVselectX} object.
 \code{confint.rlassoIVselectX} extracts the confidence intervals.
 }
-\keyword{methods}
-\keyword{rlassoIVselectX}
 

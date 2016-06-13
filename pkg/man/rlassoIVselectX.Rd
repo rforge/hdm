@@ -2,9 +2,15 @@
 % Please edit documentation in R/rlassoIVselectX.R
 \name{rlassoIVselectX}
 \alias{rlassoIVselectX}
+\alias{rlassoIVselectX.default}
+\alias{rlassoIVselectX.formula}
 \title{Instrumental Variable Estimation with Selection on the exogenous Variables by Lasso}
 \usage{
-rlassoIVselectX(x, d, y, z, post = TRUE, ...)
+rlassoIVselectX(x, ...)
+
+\method{rlassoIVselectX}{default}(x, d, y, z, post = TRUE, ...)
+
+\method{rlassoIVselectX}{formula}(formula, data, post = TRUE, ...)
 }
 \arguments{
 \item{x}{exogenous variables in the structural equation (matrix)}
@@ -16,6 +22,12 @@ rlassoIVselectX(x, d, y, z, post = TRUE, ...)
 \item{z}{set of potential instruments for the endogenous variables.}
 
 \item{post}{logical. If \code{TRUE}, post-lasso estimation is conducted.}
+
+\item{formula}{An object of class \code{Formula} of the form " y ~ x + d | x + z" with y the outcome variable,
+d endogenous variable, z instrumental variables, and x exogenous variables.}
+
+\item{data}{An optional data frame, list or environment (or object coercible by as.data.frame to a data frame) containing the variables in the model. 
+If not found in data, the variables are taken from environment(formula), typically the environment from which \code{rlassoIVselectX} is called.}
 
 \item{\dots}{arguments passed to the function \code{rlasso}}
 }
@@ -42,9 +54,4 @@ Chernozhukov, V., Hansen, C. and M. Spindler (2015). Post-Selection and Post-Reg
 Models with Many Controls and Instruments
 \emph{American Economic Review, Papers and Proceedings} 105(5), 486--490.
 }
-\keyword{Hig-dimensional}
-\keyword{Instrumental}
-\keyword{Lasso}
-\keyword{Variables}
-\keyword{setting}
 

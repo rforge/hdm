@@ -33,6 +33,4 @@ Objects of class \code{rlassoIV} are constructed by \code{rlassoIV}.
 \code{summary.rlassoIV} summarizes information of a fitted \code{rlassoIV} object.
 \code{confint.rlassoIV} extracts the confidence intervals.
 }
-\keyword{methods}
-\keyword{rlassoIV}
 

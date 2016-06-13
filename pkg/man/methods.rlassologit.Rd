@@ -35,12 +35,10 @@
 \item{digits}{significant digits in printout}
 }
 \description{
-Objects of class \code{rlassologit} are constructed by \code{rlassologit} or \code{rlassologit.fit}.
+Objects of class \code{rlassologit} are constructed by \code{rlassologit}.
 \code{print.rlassologit} prints and displays some information about fitted \code{rlassologit} objects.
 \code{summary.rlassologit} summarizes information of a fitted \code{rlassologit} object.
 \code{predict.rlassologit} predicts values based on a \code{rlassologit} object.
 \code{model.matrix.rlassologit} constructs the model matrix of a lasso object.
 }
-\keyword{methods}
-\keyword{rlassologit}
 

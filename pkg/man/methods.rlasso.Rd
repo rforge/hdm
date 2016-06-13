@@ -32,12 +32,10 @@
 \item{newdata}{new data set for prediction. An optional data frame in which to look for variables with which to predict. If omitted, the fitted values are returned.}
 }
 \description{
-Objects of class \code{rlasso} are constructed by \code{rlasso.formula} or \code{rlasso.fit}.
+Objects of class \code{rlasso} are constructed by \code{rlasso}.
 \code{print.rlasso} prints and displays some information about fitted \code{rlasso} objects.
 \code{summary.rlasso} summarizes information of a fitted \code{rlasso} object.
 \code{predict.rlasso} predicts values based on a \code{rlasso} object.
 \code{model.matrix.rlasso} constructs the model matrix of a \code{rlasso} object.
 }
-\keyword{methods}
-\keyword{rlasso}
 

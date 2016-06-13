@@ -1,4 +1,4 @@
-globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "select.Z" , "select.X", "aes", "element_blank", "scale_x_discrete"))
+globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "select.Z" , "select.X", "aes", "element_blank", "scale_x_discrete", "model.part", "all.categories", "X"))
 
 #' rlasso: Function for Lasso estimation under homoscedastic and heteroscedastic non-Gaussian
 #' disturbances
@@ -27,13 +27,6 @@ globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "sele
 #' the model with the selected variables.
 #'
 #' @aliases rlasso
-#' @param formula an object of class "formula" (or one that can be coerced to
-#' that class): a symbolic description of the model to be fitted in the form
-#' \code{y~x}
-#' @param data an optional data frame, list or environment (or object coercible
-#' by as.data.frame to a data frame) containing the variables in the model. If
-#' not found in data, the variables are taken from environment(formula),
-#' typically the environment from which \code{rlasso} is called.
 #' @param post logical. If \code{TRUE}, post-Lasso estimation is conducted.
 #' @param intercept logical. If \code{TRUE}, intercept is included which is not
 #' penalized.
@@ -73,13 +66,39 @@ globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "sele
 #' high-dimensional sparse econometric models. In Advances in Economics and
 #' Econometrics: 10th World Congress, Vol. 3: Econometrics, Cambirdge
 #' University Press: Cambridge, 245-295.
-#' @keywords Lasso data-driven penalty non-Gaussian heteroscedasticity
+#' @examples 
+#' set.seed(1)
+#' n = 100 #sample size
+#' p = 100 # number of variables
+#' s = 3 # nubmer of variables with non-zero coefficients
+#' X = Xnames = matrix(rnorm(n*p), ncol=p)
+#' colnames(Xnames) <- paste("V", 1:p, sep="")
+#' beta = c(rep(5,s), rep(0,p-s))
+#' Y = X%*%beta + rnorm(n)
+#' reg.lasso <- rlasso(Y~Xnames)
+#' Xnew = matrix(rnorm(n*p), ncol=p)  # new X
+#' colnames(Xnew) <- paste("V", 1:p, sep="")
+#' Ynew =  Xnew%*%beta + rnorm(n)  #new Y
+#' yhat = predict(reg.lasso, newdata = Xnew)
 #' @export
 #' @rdname rlasso
-rlasso <- function(formula, data, post = TRUE, intercept = TRUE, model = TRUE, 
+rlasso <- function(x, ...)
+  UseMethod("rlasso") # definition generic function
+
+#' @param formula an object of class "formula" (or one that can be coerced to
+#' that class): a symbolic description of the model to be fitted in the form
+#' \code{y~x}
+#' @param data an optional data frame, list or environment (or object coercible
+#' by as.data.frame to a data frame) containing the variables in the model. If
+#' not found in data, the variables are taken from environment(formula),
+#' typically the environment from which \code{rlasso} is called.
+#' @rdname rlasso
+#' @export
+rlasso.formula <- function(formula, data, post = TRUE, intercept = TRUE, model = TRUE, 
                            penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = .1/log(n)),
                           control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...) {
   cl <- match.call()
+  #if (missing(data))  data <- environment(formula)
   mf <- match.call(expand.dots = FALSE)
   m <- match(c("formula", "data"), names(mf), 0L)
   mf <- mf[c(1L, m)]
@@ -99,7 +118,7 @@ rlasso <- function(formula, data, post = TRUE, intercept = TRUE, model = TRUE,
       colnames(x) <- gsub(re.escape(formula[[3]]), "", colnames(x))  
     }
   }
-  est <- rlasso.fit(x, y, post = post, intercept = intercept, penalty=penalty, model=model, 
+  est <- rlasso(x, y, post = post, intercept = intercept, penalty=penalty, model=model, 
                control = control)
   est$call <- cl
   return(est)
@@ -109,7 +128,7 @@ rlasso <- function(formula, data, post = TRUE, intercept = TRUE, model = TRUE,
 #' @export
 #' @param y dependent variable (vector, matrix or object can be coerced to matrix)
 #' @param x regressors (vector, matrix or object can be coerced to matrix)
-rlasso.fit <- function(x, y, post = TRUE, intercept = TRUE, model = TRUE,
+rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, model = TRUE,
                            penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = .1/log(n)),
                            control = list(numIter = 15, tol = 10^-5, threshold = NULL),...) {
   x <- as.matrix(x)
@@ -440,7 +459,7 @@ lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.dependent.
 
   if (penalty$homoscedastic == "none") {
     if (is.null(penalty$lambda.start) | !exists("lambda.start", where = penalty))
-      error("For method \"none\" lambda.start must be provided")
+      stop("For method \"none\" lambda.start must be provided")
     n <- dim(x)[1]
     lambda0 <- penalty$lambda.start
     Ups0 <- 1/sqrt(n) * sqrt(t(t(y^2) %*% (x^2)))
@@ -458,7 +477,7 @@ lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.dependent.
 
 #' Methods for S3 object \code{rlasso}
 #'
-#' Objects of class \code{rlasso} are constructed by \code{rlasso.formula} or \code{rlasso.fit}.
+#' Objects of class \code{rlasso} are constructed by \code{rlasso}.
 #' \code{print.rlasso} prints and displays some information about fitted \code{rlasso} objects.
 #' \code{summary.rlasso} summarizes information of a fitted \code{rlasso} object.
 #' \code{predict.rlasso} predicts values based on a \code{rlasso} object.
@@ -470,7 +489,6 @@ lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.dependent.
 #' @param digits significant digits in printout
 #' @param newdata new data set for prediction. An optional data frame in which to look for variables with which to predict. If omitted, the fitted values are returned.
 #' @param ... arguments passed to the print function and other methods
-#' @keywords methods rlasso
 #' @rdname methods.rlasso
 #' @aliases methods.rlasso print.rlasso predict.rlasso model.matrix.rlasso
 #' @export
@@ -694,6 +712,9 @@ model.matrix.rlasso <- function (object, ...)
 
 predict.rlasso <- function (object, newdata = NULL, ...) 
 {
+  mf <- match.call(expand.dots = FALSE)
+  m <- match("newx", names(mf), 0L)
+  if (m==0L) stop("Please use argument \"newdata\" instead of \"newx\" to provide data for prediction.")
   k <- length(object$beta)
   if (missing(newdata) || is.null(newdata)) {
     X <- model.matrix(object)

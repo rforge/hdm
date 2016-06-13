@@ -2,22 +2,38 @@
 % Please edit documentation in R/tsls.R
 \name{tsls}
 \alias{tsls}
+\alias{tsls.default}
+\alias{tsls.formula}
 \title{Two-Stage Least Squares Estimation (TSLS)}
 \usage{
-tsls(y, d, x, z, intercept = TRUE, homoscedastic = TRUE)
+tsls(x, ...)
+
+\method{tsls}{default}(x, d, y, z, intercept = TRUE, homoscedastic = TRUE,
+  ...)
+
+\method{tsls}{formula}(formula, data, intercept = TRUE,
+  homoscedastic = TRUE, ...)
 }
 \arguments{
-\item{y}{outcome variable}
+\item{x}{exogenous variables}
+
+\item{...}{further arguments (only for consistent defintion of methods)}
 
 \item{d}{endogenous variables}
 
-\item{x}{exogenous variables}
+\item{y}{outcome variable}
 
 \item{z}{instruments}
 
 \item{intercept}{logical, if intercept should be included}
 
 \item{homoscedastic}{logical, if homoscedastic (\code{TRUE}, default) or heteroscedastic erros (\code{FALSE}) should be calculated.}
+
+\item{formula}{An object of class \code{Formula} of the form " y ~ x + d | x + z" with y the outcome variable,
+d endogenous variable, z instrumental variables, and x exogenous variables.}
+
+\item{data}{An optional data frame, list or environment (or object coercible by as.data.frame to a data frame) containing the variables in the model. 
+If not found in data, the variables are taken from environment(formula), typically the environment from which \code{tsls} is called.}
 }
 \value{
 The function returns a list with the following elements \item{coefficients}{coefficients}
@@ -33,9 +49,4 @@ for outcome variable \code{y} where \code{d} are endogenous variables in structu
 structural equation and z are instruments. It returns an object of class \code{tsls} for which the methods \code{print} and \code{summary} 
 are provided.
 }
-\keyword{2SLS}
-\keyword{Endogeneity}
-\keyword{Instrumental}
-\keyword{TSLS}
-\keyword{Variables}
 

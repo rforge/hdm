@@ -8,10 +8,8 @@
 #' data-driven penalty. The
 #' option \code{post=TRUE} conducts post-lasso estimation, i.e. a refit of the
 #' model with the selected variables.
-#' @param formula an object of class 'formula' (or one that can be coerced to
-#' that class): a symbolic description of the model to be fitted in the form
-#' \code{y~x}
-#' @param data an optional data frame, list or environment
+#' @param x regressors (matrix)
+#' @param y dependent variable (vector or matrix)
 #' @param post logical. If \code{TRUE}, post-lasso estimation is conducted.
 #' @param intercept logical. If \code{TRUE}, intercept is included which is not
 #' penalized.
@@ -48,10 +46,7 @@
 #' beta <- c(rep(2,px), rep(0,p-px))
 #' intercept <- 1
 #' P <- exp(intercept + X %*% beta)/(1+exp(intercept + X %*% beta))
-#' y <- numeric(length=250)
-#' for(i in 1:n){
-#'   y[i] <- sample(x=c(1,0), size=1, prob=c(P[i],1-P[i]))
-#' }
+#' y <- rbinom(length(y), size=1, prob=P)
 #' ## fit rlassologit object
 #'  rlassologit.reg <- rlassologit(y~X)
 #'  ## methods
@@ -62,7 +57,17 @@
 #' predict(rlassologit.reg, newdata=X3)
 #' }
 #' @export
-rlassologit <- function(formula, data, post = TRUE, intercept = TRUE,  model = TRUE, penalty = list(lambda = NULL, 
+#' @rdname rlassologit
+rlassologit <- function(x, ...)
+  UseMethod("rlassologit") # definition generic function
+
+#' @param formula an object of class 'formula' (or one that can be coerced to
+#' that class): a symbolic description of the model to be fitted in the form
+#' \code{y~x}.
+#' @param data an optional data frame, list or environment.
+#' @export
+#' @rdname rlassologit
+rlassologit.formula <- function(formula, data, post = TRUE, intercept = TRUE,  model = TRUE, penalty = list(lambda = NULL, 
                                                                                      c = 1.1, gamma = 0.1/log(n)), control = list(threshold = NULL),  ...) {
   cl <- match.call()
   mf <- match.call(expand.dots = FALSE)
@@ -83,7 +88,7 @@ rlassologit <- function(formula, data, post = TRUE, intercept = TRUE,  model = T
       colnames(x) <- gsub(re.escape(formula[[3]]), "", colnames(x))  
     }
   }
-  est <- rlassologit.fit(x, y, post = post, intercept = intercept, model = model, penalty = penalty,  
+  est <- rlassologit(x, y, post = post, intercept = intercept, model = model, penalty = penalty,  
                          control = control,  ...)
   est$call <- cl
   return(est)
@@ -92,9 +97,7 @@ rlassologit <- function(formula, data, post = TRUE, intercept = TRUE,  model = T
 
 #' @rdname rlassologit
 #' @export
-#' @param x regressors (matrix)
-#' @param y dependent variable (vector or matrix)
-rlassologit.fit <- function(x, y, post = TRUE, intercept = TRUE,  model = TRUE, penalty = list(lambda = NULL, 
+rlassologit.default <- function(x, y, post = TRUE, intercept = TRUE,  model = TRUE, penalty = list(lambda = NULL, 
                                                                                 c = 1.1, gamma =  0.1/log(n)), control = list(threshold = NULL), ...) {
   n <- dim(x)[1]
   p <- dim(x)[2]
@@ -222,7 +225,7 @@ rlassologit.fit <- function(x, y, post = TRUE, intercept = TRUE,  model = TRUE, 
 
 #' Methods for S3 object \code{rlassologit}
 #'
-#' Objects of class \code{rlassologit} are constructed by \code{rlassologit} or \code{rlassologit.fit}.
+#' Objects of class \code{rlassologit} are constructed by \code{rlassologit}.
 #' \code{print.rlassologit} prints and displays some information about fitted \code{rlassologit} objects.
 #' \code{summary.rlassologit} summarizes information of a fitted \code{rlassologit} object.
 #' \code{predict.rlassologit} predicts values based on a \code{rlassologit} object.
@@ -234,7 +237,6 @@ rlassologit.fit <- function(x, y, post = TRUE, intercept = TRUE,  model = TRUE, 
 #' @param type type of prediction required. The default ('response) is on the scale of the response variable; the alternative 'link' is on the scale of the linear predictors.
 #' @param newdata new data set for prediction
 #' @param ... arguments passed to the print function and other methods
-#' @keywords methods rlassologit
 #' @rdname methods.rlassologit
 #' @aliases methods.rlassologit print.rlassologit summary.rlassologit predict.rlassologit model.matrix.rlassologit
 #' @export
@@ -325,6 +327,10 @@ predict.rlassologit <- function (object, newdata = NULL, type = "response", ...)
   #     }
   #   }
   # }
+  mf <- match.call(expand.dots = FALSE)
+  m <- match("newx", names(mf), 0L)
+  if (m==0L) stop("Please use argument \"newdata\" instead of \"newx\" to provide data for prediction.")
+  
   k <- length(object$beta)
   if (missing(newdata) || is.null(newdata)) {
     X <- model.matrix(object)

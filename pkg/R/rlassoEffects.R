@@ -30,7 +30,6 @@
 #' @references A. Belloni, V. Chernozhukov, C. Hansen (2014). Inference on
 #' treatment effects after selection among high-dimensional controls. The
 #' Review of Economic Studies 81(2), 608-650.
-#' @keywords Estimation Inference Treatment effect High-dimensional controls
 #' @export
 #' @rdname rlassoEffects
 #' @examples
@@ -48,7 +47,12 @@
 #' ## methods
 #' summary(rlassoEffects.reg)
 #' confint(rlassoEffects.reg, level=0.9)
-rlassoEffects <- function(x, y, index = c(1:ncol(x)), method = "partialling out", 
+rlassoEffects <- function(x, ...)
+  UseMethod("rlassoEffects") # definition generic function 
+
+#' @export
+#' @rdname rlassoEffects
+rlassoEffects.default <- function(x, y, index = c(1:ncol(x)), method = "partialling out", 
                           I3 = NULL, post = TRUE, ...) {
   
   checkmate::checkChoice(method, c("partialling out", "double selection"))
@@ -120,6 +124,41 @@ rlassoEffects <- function(x, y, index = c(1:ncol(x)), method = "partialling out"
               residuals = residuals)
   class(res) <- "rlassoEffects"
   return(res)
+}
+
+#' @rdname rlassoEffects
+#' @param formula An element of class \code{formula} specifying the linear model.
+#' @param I An one-sided formula specifying the variables for which inference is conducted.
+#' @param included One-sided formula of variables which should be included in any case (only for method="double selection").
+#' @param data an optional data frame, list or environment (or object coercible by as.data.frame to a data frame) containing the variables in the model. 
+#' If not found in data, the variables are taken from environment(formula), typically the environment from which the function is called.
+#' @export
+rlassoEffects.formula <- function(formula, data, I, method = "partialling out", 
+                              included = NULL, post = TRUE, ...) {
+  cl <- match.call()
+  if (missing(data))  data <- environment(formula)
+  mf <- match.call(expand.dots = FALSE)
+  m <- match(c("formula", "data"), names(mf), 0L)
+  mf <- mf[c(1L, m)]
+  mf$drop.unused.levels <- TRUE
+  mf[[1L]] <- quote(stats::model.frame)
+  mf <- eval(mf, parent.frame())
+  mt <- attr(mf, "terms")
+  attr(mt, "intercept") <- 1
+  y <- model.response(mf, "numeric")
+  n <- length(y)
+  x <- model.matrix(mt, mf)[,-1, drop=FALSE]
+  cn <- attr(mt, "term.labels")
+  I.c <- check_variables(I, cn)
+  I3 <- check_variables(included, cn)
+  
+  #if (length(intersect(I.c, I3) != 0)) 
+  #  stop("I and included should not contain the same variables!")
+  
+  est <- rlassoEffects(x, y, index = I.c, method = method, 
+                                I3 = I3, post = post, ...)
+  est$call <- cl
+  return(est)
 }
 
 #' @rdname rlassoEffects
@@ -215,7 +254,6 @@ rlassoEffect <- function(x, y, d, method = "double selection", I3 = NULL,
 #' @param x an object of class \code{rlassoEffects}
 #' @param digits significant digits in printout
 #' @param ... arguments passed to the print function and other methods.
-#' @keywords methods rlassoEffects
 #' @rdname methods.rlassoEffects
 #' @aliases methods.rlassoEffects print.rlassoEffects confint.rlassoEffects plot.rlassoEffects
 #' @export

@@ -1,8 +1,8 @@
 Package: hdm
 Type: Package
 Title: High-Dimensional Metrics
-Version: 0.1.2
-Date: 2016-05-13
+Version: 0.2.0
+Date: 2016-05-20
 Authors@R: c(person("Martin", "Spindler", email="spindler@mea.mpisoc.mpg.de", role=c("cre", "aut")), person("Victor", "Chernozhukov", role="aut"), person("Christian", "Hansen", role="aut"))
 Depends:
     R (>= 3.0.0)
@@ -21,7 +21,8 @@ Imports:
     MASS,
     glmnet,
     ggplot2,
-    checkmate
+    checkmate,
+    Formula
 Suggests:
     testthat,
     knitr,

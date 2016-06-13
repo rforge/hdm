@@ -37,6 +37,4 @@ Objects of class \code{rlassologitEffects} are construced by \code{rlassologitEf
 \code{summary.rlassologitEffects} summarizes information of a fitted \code{rlassologitEffects} object.
 \code{confint.rlassologitEffects} extracts the confidence intervals.
 }
-\keyword{methods}
-\keyword{rlassologitEffects}
 

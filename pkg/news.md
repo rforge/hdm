@@ -1,4 +1,4 @@
-## Changes from Version 0.1.0 to 0.1.1
+## Changes from Version 0.1.0 to 0.2.0
 
 * LassoShooting.fit: handle of NAs in coefficient vector (Bug 1)
 * rlasso: removed bug in construction of model.matrix and change in predict-method (analog for rlassologit)
@@ -13,3 +13,5 @@
 * 03/05/2016: add Citation
 * 03/05/2016: change plot function (test!)
 * 03/05/2016: change of penalty choice (mm=1 half penalty and change old rule)
+* 13/06/2016: new data sets (BLP, CPS)
+* 13/06/2016: generic functions to implement formulas

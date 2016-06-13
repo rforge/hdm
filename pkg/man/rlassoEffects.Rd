@@ -3,10 +3,17 @@
 \name{rlassoEffects}
 \alias{rlassoEffect}
 \alias{rlassoEffects}
+\alias{rlassoEffects.default}
+\alias{rlassoEffects.formula}
 \title{rigorous Lasso for Linear Models: Inference}
 \usage{
-rlassoEffects(x, y, index = c(1:ncol(x)), method = "partialling out",
-  I3 = NULL, post = TRUE, ...)
+rlassoEffects(x, ...)
+
+\method{rlassoEffects}{default}(x, y, index = c(1:ncol(x)),
+  method = "partialling out", I3 = NULL, post = TRUE, ...)
+
+\method{rlassoEffects}{formula}(formula, data, I, method = "partialling out",
+  included = NULL, post = TRUE, ...)
 
 rlassoEffect(x, y, d, method = "double selection", I3 = NULL, post = TRUE,
   ...)
@@ -27,6 +34,15 @@ indicates if variables (TRUE) should be included in any case to the model and th
 In the case of partialling out it is ignored.}
 
 \item{post}{logical, if post Lasso is conducted with default \code{TRUE}.}
+
+\item{formula}{An element of class \code{formula} specifying the linear model.}
+
+\item{data}{an optional data frame, list or environment (or object coercible by as.data.frame to a data frame) containing the variables in the model. 
+If not found in data, the variables are taken from environment(formula), typically the environment from which the function is called.}
+
+\item{I}{An one-sided formula specifying the variables for which inference is conducted.}
+
+\item{included}{One-sided formula of variables which should be included in any case (only for method="double selection").}
 
 \item{d}{variable for which inference is conducted (treatment variable)}
 
@@ -73,10 +89,4 @@ A. Belloni, V. Chernozhukov, C. Hansen (2014). Inference on
 treatment effects after selection among high-dimensional controls. The
 Review of Economic Studies 81(2), 608-650.
 }
-\keyword{Estimation}
-\keyword{High-dimensional}
-\keyword{Inference}
-\keyword{Treatment}
-\keyword{controls}
-\keyword{effect}
 

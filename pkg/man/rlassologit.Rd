@@ -2,23 +2,30 @@
 % Please edit documentation in R/rlassologit.R
 \name{rlassologit}
 \alias{rlassologit}
-\alias{rlassologit.fit}
+\alias{rlassologit.default}
+\alias{rlassologit.formula}
 \title{rlassologit: Function for logistic Lasso estimation}
 \usage{
-rlassologit(formula, data, post = TRUE, intercept = TRUE, model = TRUE,
-  penalty = list(lambda = NULL, c = 1.1, gamma = 0.1/log(n)),
+rlassologit(x, ...)
+
+\method{rlassologit}{formula}(formula, data, post = TRUE, intercept = TRUE,
+  model = TRUE, penalty = list(lambda = NULL, c = 1.1, gamma = 0.1/log(n)),
   control = list(threshold = NULL), ...)
 
-rlassologit.fit(x, y, post = TRUE, intercept = TRUE, model = TRUE,
-  penalty = list(lambda = NULL, c = 1.1, gamma = 0.1/log(n)),
+\method{rlassologit}{default}(x, y, post = TRUE, intercept = TRUE,
+  model = TRUE, penalty = list(lambda = NULL, c = 1.1, gamma = 0.1/log(n)),
   control = list(threshold = NULL), ...)
 }
 \arguments{
+\item{x}{regressors (matrix)}
+
+\item{...}{further parameters passed to glmnet}
+
 \item{formula}{an object of class 'formula' (or one that can be coerced to
 that class): a symbolic description of the model to be fitted in the form
-\code{y~x}}
+\code{y~x}.}
 
-\item{data}{an optional data frame, list or environment}
+\item{data}{an optional data frame, list or environment.}
 
 \item{post}{logical. If \code{TRUE}, post-lasso estimation is conducted.}
 
@@ -32,10 +39,6 @@ penalized.}
 \item{control}{list with control values.
 \code{threshold} is applied to the final estimated lasso
 coefficients. Absolute values below the threshold are set to zero.}
-
-\item{...}{further parameters passed to glmnet}
-
-\item{x}{regressors (matrix)}
 
 \item{y}{dependent variable (vector or matrix)}
 }
@@ -74,10 +77,7 @@ X <- matrix(rnorm(n*p), ncol=p)
 beta <- c(rep(2,px), rep(0,p-px))
 intercept <- 1
 P <- exp(intercept + X \%*\% beta)/(1+exp(intercept + X \%*\% beta))
-y <- numeric(length=250)
-for(i in 1:n){
-  y[i] <- sample(x=c(1,0), size=1, prob=c(P[i],1-P[i]))
-}
+y <- rbinom(length(y), size=1, prob=P)
 ## fit rlassologit object
  rlassologit.reg <- rlassologit(y~X)
  ## methods

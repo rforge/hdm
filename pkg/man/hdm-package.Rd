@@ -37,14 +37,4 @@ A. Belloni, V. Chernozhukov, C. Hansen (2014). Inference on
 treatment effects after selection among high-dimensional controls. The
 Review of Economic Studies 81(2), 608-650.
 }
-\keyword{Endogeneity}
-\keyword{Evaluation}
-\keyword{Instrumental}
-\keyword{Lasso}
-\keyword{Microeconometrics}
-\keyword{Program}
-\keyword{Variables}
-\keyword{effects}
-\keyword{package}
-\keyword{treatment}
 

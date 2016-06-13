@@ -19,30 +19,37 @@ colnames(dat)[1] <- "Y"
 
 # plain
 
-lasso.reg1 = rlasso(Y~X,post=FALSE)
+lasso.reg1 = rlasso(Y~X,post=TRUE)
 yhat1 = predict(lasso.reg1, newdata=Xnew)
 yhat1b = predict(lasso.reg1)
-lasso.reg2 = rlasso(Y~X, data=dat, post=FALSE)
+lasso.reg2 = rlasso(Y~X, data=dat, post=TRUE)
 yhat2 = predict(lasso.reg2, newdata=Xnew)
 yhat2b = predict(lasso.reg2)
-lasso.reg3 = rlasso.fit(x=X, y=Y, post=FALSE)
+MSE2b <- mean((Ynew-yhat2b)^2)
+lasso.reg3 = rlasso.fit(x=X, y=Y, post=TRUE)
 yhat3 = predict(lasso.reg3, newdata=Xnew)
 yhat3b = predict(lasso.reg3)
 
 head(cbind(Ynew, yhat1, yhat2, yhat3))
+mean((Ynew-yhat1)^2)
+mean((Ynew-yhat2)^2)
+mean((Ynew-yhat3)^2)
 head(cbind(Y, yhat1b, yhat2b, yhat3b))
+mean((Y-yhat1b)^2)
+mean((Y-yhat2b)^2)
+mean((Y-yhat3b)^2)
 
 # formula
 Xnew2 <- Xnew[,1:4]
 Xnew3 <- Xnewnames[,1:4]
-lasso.reg1f = rlasso(Y~V1+ V2+ V3 + V4, data=dat,post=FALSE)
+lasso.reg1f = rlasso(Y~V1+ V2+ V3 + V4, data=dat,post=TRUE)
 yhat1f = predict(lasso.reg1f, newdata=Xnew)
 yhat1ff = predict(lasso.reg1f, newdata=Xnew2)
 yhat1fff = predict(lasso.reg1f, newdata=Xnew3)
 yhat1bff = predict(lasso.reg1f, newdata=dat)
 yhat1bf = predict(lasso.reg1f)
 
-lasso.reg2f = rlasso(Y~(V1+ V2+ V3 + V4)^2, data=dat,post=FALSE)
+lasso.reg2f = rlasso(Y~(V1+ V2+ V3 + V4)^2, data=dat,post=TRUE)
 yhat2f = predict(lasso.reg2f, newdata=Xnew)
 yhat2ff = predict(lasso.reg2f, newdata=Xnew2)
 yhat2fff = predict(lasso.reg2f, newdata=Xnew3)
@@ -50,5 +57,7 @@ yhat2bf = predict(lasso.reg2f)
 yhat2bff = predict(lasso.reg2f, newdata=dat)
 
 head(cbind(Ynew, yhat2fff))
+mean((Ynew-yhat2fff)^2)
 head(cbind(Y, yhat2bf, yhat2bff))
-
+mean((Y-yhat2bf)^2)
+mean((Y-yhat2bff)^2)

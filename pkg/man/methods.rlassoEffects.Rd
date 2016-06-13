@@ -46,6 +46,4 @@ summary.rlassoEffects summarizes information of a fitted \code{rlassoEffect} obj
 \code{confint.rlassoEffects} extracts the confidence intervals.
 \code{plot.rlassoEffects} plots the estimates with confidence intervals.
 }
-\keyword{methods}
-\keyword{rlassoEffects}
 

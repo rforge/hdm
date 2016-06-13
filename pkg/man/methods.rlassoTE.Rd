@@ -33,6 +33,4 @@ Objects of class \code{rlassoTE} are constructed by  \code{rlassoATE},  \code{rl
 \code{summary.rlassoTE} summarizes information of a fitted \code{rlassoTE} object.
 \code{confint.rlassoTE} extracts the confidence intervals.
 }
-\keyword{methods}
-\keyword{rlassoTE}
 

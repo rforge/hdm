@@ -2,11 +2,19 @@
 % Please edit documentation in R/rlassoIV.R
 \name{rlassoIV}
 \alias{rlassoIV}
+\alias{rlassoIV.default}
+\alias{rlassoIV.formula}
 \alias{rlassoIVmult}
 \title{Post-Selection and Post-Regularization Inference in Linear Models with Many
 Controls and Instruments}
 \usage{
-rlassoIV(x, d, y, z, select.Z = TRUE, select.X = TRUE, post = TRUE, ...)
+rlassoIV(x, ...)
+
+\method{rlassoIV}{default}(x, d, y, z, select.Z = TRUE, select.X = TRUE,
+  post = TRUE, ...)
+
+\method{rlassoIV}{formula}(formula, data, select.Z = TRUE, select.X = TRUE,
+  post = TRUE, ...)
 
 rlassoIVmult(x, d, y, z, select.Z = TRUE, select.X = TRUE, ...)
 }
@@ -19,11 +27,17 @@ rlassoIVmult(x, d, y, z, select.Z = TRUE, select.X = TRUE, ...)
 
 \item{z}{matrix of instrumental variables}
 
-\item{select.Z}{logical, indicating selection on the instruments}
+\item{select.Z}{logical, indicating selection on the instruments.}
 
-\item{select.X}{logical, indicating selection on the exogenous variables}
+\item{select.X}{logical, indicating selection on the exogenous variables.}
 
 \item{post}{logical, wheter post-Lasso should be conducted (default=\code{TRUE})}
+
+\item{formula}{An object of class \code{Formula} of the form " y ~ x + d | x + z" with y the outcome variable,
+d endogenous variable, z instrumental variables, and x exogenous variables.}
+
+\item{data}{an optional data frame, list or environment (or object coercible by as.data.frame to a data frame) containing the variables in the model. 
+If not found in data, the variables are taken from environment(formula), typically the environment from which \code{rlassoIV} is called.}
 
 \item{\dots}{arguments passed to the function \code{rlasso}}
 }
@@ -45,16 +59,21 @@ the control variables X (\code{rlassoIVselectX}) or without selection (\code{tsl
 \code{x} are automatically used as instruments and added to the
 instrument set \code{z}.
 }
+\examples{
+\dontrun{
+data(EminentDomain)
+z <- EminentDomain$logGDP$z # instruments
+x <- EminentDomain$logGDP$x # exogenous variables
+y <- EminentDomain$logGDP$y # outcome varialbe
+d <- EminentDomain$logGDP$d # treatment / endogenous variable
+lasso.IV.Z = rlassoIV(x=x, d=d, y=y, z=z, select.X=FALSE, select.Z=TRUE) 
+summary(lasso.IV.Z)
+confint(lasso.IV.Z)
+}
+}
 \references{
 V. Chernozhukov, C. Hansen, M. Spindler (2015). Post-selection
 and post-regularization inference in linear models with many controls and
 instruments. American Economic Review: Paper & Proceedings 105(5), 486--490.
 }
-\keyword{Instrumental}
-\keyword{Lasso}
-\keyword{Many}
-\keyword{Variable}
-\keyword{and}
-\keyword{controls}
-\keyword{instruments}
 

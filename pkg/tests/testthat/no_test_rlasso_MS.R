@@ -8,6 +8,7 @@ beta = c(rep(3,s), rep(0,p-s))
 y = 1 + X%*%beta + rnorm(n)
 
 lasso.reg = rlasso(y~X, post=TRUE, intercept=FALSE)
+lasso.reg = rlasso(X, y, post=TRUE, intercept=FALSE)
 lasso.reg = rlasso(y~X, post=FALSE, intercept=TRUE)
 lasso.reg = rlasso(y~X, post=TRUE, intercept=TRUE, penalty=list(lambda=0.1))
 

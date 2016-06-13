@@ -25,6 +25,4 @@ Objects of class \code{tsls} are constructed by \code{tsls}.
 \code{print.tsls} prints and displays some information about fitted \code{tsls} objects.
 \code{summary.tsls} summarizes information of a fitted \code{tsls} object.
 }
-\keyword{methods}
-\keyword{tsls}
 
