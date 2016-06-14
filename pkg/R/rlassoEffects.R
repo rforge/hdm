@@ -149,7 +149,7 @@ rlassoEffects.formula <- function(formula, data, I, method = "partialling out",
   n <- length(y)
   x <- model.matrix(mt, mf)[,-1, drop=FALSE]
   cn <- attr(mt, "term.labels")
-  if (is.matrix(eval(parse(text=cn)))) cn <- colnames(eval(parse(text=cn)))
+  try(if (is.matrix(eval(parse(text=cn)))) cn <- colnames(eval(parse(text=cn))), silent=TRUE)
   I.c <- check_variables(I, cn)
   I3 <- check_variables(included, cn)
   
