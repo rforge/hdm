@@ -22,7 +22,8 @@ Imports:
     glmnet,
     ggplot2,
     checkmate,
-    Formula
+    Formula,
+    methods
 Suggests:
     testthat,
     knitr,

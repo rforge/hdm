@@ -46,6 +46,11 @@
 #' @importFrom stats rnorm
 #' @importFrom stats var
 #' @importFrom stats vcov
+#' @importFrom stats as.formula
+#' @importFrom stats contrasts
+#' @importFrom stats formula
+#' @importFrom stats terms
+#' @importFrom methods is 
 NULL
 
 #' Growth data set
