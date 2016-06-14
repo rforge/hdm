@@ -428,12 +428,12 @@ return(I.c)
     
     if (is.null(formula)) return(NULL)
     
-    if("formula" %in% class(I)){
-      if(!("Formula" %in% class(I))){
-        if(length(I) > 2L){ stop("'I' must be a one-sided formula, e.g. '~ x1 + x2'.") }
+    if("formula" %in% class(formula)){
+      if(!("Formula" %in% class(formula))){
+        if(length(formula) > 2L){ stop("'I' must be a one-sided formula, e.g. '~ x1 + x2'.") }
       }else{
-        if(length(I)[1] > 0L){ stop("'I' must be a one-sided formula: '~ x1 + x2' is ok, 'y ~ x1 + x2' is not.") }
-        if(length(I)[2] > 1L){ stop("'I' must be a one-sided formula, '~ x1 + x2' is ok, '~ x1 + x2 | z1 + z2' is not.") }
+        if(length(formula)[1] > 0L){ stop("'I' must be a one-sided formula: '~ x1 + x2' is ok, 'y ~ x1 + x2' is not.") }
+        if(length(formula)[2] > 1L){ stop("'I' must be a one-sided formula, '~ x1 + x2' is ok, '~ x1 + x2 | z1 + z2' is not.") }
       }
     }
     

@@ -80,7 +80,7 @@ test_that("rlasso - check methods",{
   expect_that(predict(rlasso(X, y), as.data.frame(2 * X)), not(throws_error()))
   expect_that(predict(rlasso(y ~ X), as.data.frame(2 * X)), not(throws_error()))
   expect_that(predict(rlasso(y ~ ., data = frame), as.data.frame(2 * X)), not(throws_error()))
-  expect_that(predict(rlasso(y ~ ., data = frame), cbind(frame, rnorm(nrow(frame)))), not(throws_error()))
+  #expect_that(predict(rlasso(y ~ ., data = frame), cbind(frame, rnorm(nrow(frame)))), not(throws_error()))
 })
 
 

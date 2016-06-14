@@ -116,6 +116,7 @@ rlassologitEffects.formula  <- function(formula, data, I,
   n <- length(y)
   x <- model.matrix(mt, mf)[,-1, drop=FALSE]
   cn <- attr(mt, "term.labels")
+  if (is.matrix(eval(parse(text=cn)))) cn <- colnames(eval(parse(text=cn)))
   I.c <- check_variables(I, cn)
   I3 <- check_variables(included, cn)
   
@@ -169,7 +170,7 @@ rlassologitEffect <- function(x, y, d, I3 = NULL, post = TRUE) {
   la3 <- 1.1/2 * sqrt(n) * qnorm(1 - 0.05/(max(n, (p3 + 1) * log(n))))
   l3 <- rlassologit(cbind(d, xselect), y, post = TRUE, normalize = TRUE, 
                     intercept = TRUE, penalty = list(lambda.start = la3))
-  alpha <- l3$coefficients[1]
+  alpha <- l3$beta[1]
   t3 <- predict(l3, type = "link", newdata = cbind(d, xselect))
   G3 <- exp(t3)/(1 + exp(t3))
   w3 <- G3 * (1 - G3)

@@ -26,7 +26,7 @@ lasso.reg2 = rlasso(Y~X, data=dat, post=TRUE)
 yhat2 = predict(lasso.reg2, newdata=Xnew)
 yhat2b = predict(lasso.reg2)
 MSE2b <- mean((Ynew-yhat2b)^2)
-lasso.reg3 = rlasso.fit(x=X, y=Y, post=TRUE)
+lasso.reg3 = rlasso(x=X, y=Y, post=TRUE)
 yhat3 = predict(lasso.reg3, newdata=Xnew)
 yhat3b = predict(lasso.reg3)
 
