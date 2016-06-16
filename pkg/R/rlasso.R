@@ -145,7 +145,7 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, model = TRUE,
   if (!exists("X.dependent.lambda", where = penalty))  penalty$X.dependent.lambda = "FALSE"
   if (!exists("gamma", where = penalty))  penalty$gamma = 0.1/log(n)
   
-  if (penalty$homoscedastic=="none" & !exists("lambda.start", where=penalty)) error("lambda.start must be provided!")
+  if (penalty$homoscedastic=="none" & !exists("lambda.start", where=penalty)) stop("lambda.start must be provided!")
   # checking input numIter, tol
   if (!exists("numIter", where = control)) {
     control$numIter = 15
@@ -226,11 +226,11 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, model = TRUE,
       if (intercept) {
         intercept.value <- mean(y + mu)
         coef <- rep(0,p+1)
-        names(coef) <- c("intercept", names(coefTemp))
+        names(coef) <- c("intercept", colnames(x)) #c("intercept", names(coefTemp))
       } else {
         intercept.value <- mean(y)
         coef <- rep(0,p)
-        names(coef) <- names(coefTemp)
+        names(coef) <- colnames(x) #names(coefTemp)
       }
       est <- list(coefficients = coef, beta=rep(0,p), intercept=intercept.value, index = rep(FALSE, p),
                   lambda = lambda, lambda0 = lambda0, loadings = Ups0, residuals = y -

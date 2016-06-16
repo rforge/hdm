@@ -97,3 +97,21 @@ lasso.reg.post <- rlasso(y~X, post=TRUE, intercept=FALSE)
 Results2 <- mean((fo-Xo%*%coef(lasso.reg.post))^2)
 lasso.reg.post$coefficients[1:s]
 print("MSE", Results2)
+
+################################ test sup score test
+set.seed(12345)
+R <- 500
+pvector <- numeric(length = R)
+for (i in 1:R) {
+n = 100 #sample size
+p = 50 # number of variables
+s = 3 # nubmer of non-zero variables
+X = matrix(rnorm(n*p), ncol=p)
+colnames(X) = paste("V", 1:p, sep="")
+beta = c(rep(1,s), rep(0,p-s))
+y = 0 + X%*%beta + rnorm(n)
+
+lasso.reg = rlasso(y~X, post=TRUE, intercept=FALSE)
+pvector[i] <- summary(lasso.reg)$pvalue
+}
+mean(pvector < 0.05)

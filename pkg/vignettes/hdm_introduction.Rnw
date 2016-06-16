@@ -17,6 +17,8 @@
 \usepackage[utf8]{inputenc}
 \usepackage{soul}
 \usepackage{natbib}
+\usepackage{geometry}
+\geometry{verbose,tmargin=3cm,bmargin=3cm,lmargin=3cm,rmargin=3cm}
 \newcommand{\Robject}[1]{{\texttt{#1}}}
 \newcommand{\Rfunction}[1]{{\texttt{#1}}}
 \newcommand{\Rpackage}[1]{{\texttt{#1}}}
@@ -78,19 +80,19 @@ knitr::opts_chunk$set(warning = FALSE)
 
 opts_chunk$set(tidy=TRUE, tidy.opts=list(width.cutoff=60)) #{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 
-# source: https://github.com/yihui/knitr-examples/blob/master/077-wrap-output.Rmd
-#knitr::opts_chunk$set(linewidth = NULL)
-#hook_output = knit_hooks$get('output')
-#knit_hooks$set(output = function(x, options) {
-#  # this hook is used only when the linewidth option is not NULL
-#  if (!is.null(n <- options$linewidth)) {
-#    x = knitr:::split_lines(x)
-#    # any lines wider than n should be wrapped
-#    if (any(nchar(x) > n)) x = strwrap(x, width = n)
-#    x = paste(x, collapse = '\n')
-#  }
-#  hook_output(x, options)
-#})
+# # source: https://github.com/yihui/knitr-examples/blob/master/077-wrap-output.Rmd
+# knitr::opts_chunk$set(linewidth = NULL)
+# hook_output = knit_hooks$get('output')
+# knit_hooks$set(output = function(x, options) {
+#   # this hook is used only when the linewidth option is not NULL
+#   if (!is.null(n <- options$linewidth)) {
+#     x = knitr:::split_lines(x)
+#     # any lines wider than n should be wrapped
+#     if (any(nchar(x) > n)) x = strwrap(x, width = n)
+#     x = paste(x, collapse = '\n')
+#   }
+#   hook_output(x, options)
+# })
 @
 
 <<eval=FALSE>>=
@@ -303,6 +305,7 @@ the option \code{all} can be set to \code{FALSE} to limit the print only to the 
 
 <<Estimation_lasso1>>=
 lasso.reg = rlasso(Y~X,post=FALSE)  # use lasso, not-Post-lasso
+# lasso.reg = rlasso(X, Y, post=FALSE)
 sum.lasso <- summary(lasso.reg, all=FALSE) # can also do print(lasso.reg, all=FALSE)
 yhat.lasso = predict(lasso.reg)   #in-sample prediction
 Xnew = matrix(rnorm(n*p), ncol=p)  # new X
@@ -442,7 +445,9 @@ summary(Eff)$coef[,1:2]
 
 
 \subsection{Inference: Confidence Intervals and Significance Testing}
-The function \code{rlassoEffects} does inference -- namely construction of confidence intervals and significance testing -- for target variables. Those can be specified either by the variable names, an integer valued vector giving their position in \code{x} or by a logical vector indicating the variables for which inference should be conducted. It returns an object of S3 class \code{rlassoEffect} for which the methods \code{summary}, \code{print}, \code{confint}, and \code{plot} are provided. \code{rlassoEffects} is a wrap function for the function \code{rlassoEffect} which does inference for a single target regressor. The theoretical underpinning is given in \citet{BelloniChernozhukovHansen2011} and for a more general class of models in \citet{BCK2014}.
+The function \code{rlassoEffects} does inference -- namely construction of confidence intervals and significance testing -- for target variables. Those can be specified either by the variable names, an integer valued vector giving their position in \code{x} or by a logical vector indicating the variables for which inference should be conducted. It returns an object of S3 class \code{rlassoEffects} for which the methods \code{summary}, \code{print}, \code{confint}, and \code{plot} are provided. \code{rlassoEffects} is a wrap function for the function \code{rlassoEffect} which does inference for a single target regressor. The theoretical underpinning is given in \citet{BelloniChernozhukovHansen2011} and for a more general class of models in \citet{BCK2014}.
+The function \code{rlassoEffects} might either be used in the form \code{rlassoEffects(x, y, index)} where \code{x} is a matrix, \code{y} denotes the outcome variable and \code{index} specifies the variables of \code{x} for which inference is conducted. This can done by an integer vector (postion of the variables), a logical vector or the name of the variables. An alternative usage is as \code{rlassoEffects(formula, data, I)} where \code{I} is a one-sided formula which specifies the variables for which is inference is conducted. For further details we refer to the help page of the function and the following examples where both methods for usage are shown.
+
 
 Here is an example of the use.
 <<DGP_lasso>>=
@@ -598,6 +603,8 @@ and high-dimensional $x_i$ the algorithm described in \citet{CHS:ManyIVNote} is 
  uses post-Lasso for partialling out.  By setting \code{post=FALSE}
  we can employ Lasso instead of Post-Lasso. Finally, the package provides the standard function \code{tsls}, which implements the \textquotedblleft classical\textquotedblright\ two-stage least squares estimation.
 
+\textbf{Fucntion usage} Both the family of \code{rlassoIV}-functions and the family of the functions for treatment effects , which are introduced in the next section, allow use with both formula-interface and by handing over the prepard model matrices. Hence the general pattern  for use with formula is \code{function(formula, data, ...)} where formula consists of two-parts and is a member of the class \code{Formula}. These formulas are of the pattern \code{y ~ d + x | x + z} where \code{y} is the outcome variable, \code{x} are exogenous variables, \code{d} endogenous varialbes (if several ones are allowed depends on the concrete function), and \code{z} denote the instrumental variables. A more primitive use of the functions is by simply hand over the required group of variables as matrices: \code{function(x=x, d=d, y=y, z=z)}. In some of hte following examples both alternatives are displayed.   
+
 \subsection{Application: Economic Development and Institutions}
 Estimating the causal effect of institutions on output is complicated by the simultaneity between institutions and output: specifically, better institutions may
 lead to higher incomes, but higher incomes may also lead to the development of
@@ -686,7 +693,6 @@ As mentioned above, $y$ is the economic outcome, the logarithm of the GDP, $d$  
 First, we estimate the effect of the treatment variable by simple OLS and 2SLS using two instruments:
 <<OLS_EminentDomina>>=
 ED.ols = lm(y~cbind(d,x))
-ED.2sls = tsls(y=y, d=d, x=x, z=z[,1:2], intercept=FALSE)
 ED.2sls = tsls(y=y, d=d, x=x, z=z[,1:2], intercept=FALSE)
 @
 
@@ -876,7 +882,7 @@ tab
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The Lasso Methods for Discovery of Significant
-Causes Amongst Many Potential Causes, with Many Controls}
+Causes amongst Many Potential Causes, with Many Controls}
 Here we consider the model
 $$
 \underbrace{Y_{i}}_{\mathrm{Outcome}} \ \ =  \ \ \underbrace{\sum_{l=1}^{p_1} D_{il} \alpha_\ell}_{

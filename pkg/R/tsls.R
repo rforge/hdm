@@ -36,11 +36,11 @@ tsls.default <- function(x, d, y, z, intercept=TRUE, homoscedastic=TRUE, ...) {
   
   if (intercept==TRUE && is.null(x)) {
     x <- as.matrix(rep(1,n))
-    colnames(x) <- "Intercept"
+    colnames(x) <- "(Intercept)"
   } else {
     if (intercept==TRUE) {
       x <- as.matrix(cbind(1,x))
-      colnames(x)[1] <- "Intercept"
+      colnames(x)[1] <- "(Intercept)"
     }
   }
   
@@ -60,17 +60,18 @@ tsls.default <- function(x, d, y, z, intercept=TRUE, homoscedastic=TRUE, ...) {
   Z <- cbind(z, x)
 
   Mxz <- t(X) %*% Z
-  #Mzz <- solve(t(Z) %*% Z)
-  Mzz <- MASS::ginv(t(Z) %*% Z)
-  #M <- solve(Mxz %*% Mzz %*% t(Mxz))
-  M <- MASS::ginv(Mxz %*% Mzz %*% t(Mxz))
+  Mzz <- solve(t(Z) %*% Z)
+  #Mzz <- MASS::ginv(t(Z) %*% Z)
+  M <- solve(Mxz %*% Mzz %*% t(Mxz))
+  #M <- MASS::ginv(Mxz %*% Mzz %*% t(Mxz))
   
   b <- M %*% Mxz %*% Mzz %*% (t(Z) %*% y)
   #Dhat <- Z %*% solve(t(Z) %*% Z) %*% t(Z) %*% X
   #b2 <- MASS::ginv(t(Dhat) %*% X) %*% (t(Dhat) %*% y)
   if (homoscedastic==TRUE) {
   e <- y - X %*% b
-  VC1 <- as.numeric((t(e) %*% e/(n - k))) * M
+  #VC1 <- as.numeric((t(e) %*% e/(n - k))) * M
+  VC1 <- as.numeric((sum(e^2)/(n - k))) * M
   }
   if (homoscedastic==FALSE) {
     e <- y - X %*% b

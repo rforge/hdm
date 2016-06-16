@@ -15,7 +15,7 @@ DPG_rlasso <- function(n, p, px){
 # DPG + rlasso
 DPG_coef_rlasso <- function(n, p, px){
   ret <- DPG_rlasso(n, p, px)
-  rlasso.fit(ret[[1]], ret[[2]])
+  rlasso(ret[[1]], ret[[2]])
 }
 
 # Beispielwerte
@@ -47,22 +47,22 @@ str(lassofit)
 
 
 # intercept TRUE/FALSE
-summary(rlasso.fit(X, y, intercept = TRUE), all = FALSE)
-summary(rlasso.fit(X, y, intercept = FALSE), all = FALSE)
+summary(rlasso(X, y, intercept = TRUE), all = FALSE)
+summary(rlasso(X, y, intercept = FALSE), all = FALSE)
 
 ## Schaetzwerte aendern sich mit intercept = F stark
 
 
 # post TRUE/FALSE
-summary(rlasso.fit(X, y, post = TRUE), all = FALSE)
-summary(rlasso.fit(X, y, post = FALSE), all = FALSE)
+summary(rlasso(X, y, post = TRUE), all = FALSE)
+summary(rlasso(X, y, post = FALSE), all = FALSE)
 
 ## Schaetzwerte werden deutlich geringer fuer post = F
 
 
 # normalize TRUE/FALSE
-summary(rlasso.fit(X, y, normalize = TRUE), all = FALSE)
-summary(rlasso.fit(X, y, normalize = FALSE), all = FALSE)
+summary(rlasso(X, y, normalize = TRUE), all = FALSE)
+summary(rlasso(X, y, normalize = FALSE), all = FALSE)
 
 ## keine Aenderung der Koeffizientenwerte
 
@@ -72,16 +72,16 @@ ret2 <- DPG_rlasso(200, 100, 0)
 X2 <- ret2$X
 y2 <- ret2$y
 rm(ret2)
-lasso_Ohne_Einfluss <- rlasso.fit(X2, y2)
-lasso_Ohne_Einfluss2 <- rlasso.fit(X2, y2, intercept = FALSE)
+lasso_Ohne_Einfluss <- rlasso(X2, y2)
+lasso_Ohne_Einfluss2 <- rlasso(X2, y2, intercept = FALSE)
 
 ## hat keine Variable Einfluss, so wird Intercept falsch berechnet
 
 # homoscedastic TRUE/FALSE/"none"
-str(rlasso.fit(X, y, penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE)))
-str(rlasso.fit(X, y, penalty = list(homoscedastic = TRUE, X.dependent.lambda = FALSE)))
-str(rlasso.fit(X, y, penalty = list(homoscedastic = "none", X.dependent.lambda = FALSE)))
-str(rlasso.fit(X, y, penalty = list(homoscedastic = "none", X.dependent.lambda = FALSE, lambda.start = 100)))
+str(rlasso(X, y, penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE)))
+str(rlasso(X, y, penalty = list(homoscedastic = TRUE, X.dependent.lambda = FALSE)))
+str(rlasso(X, y, penalty = list(homoscedastic = "none", X.dependent.lambda = FALSE)))
+str(rlasso(X, y, penalty = list(homoscedastic = "none", X.dependent.lambda = FALSE, lambda.start = 100)))
 
 ## keine Aenderung der Koeffizientenwerte
 ## lambdas bei homoscedastic = T fuer alle Koeffizienten gleich 
@@ -90,20 +90,20 @@ str(rlasso.fit(X, y, penalty = list(homoscedastic = "none", X.dependent.lambda =
 
 
 # X.design independent/dependent
-str(rlasso.fit(X, y, penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE)))
-str(rlasso.fit(X, y, penalty = list(homoscedastic = FALSE, X.dependent.lambda = TRUE)))
-str(rlasso.fit(X, y, penalty = list(homoscedastic = FALSE, X.dependent.lambda = TRUE, numSim = 1000)))
+str(rlasso(X, y, penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE)))
+str(rlasso(X, y, penalty = list(homoscedastic = FALSE, X.dependent.lambda = TRUE)))
+str(rlasso(X, y, penalty = list(homoscedastic = FALSE, X.dependent.lambda = TRUE, numSim = 1000)))
 
 ## keine Aenderung der Koeffizientenwerte
 ## lambda aendert sich auch durch X.design Aenderung oder numSim Aenderung (bei X-dependent)
 
 
 # formula Methode
-all.equal(rlasso.fit(X, y), rlasso(y ~ X))
-all.equal(rlasso.fit(X, y), rlasso(y ~., data = frame))
-coef(rlasso.fit(X, y))
+all.equal(rlasso(X, y), rlasso(y ~ X))
+all.equal(rlasso(X, y), rlasso(y ~., data = frame))
+coef(rlasso(X, y))
 coef(rlasso(y ~ X))
-attributes(residuals(rlasso.fit(X, y)))
+attributes(residuals(rlasso(X, y)))
 attributes(residuals(rlasso(y ~ X)))
 
 ## Ergebnisse sind dieselben. Namen stimmen nicht ganz ueberein. Einflussvariablen werden zB bei 
@@ -116,14 +116,14 @@ attributes(residuals(rlasso(y ~ X)))
 # Methoden
 
 # summary und print
-print(rlasso.fit(X, y), all = "FALSE")
-print(rlasso.fit(X, y), digits = 3)
+print(rlasso(X, y), all = "FALSE")
+print(rlasso(X, y), digits = 3)
 
-summary(rlasso.fit(X, y), all = "FALSE")
-summary(rlasso.fit(X, y), digits = 3)
+summary(rlasso(X, y), all = "FALSE")
+summary(rlasso(X, y), digits = 3)
 
 # model.matrix
-all.equal(model.matrix(rlasso.fit(X, y)), X)
+all.equal(model.matrix(rlasso(X, y)), X)
 all.equal(model.matrix(rlasso(y ~ X)), X)
 all.equal(model.matrix(rlasso(y ~., data = frame)), X)
 
@@ -137,27 +137,27 @@ newdata2 <- as.data.frame(matrix(rnorm(30000), ncol = 150))
 ## bei newdata2 kommen die Variablennamen nun im spaeteren Modell vor (V1,...V100)
 
 # ohne newdata
-all.equal(predict(rlasso.fit(X, y)), rlasso.fit(X, y)$intercept.value + X %*% rlasso.fit(X, y)$coef)
+all.equal(predict(rlasso(X, y)), rlasso(X, y)$intercept.value + X %*% rlasso(X, y)$coef)
 all.equal(predict(rlasso(y ~ X)), rlasso(y ~ X)$intercept.value + X %*% rlasso(y ~ X)$coef)
 predict(rlasso(y ~ x1 + x2, data = frame))
 predict(rlasso(y ~ x7, data = frame))
-predict(rlasso.fit(X, y, intercept = FALSE)) 
-predict(rlasso.fit(X, rnorm(200)))
-predict(rlasso.fit(X, rnorm(200), intercept = FALSE))
+predict(rlasso(X, y, intercept = FALSE)) 
+predict(rlasso(X, rnorm(200)))
+predict(rlasso(X, rnorm(200), intercept = FALSE))
 
 # mit newdata
-predict(rlasso.fit(X, y), newdata = newdata)
+predict(rlasso(X, y), newdata = newdata)
 predict(rlasso(y ~ X), newdata = newdata) 
 predict(rlasso(y ~ x1 + x2, data = frame), newdata = newdata) # erwartet fehler, da unpassende Variablenzahl
 predict(rlasso(y ~ x7, data = frame), newdata = newdata) # ebenso
-predict(rlasso.fit(X, y, intercept = FALSE), data = newdata)
+predict(rlasso(X, y, intercept = FALSE), data = newdata)
 
 #mit  newdata2
-predict(rlasso.fit(X, y), newdata = newdata2)
+predict(rlasso(X, y), newdata = newdata2)
 predict(rlasso(y ~ X), newdata = newdata2) # erwartet Fehler, da im Gegensatz zu oben kein passender Name
 predict(rlasso(y ~ x1 + x2, data = frame), newdata = newdata2)
 predict(rlasso(y ~ x7, data = frame), newdata = newdata2) 
-predict(rlasso.fit(X, y, intercept = FALSE), data = newdata2)
+predict(rlasso(X, y, intercept = FALSE), data = newdata2)
 
 ## predict verknuepft bei neuem Datensatz entweder ueber Namen 
 ## oder ueber die Position (nur bei gleicher Variablenzahl)
@@ -165,7 +165,7 @@ predict(rlasso.fit(X, y, intercept = FALSE), data = newdata2)
 
 
 # lauft nicht durch:
-predict(rlasso.fit(frame[, 2:101], y))
+predict(rlasso(frame[, 2:101], y))
 l <- list(X = X,y = y)
-predict(rlasso.fit(l$X, l$y))
-model.matrix(rlasso.fit(l$X, l$y))
+predict(rlasso(l$X, l$y))
+model.matrix(rlasso(l$X, l$y))

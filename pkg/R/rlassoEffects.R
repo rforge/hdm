@@ -33,20 +33,38 @@
 #' @export
 #' @rdname rlassoEffects
 #' @examples
-#' library(hdm)
-#' ## DGP
-#' n <- 250
-#' p <- 100
-#' px <- 10
-#' X <- matrix(rnorm(n*p), ncol=p)
-#' beta <- c(rep(2,px), rep(0,p-px))
-#' intercept <- 1
-#' y <- intercept + X %*% beta + rnorm(n)
-#' ## fit rlassoEffects object with inference on three variables
-#' rlassoEffects.reg <- rlassoEffects(x=X, y=y, index=c(1,7,20))
-#' ## methods
-#' summary(rlassoEffects.reg)
-#' confint(rlassoEffects.reg, level=0.9)
+#' library(hdm); library(ggplot2)
+#' set.seed(1)
+#' n = 100 #sample size
+#' p = 100 # number of variables
+#' s = 3 # nubmer of non-zero variables
+#' X = matrix(rnorm(n*p), ncol=p)
+#' colnames(X) <- paste("X", 1:p, sep="")
+#' beta = c(rep(3,s), rep(0,p-s))
+#' y = 1 + X%*%beta + rnorm(n)
+#' data = data.frame(cbind(y,X))
+#' colnames(data)[1] <- "y"
+#' fm = paste("y ~", paste(colnames(X), collapse="+"))
+#' fm = as.formula(fm)                 
+#' lasso.effect = rlassoEffects(X, y, index=c(1,2,3,50))
+#' lasso.effect = rlassoEffects(fm, I = ~ X1 + X2 + X3 + X50, data=data)
+#' print(lasso.effect)
+#' summary(lasso.effect)
+#' confint(lasso.effect)
+# library(hdm)
+# ## DGP
+# n <- 250
+# p <- 100
+# px <- 10
+# X <- matrix(rnorm(n*p), ncol=p)
+# beta <- c(rep(2,px), rep(0,p-px))
+# intercept <- 1
+# y <- intercept + X %*% beta + rnorm(n)
+# ## fit rlassoEffects object with inference on three variables
+# rlassoEffects.reg <- rlassoEffects(x=X, y=y, index=c(1,7,20))
+# ## methods
+# summary(rlassoEffects.reg)
+# confint(rlassoEffects.reg, level=0.9)
 rlassoEffects <- function(x, ...)
   UseMethod("rlassoEffects") # definition generic function 
 
@@ -99,6 +117,7 @@ rlassoEffects.default <- function(x, y, index = c(1:ncol(x)), method = "partiall
   lasso.regs <- vector("list", k)
   reside <- matrix(NA, nrow = n, ncol = p1)
   residv <- matrix(NA, nrow = n, ncol = p1)
+  coef.mat <- NULL
   names(coefficients) <- names(se) <- names(t) <- names(pval) <- names(lasso.regs) <- colnames(reside) <- colnames(residv) <- colnames(x)[index]
   
   for (i in 1:k) {
@@ -116,12 +135,14 @@ rlassoEffects.default <- function(x, y, index = c(1:ncol(x)), method = "partiall
       pval[i] <- col$pval
       reside[, i] <- col$residuals$epsilon
       residv[, i] <- col$residuals$v
+      coef.mat <- cbind(coef.mat, col$coefficients.reg)
     }
   }
+  #colnames(coef.mat) <- colnames(x)[index]
   residuals <- list(e = reside, v = residv)
   res <- list(coefficients = coefficients, se = se, t = t, pval = pval, 
               lasso.regs = lasso.regs, index = index, call = match.call(), samplesize = n, 
-              residuals = residuals)
+              residuals = residuals, coef.mat = coef.mat)
   class(res) <- "rlassoEffects"
   return(res)
 }
@@ -217,7 +238,9 @@ rlassoEffect <- function(x, y, d, method = "double selection", I3 = NULL,
     # coefficients=unname(alpha), coefficient=unname(alpha),
     # coefficients.reg=coef(reg1), residuals=res, call=match.call(),
     # samplesize=n)
-    results <- list(alpha = alpha, se = drop(se), t = tval, pval = pval, 
+    se <- drop(se)
+    names(se) <- colnames(d)
+    results <- list(alpha = alpha, se = se, t = tval, pval = pval, 
                     no.selected = no.selected, coefficients = alpha, coefficient = alpha, 
                     coefficients.reg = coef(reg1), residuals = res, call = match.call(), 
                     samplesize = n)

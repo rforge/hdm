@@ -81,14 +81,15 @@ rlassologitEffects.default <- function(x, y, index = c(1:ncol(x)), I3 = NULL, po
       se[i] <- col$se
       t[i] <- col$t
       pval[i] <- col$pval
-      # reside[,i] <- col$residuals$epsilon residv[,i] <- col$residuals$v
+      reside[,i] <- col$residuals$epsilon
+      residv[,i] <- col$residuals$v
     }
   }
   residuals <- list(e = reside, v = residv)
   res <- list(coefficients = coefficients, se = se, t = t, pval = pval, 
               lasso.regs = lasso.regs, index = I, call = match.call(), samplesize = n, 
               residuals = residuals)
-  class(res) <- "rlassologitEffects"
+  class(res) <- c("rlassologitEffects")
   return(res)
 }
 
@@ -144,6 +145,7 @@ rlassologitEffect <- function(x, y, d, I3 = NULL, post = TRUE) {
   la1 <- 1.1/2 * sqrt(n) * qnorm(1 - 0.05/(max(n, (p + 1) * log(n))))
   dx <- cbind(d, x)
   l1 <- rlassologit(y ~ dx, post = post, intercept = TRUE, penalty = list(lambda.start = la1))
+  xi <- l1$residuals
   t <- predict(l1, type = "link", newdata = dx)
   sigma2 <- exp(t)/(1 + exp(t))^2
   w <- sigma2  #exp(t)/(1+exp(t))^2
@@ -195,9 +197,13 @@ rlassologitEffect <- function(x, y, d, I3 = NULL, post = TRUE) {
   }
   # return(list(alpha=unname(alpha), se=drop(se), t=unname(tval),
   # pval=unname(pval), coefficients=coef(l3), residuals=l3$residuals))
-  results <- list(alpha = alpha, se = drop(se), t = tval, pval = pval, 
+  res <- list(epsilon= l3$residuals, v= z)
+  se <- drop(se)
+  names(se) <- colnames(d)
+  results <- list(alpha = alpha, se = se, t = tval, pval = pval, 
                   no.selected = no.selected, coefficients = alpha, coefficient = alpha, 
-                  residuals = l3$residuals, call = match.call(), samplesize = n, post = post)
+                  residuals = res, call = match.call(), samplesize = n, post = post)
+  class(results) <- c("rlassologitEffects")
   return(results)
 }
 
@@ -285,25 +291,46 @@ confint.rlassologitEffects <- function(object, parm, level = 0.95, joint = FALSE
   }
   
   if (joint) {
-    phi <- object$residuals$e * object$residuals$v
-    m <- 1/sqrt(colMeans(phi^2))
-    phi <- t(t(phi)/m)
-    sigma <- sqrt(colMeans(phi^2))
+    # phi <- object$residuals$e * object$residuals$v
+    # m <- 1/sqrt(colMeans(phi^2))
+    # phi <- t(t(phi)/m)
+    # sigma <- sqrt(colMeans(phi^2))
+    # sim <- vector("numeric", length = B)
+    # for (i in 1:B) {
+    #   xi <- rnorm(n)
+    #   phi_temp <- phi * xi
+    #   Nstar <- 1/sqrt(n) * colSums(phi_temp)
+    #   sim[i] <- max(abs(Nstar))
+    # }
+    e <- object$residuals$e
+    v <- object$residuals$v
+    ev <- e*v
+    Ev2 <- colMeans(v^2)
+    Ee2v2 <- colMeans(ev^2)
+    Omegahat <- matrix(NA, ncol=k, nrow=k)
+    for (j in 1:k) {
+      for (l in 1:k) {
+        Omegahat[j,l] = Omegahat[l,j] = 1/(Ev2[j]*Ev2[l]) * mean(ev[,j]*ev[,l])
+      }
+    }
+    var <- diag(Omegahat)
+    Beta <- matrix(NA, ncol=B, nrow=k)
     sim <- vector("numeric", length = B)
     for (i in 1:B) {
-      xi <- rnorm(n)
-      phi_temp <- phi * xi
-      Nstar <- 1/sqrt(n) * colSums(phi_temp)
-      sim[i] <- max(abs(Nstar))
+      beta_i <- MASS::mvrnorm(mu = rep(0,k), Sigma=Omegahat/n)
+      sim[i] <- max(abs(sqrt(n)*beta_i/var))
     }
-    a <- (1 - level)/2
-    ab <- c(a, 1 - a)
-    pct <- format.perc(ab, 3)
-    ci <- array(NA, dim = c(length(parm), 2L), dimnames = list(parm, 
-                                                               pct))
+     a <- (1 - level)/2
+     ab <- c(a, 1 - a)
+     pct <- format.perc(ab, 3)
+     ci <- array(NA, dim = c(length(parm), 2L), dimnames = list(parm, 
+                                                                pct))
+    # hatc <- quantile(sim, probs = 1 - a)
+    # ci[, 1] <- cf[parm] - hatc * 1/sqrt(n) * sigma
+    # ci[, 2] <- cf[parm] + hatc * 1/sqrt(n) * sigma
     hatc <- quantile(sim, probs = 1 - a)
-    ci[, 1] <- cf[parm] - hatc * 1/sqrt(n) * sigma
-    ci[, 2] <- cf[parm] + hatc * 1/sqrt(n) * sigma
+    ci[, 1] <- cf[parm] - hatc * 1/sqrt(n) * sqrt(var)
+    ci[, 2] <- cf[parm] + hatc * 1/sqrt(n) * sqrt(var)
   }
   return(ci)
 }
