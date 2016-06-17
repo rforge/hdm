@@ -71,7 +71,8 @@ NULL
 #' @name Growth Data
 #' @aliases Growth Example GrowthData GDP
 #' @docType data
-#' @format \describe{Dataframe with the following variables:
+#' @format Dataframe with the following variables:
+#' \describe{
 #' \item{outcome}{dependent variable: national growth rates in GDP per capita
 #' for the periods 1965-1975 and 1975-1985}
 #' \item{x}{covariates which might influence growth}}
@@ -102,7 +103,7 @@ NULL
 #' @name pension
 #' @aliases 401(k) plans wealth data pension
 #' @docType data
-#' @format \describe{Dataframe with the following variables (amongst others):
+#' @format Dataframe with the following variables (amongst others): \describe{
 #' \item{p401}{participation in 401(k)}
 #' \item{e401}{eligibility for 401(k)}
 #' \item{a401}{401(k) assets}
@@ -194,7 +195,7 @@ NULL
 #'
 #' Data set was analysed in Berry, Levinsohn and Pakes (1995). The data stem from annual issues of the Automotive News Market Data Book. 
 #' The data set inlcudes information on all models marketed during the the periord beginning 1971 and ending in 1990 cotaining 2217 model/years from 997 distinct models.
-#' A detailed description is given in BLP (1995, 868--871). The function \code{constructIV} constructs instrumental variables along the lines described and used in BLP (1995).
+#' A detailed description is given in BLP (1995, 868--871). The internal function \code{constructIV} constructs instrumental variables along the lines described and used in BLP (1995).
 #'
 #' @name BLP
 #' @docType data
@@ -214,7 +215,6 @@ NULL
 #' \item{outshr}{share s0}
 #' \item{y}{outcome variable defined as log(share) - log(outshr) }
 #' \item{trend}{time trend}
-#' \item{Exprop}{Average protection against expropriation risk}
 #' }
 #' @references S. Berry, J. Levinsohn, A. Pakes (1995). Automobile Prices in Market EquilibriumD. Econometrica, 63(4), 841--890.
 #' @keywords datasets
@@ -227,8 +227,8 @@ NULL
 #' Census data from the US for the year 2012.
 #'
 #' The CPS is a monthly U.S. household survey conducted jointly by the U.S. Census Bureau and the Bureau of Labor Statistics. The data comprise the year 2012. 
-#' This data set was used in Mulligan and Rubinstein (2008)
-#'  The sample comprises white non-hipanic, ages 25-54, working full time full year (35+ hours per week at least 50 weeks), exclude living in group quarters, 
+#' This data set was used in Mulligan and Rubinstein (2008). 
+#' The sample comprises white non-hipanic, ages 25-54, working full time full year (35+ hours per week at least 50 weeks), exclude living in group quarters, 
 #'  self-employed, military, agricultural, and private household sector, allocated earning, inconsistent report on earnings and employment, missing data.
 #' @name cps2012
 #' @docType data

@@ -69,20 +69,24 @@ distributed which allows inference on the treatment effect. It presents a wrap f
 which does inference for a single variable.
 }
 \examples{
-library(hdm)
-## DGP
-n <- 250
-p <- 100
-px <- 10
-X <- matrix(rnorm(n*p), ncol=p)
-beta <- c(rep(2,px), rep(0,p-px))
-intercept <- 1
-y <- intercept + X \%*\% beta + rnorm(n)
-## fit rlassoEffects object with inference on three variables
-rlassoEffects.reg <- rlassoEffects(x=X, y=y, index=c(1,7,20))
-## methods
-summary(rlassoEffects.reg)
-confint(rlassoEffects.reg, level=0.9)
+library(hdm); library(ggplot2)
+set.seed(1)
+n = 100 #sample size
+p = 100 # number of variables
+s = 3 # nubmer of non-zero variables
+X = matrix(rnorm(n*p), ncol=p)
+colnames(X) <- paste("X", 1:p, sep="")
+beta = c(rep(3,s), rep(0,p-s))
+y = 1 + X\%*\%beta + rnorm(n)
+data = data.frame(cbind(y,X))
+colnames(data)[1] <- "y"
+fm = paste("y ~", paste(colnames(X), collapse="+"))
+fm = as.formula(fm)                 
+lasso.effect = rlassoEffects(X, y, index=c(1,2,3,50))
+lasso.effect = rlassoEffects(fm, I = ~ X1 + X2 + X3 + X50, data=data)
+print(lasso.effect)
+summary(lasso.effect)
+confint(lasso.effect)
 }
 \references{
 A. Belloni, V. Chernozhukov, C. Hansen (2014). Inference on

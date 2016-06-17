@@ -8,7 +8,8 @@
 \alias{Growth Data}
 \alias{GrowthData}
 \title{Growth data set}
-\format{\describe{Dataframe with the following variables:
+\format{Dataframe with the following variables:
+\describe{
 \item{outcome}{dependent variable: national growth rates in GDP per capita
 for the periods 1965-1975 and 1975-1985}
 \item{x}{covariates which might influence growth}}}

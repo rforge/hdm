@@ -8,7 +8,7 @@
 \alias{plans}
 \alias{wealth}
 \title{Pension 401(k) data set}
-\format{\describe{Dataframe with the following variables (amongst others):
+\format{Dataframe with the following variables (amongst others): \describe{
 \item{p401}{participation in 401(k)}
 \item{e401}{eligibility for 401(k)}
 \item{a401}{401(k) assets}

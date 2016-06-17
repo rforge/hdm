@@ -453,3 +453,26 @@ check_binary <- function(x) {
   return(invisible(NULL))
 }
 
+################## Function for constructing Instrumenatl Variables following BLP (1995)
+constructIV <- function(firmid, cdid, id, X) {
+  n <- dim(X)[1]
+  p <- dim(X)[2]
+  names <- colnames(X)
+  if (is.null(names)) names <- paste("V", 1:p, sep="")
+  sum.other <-  matrix(NA, nrow = n, ncol = p)
+  colnames(sum.other) <- paste("sum.other.", names, sep="")
+  sum.rival <-  matrix(NA, nrow = n, ncol = p)
+  colnames(sum.rival) <- paste("sum.rival.", names, sep="")
+  
+  for (i in 1:n) {
+    for (j in 1:p) {
+      other_ind=(firmid==firmid[i] & cdid==cdid[i] & id!=id[i])
+      rival_ind=(firmid!=firmid[i] & cdid==cdid[i])
+      
+      sum.other[i,j]=sum(X[other_ind==1,j])
+      sum.rival[i,j]=sum(X[rival_ind==1,j]) 
+    }
+  }
+  return(cbind(sum.other, sum.rival))
+}
+

@@ -24,6 +24,18 @@
 #' @references Chernozhukov, V., Hansen, C. and M. Spindler (2015). Post-Selection and Post-Regularization Inference in Linear
 #' Models with Many Controls and Instruments
 #' \emph{American Economic Review, Papers and Proceedings} 105(5), 486--490.
+#' @examples
+#' library(hdm)
+#' data(AJR); y = AJR$GDP; d = AJR$Exprop; z = AJR$logMort
+#' x = model.matrix(~ -1 + (Latitude + Latitude2 + Africa + 
+#'                            Asia + Namer + Samer)^2, data=AJR)
+#' dim(x)
+#'   #AJR.Xselect = rlassoIV(x=x, d=d, y=y, z=z, select.X=TRUE, select.Z=FALSE)
+#'   AJR.Xselect = rlassoIV(GDP ~ Exprop +  (Latitude + Latitude2 + Africa + 
+#'                                             Asia + Namer + Samer)^2 | logMort +  (Latitude + Latitude2 + Africa +
+#'                                                                                     Asia + Namer + Samer)^2, data=AJR, select.X=TRUE, select.Z=FALSE)
+#' summary(AJR.Xselect)
+#' confint(AJR.Xselect)
 rlassoIVselectX <- function(x, ...)
   UseMethod("rlassoIVselectX") # definition generic function
 
