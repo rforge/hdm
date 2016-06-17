@@ -50,6 +50,8 @@
 #' @importFrom stats contrasts
 #' @importFrom stats formula
 #' @importFrom stats terms
+#' @importFrom stats update
+#' @importFrom Formula model.part
 #' @importFrom methods is 
 NULL
 
