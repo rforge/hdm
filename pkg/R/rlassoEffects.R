@@ -455,7 +455,7 @@ plot.rlassoEffects <- function(x, joint=FALSE, level= 0.95, main = "", xlab = "c
   # layout
   plotobject <- plotobject + ggplot2::theme_bw() + ggplot2::geom_blank() + 
     ggplot2::theme(panel.grid.major.x = ggplot2::element_blank(), panel.grid.minor.x = ggplot2::element_blank())
-  plotobject <- plotobject + scale_x_discrete(labels = abbreviate)
+  plotobject <- plotobject + ggplot2::scale_x_discrete(labels = abbreviate)
   # plot
   plotobject
 }
