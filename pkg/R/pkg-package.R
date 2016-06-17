@@ -52,8 +52,7 @@
 #' @importFrom stats terms
 #' @importFrom stats update
 #' @importFrom Formula model.part
-#' @importFrom methods is 
-#' @imporfFrom ggplot2 aes
+#' @importFrom methods is
 NULL
 
 #' Growth data set

@@ -438,7 +438,7 @@ plot.rlassoEffects <- function(x, joint=FALSE, level= 0.95, main = "", xlab = "c
   # generate points
   plotobject <- ggplot2::ggplot(coefmatrix, ggplot2::aes(y = coef, x = factor(names, 
                                                                               levels = names))) + ggplot2::geom_point(colour = col) + 
-  ggplot2::geom_hline(colour = col, aes(width = 0.1, h = 0, yintercept=0))
+  ggplot2::geom_hline(colour = col, ggplot2::aes(width = 0.1, h = 0, yintercept=0))
   
   # generate errorbars (KIs)
   plotobject <- plotobject + ggplot2::geom_errorbar(ymin = coefmatrix$lower, 
