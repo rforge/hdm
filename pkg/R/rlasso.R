@@ -82,9 +82,9 @@ globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "sele
 #' yhat = predict(reg.lasso, newdata = Xnew)
 #' @export
 #' @rdname rlasso
-rlasso <- function(x, ...)
+rlasso <- function(x, ...) {
   UseMethod("rlasso") # definition generic function
-
+  }
 #' @param formula an object of class "formula" (or one that can be coerced to
 #' that class): a symbolic description of the model to be fitted in the form
 #' \code{y~x}
@@ -94,7 +94,7 @@ rlasso <- function(x, ...)
 #' typically the environment from which \code{rlasso} is called.
 #' @rdname rlasso
 #' @export
-rlasso.formula <- function(formula, data, post = TRUE, intercept = TRUE, model = TRUE, 
+rlasso.formula <- function(formula, data = NULL, post = TRUE, intercept = TRUE, model = TRUE, 
                            penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = .1/log(n)),
                           control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...) {
   cl <- match.call()
@@ -123,6 +123,17 @@ rlasso.formula <- function(formula, data, post = TRUE, intercept = TRUE, model =
   est$call <- cl
   return(est)
 }
+
+#' @rdname rlasso
+#' @export
+rlasso.character <- function(x, data = NULL, post = TRUE, intercept = TRUE, model = TRUE, 
+                           penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = .1/log(n)),
+                           control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...) {
+  formula <- as.formula(x)
+  res <- rlasso.formula(formula, data = data, post = post, intercept = intercept, model = model, 
+                        penalty = penalty, control = control, ...)
+}
+
 
 #' @rdname rlasso
 #' @export

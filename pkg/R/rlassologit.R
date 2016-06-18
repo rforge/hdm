@@ -67,7 +67,7 @@ rlassologit <- function(x, ...)
 #' @param data an optional data frame, list or environment.
 #' @export
 #' @rdname rlassologit
-rlassologit.formula <- function(formula, data, post = TRUE, intercept = TRUE,  model = TRUE, penalty = list(lambda = NULL, 
+rlassologit.formula <- function(formula, data = NULL, post = TRUE, intercept = TRUE,  model = TRUE, penalty = list(lambda = NULL, 
                                                                                      c = 1.1, gamma = 0.1/log(n)), control = list(threshold = NULL),  ...) {
   cl <- match.call()
   mf <- match.call(expand.dots = FALSE)
@@ -94,6 +94,14 @@ rlassologit.formula <- function(formula, data, post = TRUE, intercept = TRUE,  m
   return(est)
 }
 
+#' @export
+#' @rdname rlassologit
+rlassologit.character <- function(x, data = NULL, post = TRUE, intercept = TRUE,  model = TRUE, penalty = list(lambda = NULL, 
+                                                                                                                   c = 1.1, gamma = 0.1/log(n)), control = list(threshold = NULL),  ...) {
+  formula <- as.formula(x)
+  res <- rlassologit.formula(formula, data = data, post = post, intercept = intercept,  model = model, penalty = penalty, control = control,  ...)
+  return(res)
+}
 
 #' @rdname rlassologit
 #' @export
