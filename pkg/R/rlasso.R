@@ -113,9 +113,9 @@ rlasso.formula <- function(formula, data = NULL, post = TRUE, intercept = TRUE, 
   if (missing(data)) {
     if (is.call(formula[[3]])) { 
     #colnames(x) <- sub(format(formula[[3]]), "", colnames(x))
-    colnames(x) <- gsub(re.escape(format(formula[[3]])), "", colnames(x))
+    colnames(x) <- sub(re.escape(format(formula[[3]])), "", colnames(x))
     } else {
-      colnames(x) <- gsub(re.escape(formula[[3]]), "", colnames(x))  
+      colnames(x) <- sub(re.escape(formula[[3]]), "", colnames(x))  
     }
   }
   est <- rlasso(x, y, post = post, intercept = intercept, penalty=penalty, model=model, 
