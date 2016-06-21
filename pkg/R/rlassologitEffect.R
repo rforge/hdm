@@ -149,7 +149,7 @@ rlassologitEffect <- function(x, y, d, I3 = NULL, post = TRUE) {
   t <- predict(l1, type = "link", newdata = dx)
   sigma2 <- exp(t)/(1 + exp(t))^2
   w <- sigma2  #exp(t)/(1+exp(t))^2
-  f <- w/sigma2
+  f <- sigma2 #1 #w/sigma2
   I1 <- l1$index[-1]
   # Step 2
   la2 <- rep(2.2 * sqrt(n) * qnorm(1 - 0.05/(max(n, p * log(n)))), p)
@@ -169,11 +169,12 @@ rlassologitEffect <- function(x, y, d, I3 = NULL, post = TRUE) {
   }
   xselect <- x[, I]
   p3 <- dim(xselect)[2]
-  la3 <- 1.1/2 * sqrt(n) * qnorm(1 - 0.05/(max(n, (p3 + 1) * log(n))))
-  l3 <- rlassologit(cbind(d, xselect), y, post = TRUE, normalize = TRUE, 
-                    intercept = TRUE, penalty = list(lambda.start = la3))
-  alpha <- l3$beta[1]
-  t3 <- predict(l3, type = "link", newdata = cbind(d, xselect))
+  #la3 <- 1.1/2 * sqrt(n) * qnorm(1 - 0.05/(max(n, (p3 + 1) * log(n))))
+  #l3 <- rlassologit(cbind(d, xselect), y, post = TRUE, normalize = TRUE, 
+  #                  intercept = TRUE, penalty = list(lambda.start = la3))
+  l3 <- glm(y ~ cbind(d, xselect),family=binomial(link='logit'))
+  alpha <- l3$coef[2]
+  t3 <- predict(l3, type = "link")
   G3 <- exp(t3)/(1 + exp(t3))
   w3 <- G3 * (1 - G3)
   S21 <- 1/mean(w3 * d * z)^2 * mean((y - G3)^2 * z^2)
