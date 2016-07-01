@@ -174,6 +174,7 @@ rlassologitEffect <- function(x, y, d, I3 = NULL, post = TRUE) {
   #                  intercept = TRUE, penalty = list(lambda.start = la3))
   l3 <- glm(y ~ cbind(d, xselect),family=binomial(link='logit'))
   alpha <- l3$coef[2]
+  names(alpha) <- colnames(d)
   t3 <- predict(l3, type = "link")
   G3 <- exp(t3)/(1 + exp(t3))
   w3 <- G3 * (1 - G3)
@@ -335,6 +336,8 @@ confint.rlassologitEffects <- function(object, parm, level = 0.95, joint = FALSE
   }
   return(ci)
 }
+
+
 
 
 

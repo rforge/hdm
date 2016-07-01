@@ -683,8 +683,8 @@ characteristics of judges serving on federal appellate panels can only be relate
 First, we load the data an construct the matrices with the controls (x), instruments (z), outcome (y), and treatment variables (d). Here we consider regional GDP as the outcome variable. 
 <<lassoIV>>=
 data(EminentDomain)
-z <- EminentDomain$logGDP$z
-x <- EminentDomain$logGDP$x
+z <- as.matrix(EminentDomain$logGDP$z)
+x <- as.matrix(EminentDomain$logGDP$x)
 y <- EminentDomain$logGDP$y
 d <- EminentDomain$logGDP$d
 @
