@@ -291,7 +291,7 @@ The method \texttt{summary} of \texttt{rlasso}-objects displays additionally for
 
 \subsection*{Example}(Prediction Using Lasso and Post-Lasso) Consider generated data from a sparse linear model:
 <<DGP_lasso1>>=
-set.seed(1)
+set.seed(12345)
 n = 100 #sample size
 p = 100 # number of variables
 s = 3 # nubmer of variables with non-zero coefficients
