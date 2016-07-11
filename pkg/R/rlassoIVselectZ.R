@@ -78,9 +78,9 @@ rlassoIVselectZ.default <- function(x, d, y, z, post = TRUE, intercept = TRUE, .
   d <- cbind(d, x)
   
   # calculation coefficients
-  alpha.hat <- solve(t(Dhat) %*% d) %*% (t(Dhat) %*% y)
-  # alpha.hat <- MASS::ginv(t(Dhat)%*%d)%*%(t(Dhat)%*%y) calcualtion of
-  # the variance-covariance matrix
+  #alpha.hat <- solve(t(Dhat) %*% d) %*% (t(Dhat) %*% y)
+  alpha.hat <- MASS::ginv(t(Dhat)%*%d)%*%(t(Dhat)%*%y)
+  # calcualtion of the variance-covariance matrix
   residuals <- y - d %*% alpha.hat
   Omega.hat <- t(Dhat) %*% diag(as.vector(residuals^2)) %*% Dhat  #  Dhat.e <- Dhat*as.vector(residuals);  Omega.hat <- t(Dhat.e)%*%Dhat.e
   Q.hat.inv <- MASS::ginv(t(d) %*% Dhat)  #solve(t(d)%*%Dhat)
