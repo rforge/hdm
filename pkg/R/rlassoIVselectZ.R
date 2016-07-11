@@ -25,6 +25,7 @@
 #' @references D. Belloni, D. Chen, V. Chernozhukov and C. Hansen (2012).
 #' Sparse models and methods for optimal instruments with an application to
 #' eminent domain. \emph{Econometrica} 80 (6), 2369--2429.
+#' @export
 rlassoIVselectZ <- function(x, ...)
   UseMethod("rlassoIVselectZ") # definition generic function
 
