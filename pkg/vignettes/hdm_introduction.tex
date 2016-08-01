@@ -85,7 +85,8 @@
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 \begin{document}
 \begin{abstract}
-The package High-dimensional Metrics (\Rpackage{hdm}) is an evolving collection of statistical methods for estimation and quantification of uncertainty in high-dimensional approximately sparse models. It focuses on providing semi-parametrically efficient estimators, confidence intervals, and significance testing for low-dimensional subcomponents of the high-dimensional parameter vector. This vignette offers a brief introduction and a tutorial to the implemented methods.  \R and the package \Rpackage{hdm} are open-source software projects and can be freely downloaded from CRAN:
+The package High-dimensional Metrics (\Rpackage{hdm}) is an evolving collection of statistical methods for estimation and quantification of uncertainty in high-dimensional approximately sparse models. It focuses on providing confidence intervals and significance testing for (possibly many) low-dimensional subcomponents of the high-dimensional parameter vector. Efficient estimators and uniformly valid confidence intervals for regression coefficients on target variables (e.g., treatment or policy variable) in a high-dimensional approximately sparse regression model, for average treatment effect (ATE) and average treatment effect for the treated (ATET),  as well for extensions of these parameters to the endogenous setting are provided. 
+Theory grounded, data-driven methods for selecting the penalization parameter in Lasso regressions under heteroscedastic and non-Gaussian errors are implemented. Moreover, joint/ simultaneous confidence intervals for regression coefficients of a high-dimensional sparse regression are implemented, including a joint significance test for Lasso regression. Data sets which have been used in the literature and might be useful for classroom demonstration and for testing new estimators are included.  \R and the package \Rpackage{hdm} are open-source software projects and can be freely downloaded from CRAN:
 \texttt{http://cran.r-project.org}.
 \end{abstract}
 
@@ -101,17 +102,17 @@ Analysis of high-dimensional models, models in which the number of parameters to
 
 With increasing availability of such data sets in economics and other data science fields, new methods for analyzing those data have been developed. The \R package \Rpackage{hdm} contains implementations of recently developed methods for high-dimensional approximately sparse models, mainly relying on forms of lasso and post-lasso as well as related estimation and inference methods.  The methods are illustrated with econometric applications, but are also useful in other  disciplines such as medicine, biology, sociology or psychology. 
 
-The methods which are implemented in this package are distinct from already available methods in other packages in the following three major ways: 
+The methods which are implemented in this package are distinct from already available methods in other packages in the following four major ways: 
 \begin{itemize} 
 
 
-\item[\textbf{1)}] First, we provide efficient estimators and  uniformly valid confidence intervals for various low-dimensional causal/structural parameters  appearing in high-dimensional approximately sparse models.   For example, we provide efficient estimators and uniformly valid confidence intervals for a regression coefficient on a target variable (e.g., a treatment or policy variable) in a high-dimensional sparse regression model.  We also provide estimates and confidence intervals for average treatment effect (ATE) and average treatment effect for the treated (ATET),  as well  extensions of these parameters to the endogenous setting.
+\item[\textbf{1)}] First, we provide a version of Lasso regression that expressly handles and allows for non-Gaussian and heteroscedastic errors.
 
+\item[\textbf{2)}] Second, we implement a theoretically grounded, data-driven choice of the penalty level $\lambda$ in the Lasso regressions. To underscore this choice,  we call the Lasso implementation in this package \textquotedblleft rigorous\textquotedblright Lasso (=\code{rlasso}). The prefix \textbf{r} in function names should underscore this. In high-dimensional settings cross-validation is very popular; but it lacks a theoretical justification for use in the present context and some theoretical proposals for the choice of $\lambda$ are often not feasible. Moreover, the theoretically grounded, data-driven choice redundantizes cross-validation which is time-consuming particularly in large data sets.  
 
-\item[\textbf{2)}] Second, we provide theoretically grounded, data-driven choice of the penalty level $\lambda$ in the lasso 
-method. Because of this, we call the resulting method the \textquotedblleft rigorous\textquotedblright\ lasso (=\code{rlasso}). The prefix \textbf{r} in function names should underscore this. In high-dimensions setting cross-validation is very popular, but it lacks a theoretical justification and some theoretical proposals for the choice of $\lambda$ are often not feasible.
+\item[\textbf{3)}] Third, we provide efficient estimators and  uniformly valid confidence intervals for various low-dimensional causal/structural parameters  appearing in high-dimensional approximately sparse models. For example, we provide efficient estimators and uniformly valid confidence intervals for a regression coefficient on a target variable (e.g., a treatment or policy variable) in a high-dimensional sparse regression model. Target variable in this context means the object not interest, e.g. a prespecified regression coefficient. We also provide estimates and confidence intervals for average treatment effect (ATE) and average treatment effect for the treated (ATET),  as well  extensions of these parameters to the endogenous setting.
 
-\item[\textbf{3)}] Third, we provide a version of lasso for linear regressions specifically that expressly handles non-Gaussian and heteroskedastic errors.
+\item[\textbf{4)}] Fourth, joint/ simultaneous confidence intervals for estimated coefficients in a  high-dimensional approximately sparse models are provided, based on the methods and theory developed in \cite{BCK2014}. They proposed uniformly valid confidence regions for regressions coefficients in a high-dimensional sparse Z-estimation problems, which include median, mean, and many other regression problems as special cases. In this article we apply this method to the coefficients of a Lasso regression and highlight this method with an empirical example.
 
 \end{itemize}
 
@@ -343,7 +344,7 @@ The method \texttt{summary} of \texttt{rlasso}-objects displays additionally for
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{set.seed}\hlstd{(}\hlnum{1}\hlstd{)}
+\hlkwd{set.seed}\hlstd{(}\hlnum{12345}\hlstd{)}
 \hlstd{n} \hlkwb{=} \hlnum{100}  \hlcom{#sample size}
 \hlstd{p} \hlkwb{=} \hlnum{100}  \hlcom{# number of variables}
 \hlstd{s} \hlkwb{=} \hlnum{3}  \hlcom{# nubmer of variables with non-zero coefficients}
@@ -361,6 +362,7 @@ the option \code{all} can be set to \code{FALSE} to limit the print only to the 
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{lasso.reg} \hlkwb{=} \hlkwd{rlasso}\hlstd{(Y} \hlopt{~} \hlstd{X,} \hlkwc{post} \hlstd{=} \hlnum{FALSE}\hlstd{)}  \hlcom{# use lasso, not-Post-lasso}
+\hlcom{# lasso.reg = rlasso(X, Y, post=FALSE)}
 \hlstd{sum.lasso} \hlkwb{<-} \hlkwd{summary}\hlstd{(lasso.reg,} \hlkwc{all} \hlstd{=} \hlnum{FALSE}\hlstd{)}  \hlcom{# can also do print(lasso.reg, all=FALSE)}
 \end{alltt}
 \begin{verbatim}
@@ -371,29 +373,31 @@ the option \code{all} can be set to \code{FALSE} to limit the print only to the 
 ## Post-Lasso Estimation:  FALSE 
 ## 
 ## Total number of variables: 100
-## Number of selected variables: 9 
+## Number of selected variables: 11 
 ## 
 ## Residuals: 
 ##      Min       1Q   Median       3Q      Max 
-## -2.07855 -0.50062 -0.04591  0.55878  1.86776 
+## -2.09008 -0.45801 -0.01237  0.50291  2.25098 
 ## 
 ##             Estimate
-## (Intercept)    0.043
-## 1              4.738
-## 2              4.863
-## 3              4.829
-## 24             0.016
-## 83            -0.065
-## 84             0.004
-## 85             0.034
-## 87            -0.031
-## 89            -0.021
+## (Intercept)    0.057
+## 1              4.771
+## 2              4.693
+## 3              4.766
+## 13            -0.045
+## 15            -0.047
+## 16            -0.005
+## 19            -0.092
+## 22            -0.027
+## 40            -0.011
+## 61             0.114
+## 100           -0.025
 ## 
-## Residual standard error: 0.8017
-## Multiple R-squared:  0.9906
-## Adjusted R-squared:  0.9897
+## Residual standard error: 0.8039
+## Multiple R-squared:  0.9913
+## Adjusted R-squared:  0.9902
 ## Joint significance test:
-##  the sup score statistic for joint significance test is 51.16 with a p-value of     0
+##  the sup score statistic for joint significance test is 64.02 with a p-value of     0
 \end{verbatim}
 \begin{alltt}
 \hlstd{yhat.lasso} \hlkwb{=} \hlkwd{predict}\hlstd{(lasso.reg)}  \hlcom{#in-sample prediction}
@@ -410,24 +414,24 @@ the option \code{all} can be set to \code{FALSE} to limit the print only to the 
 ## rlasso.formula(formula = Y ~ X, post = TRUE)
 ## 
 ## (Intercept)            1            2            3  
-##     0.01695      4.94547      5.04876      4.98373
+##      0.0341       4.9241       4.8579       4.9644
 \end{verbatim}
 \begin{alltt}
 \hlstd{yhat.postlasso} \hlkwb{=} \hlkwd{predict}\hlstd{(post.lasso.reg)}  \hlcom{#in-sample prediction}
 \hlstd{yhat.postlasso.new} \hlkwb{=} \hlkwd{predict}\hlstd{(post.lasso.reg,} \hlkwc{newdata} \hlstd{= Xnew)}  \hlcom{#out-of-sample prediction}
-\hlstd{MAE} \hlkwb{<-} \hlkwd{apply}\hlstd{(}\hlkwd{cbind}\hlstd{(}\hlkwd{abs}\hlstd{(Ynew} \hlopt{-} \hlstd{yhat.lasso.new),} \hlkwd{abs}\hlstd{(Ynew} \hlopt{-} \hlstd{yhat.postlasso.new)),}
-    \hlnum{2}\hlstd{, mean)}
+\hlstd{MAE} \hlkwb{<-} \hlkwd{apply}\hlstd{(}\hlkwd{cbind}\hlstd{(}\hlkwd{abs}\hlstd{(Ynew} \hlopt{-} \hlstd{yhat.lasso.new),} \hlkwd{abs}\hlstd{(Ynew} \hlopt{-} \hlstd{yhat.postlasso.new)),} \hlnum{2}\hlstd{,}
+    \hlstd{mean)}
 \hlkwd{names}\hlstd{(MAE)} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"lasso MAE"}\hlstd{,} \hlstr{"Post-lasso MAE"}\hlstd{)}
 \hlkwd{print}\hlstd{(MAE,} \hlkwc{digits} \hlstd{=} \hlnum{2}\hlstd{)}  \hlcom{# MAE for Lasso and Post-Lasso}
 \end{alltt}
 \begin{verbatim}
 ##      lasso MAE Post-lasso MAE 
-##           0.88           0.82
+##           0.91           0.79
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
 
-In the example above the sup-score statistic for overall significance is 51.16 with a pvalue of 0. This means that the null hypothesis is rejected on level $\alpha=0.05$ and the model seems to have explanatory power.
+In the example above the sup-score statistic for overall significance is 64.02 with a pvalue of 0. This means that the null hypothesis is rejected on level $\alpha=0.05$ and the model seems to have explanatory power.
 
 \section{Inference on Target Regression Coefficients}
 
@@ -598,7 +602,9 @@ Algorithmically the method is as follows:
 
 
 \subsection{Inference: Confidence Intervals and Significance Testing}
-The function \code{rlassoEffects} does inference -- namely construction of confidence intervals and significance testing -- for target variables. Those can be specified either by the variable names, an integer valued vector giving their position in \code{x} or by a logical vector indicating the variables for which inference should be conducted. It returns an object of S3 class \code{rlassoEffect} for which the methods \code{summary}, \code{print}, \code{confint}, and \code{plot} are provided. \code{rlassoEffects} is a wrap function for the function \code{rlassoEffect} which does inference for a single target regressor. The theoretical underpinning is given in \citet{BelloniChernozhukovHansen2011} and for a more general class of models in \citet{BCK2014}.
+The function \code{rlassoEffects} does inference -- namely construction of confidence intervals and significance testing -- for target variables. Those can be specified either by the variable names, an integer valued vector giving their position in \code{x} or by a logical vector indicating the variables for which inference should be conducted. It returns an object of S3 class \code{rlassoEffects} for which the methods \code{summary}, \code{print}, \code{confint}, and \code{plot} are provided. \code{rlassoEffects} is a wrap function for the function \code{rlassoEffect} which does inference for a single target regressor. The theoretical underpinning is given in \citet{BelloniChernozhukovHansen2011} and for a more general class of models in \citet{BCK2014}.
+The function \code{rlassoEffects} might either be used in the form \code{rlassoEffects(x, y, index)} where \code{x} is a matrix, \code{y} denotes the outcome variable and \code{index} specifies the variables of \code{x} for which inference is conducted. This can done by an integer vector (postion of the variables), a logical vector or the name of the variables. An alternative usage is as \code{rlassoEffects(formula, data, I)} where \code{I} is a one-sided formula which specifies the variables for which is inference is conducted. For further details we refer to the help page of the function and the following examples where both methods for usage are shown.
+
 
 Here is an example of the use.
 \begin{knitrout}
@@ -667,7 +673,7 @@ second, third, and the fiftieth:
 
 The two methods are first-order equivalent in both low-dimensional and high-dimensional settings under regularity conditions.  Not surprisingly we see that in the numerical example of this section, the estimates and standard errors produced by the two methods are very close to each other.  
 
-It is also possible to estimate joint confidence intervals. The method relies on a multiplier bootstrap method as described in \cite{BCK2014}. Joint confidence intervals can be invoked by setting the option \code{joint} to \code{TRUE} in the method \code{confint} for objects of class \code{rlassoEffects}.
+It is also possible to estimate joint confidence intervals. The method relies on a multiplier bootstrap method as described in \cite{BCK2014}. Joint confidence intervals can be invoked by setting the option \code{joint} to \code{TRUE} in the method \code{confint} for objects of class \code{rlassoEffects}. We will also demonstrate the application of joint confidence intervals in an empirical application in the next section.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -695,6 +701,140 @@ Finally, we can also plot the estimated effects with their confidence intervals:
 \end{knitrout}
 
 For logistic regression we provide the functions \code{rlassologit} and \code{rlassologitEffects}. Further information can be found in the help.
+
+\subsection{Application: the effect of gender on wage}
+In Labour Economics an important question is how the wage is related to the gender of the employed. We use US census data from the year 2012 to analyse the effect of gender and interaction effects of other variables with gender on wage jointly. The dependent variable is the logarithm of the wage, the target variable is \texttt{female} (in combination with other variables). All other variables denote some other socio-economic characteristics, e.g. marital status, education, and experience.  For a detailed description of the variables we refer to the help page.
+
+First, we load and prepare the data.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{library}\hlstd{(hdm)}
+\hlkwd{data}\hlstd{(cps2012)}
+\hlstd{X} \hlkwb{<-} \hlkwd{model.matrix}\hlstd{(}\hlopt{~-}\hlnum{1} \hlopt{+} \hlstd{female} \hlopt{+} \hlstd{female}\hlopt{:}\hlstd{(widowed} \hlopt{+} \hlstd{divorced} \hlopt{+} \hlstd{separated} \hlopt{+} \hlstd{nevermarried} \hlopt{+}
+    \hlstd{hsd08} \hlopt{+} \hlstd{hsd911} \hlopt{+} \hlstd{hsg} \hlopt{+} \hlstd{cg} \hlopt{+} \hlstd{ad} \hlopt{+} \hlstd{mw} \hlopt{+} \hlstd{so} \hlopt{+} \hlstd{we} \hlopt{+} \hlstd{exp1} \hlopt{+} \hlstd{exp2} \hlopt{+} \hlstd{exp3)} \hlopt{+ +}\hlstd{(widowed} \hlopt{+}
+    \hlstd{divorced} \hlopt{+} \hlstd{separated} \hlopt{+} \hlstd{nevermarried} \hlopt{+} \hlstd{hsd08} \hlopt{+} \hlstd{hsd911} \hlopt{+} \hlstd{hsg} \hlopt{+} \hlstd{cg} \hlopt{+} \hlstd{ad} \hlopt{+} \hlstd{mw} \hlopt{+} \hlstd{so} \hlopt{+}
+    \hlstd{we} \hlopt{+} \hlstd{exp1} \hlopt{+} \hlstd{exp2} \hlopt{+} \hlstd{exp3)}\hlopt{^}\hlnum{2}\hlstd{,} \hlkwc{data} \hlstd{= cps2012)}
+\hlkwd{dim}\hlstd{(X)}
+\end{alltt}
+\begin{verbatim}
+## [1] 29217   136
+\end{verbatim}
+\begin{alltt}
+\hlstd{X} \hlkwb{<-} \hlstd{X[,} \hlkwd{which}\hlstd{(}\hlkwd{apply}\hlstd{(X,} \hlnum{2}\hlstd{, var)} \hlopt{!=} \hlnum{0}\hlstd{)]}  \hlcom{# exclude all constant variables}
+\hlkwd{dim}\hlstd{(X)}
+\end{alltt}
+\begin{verbatim}
+## [1] 29217   116
+\end{verbatim}
+\begin{alltt}
+\hlstd{index.gender} \hlkwb{<-} \hlkwd{grep}\hlstd{(}\hlstr{"female"}\hlstd{,} \hlkwd{colnames}\hlstd{(X))}
+\hlstd{y} \hlkwb{<-} \hlstd{cps2012}\hlopt{$}\hlstd{lnw}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+The parameter estimates for the target parameters, i.e. all coefficients related to gender (i.e. by interaction with other variables) are calculated and summarized by the following commands
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{effects.female} \hlkwb{<-} \hlkwd{rlassoEffects}\hlstd{(}\hlkwc{x} \hlstd{= X,} \hlkwc{y} \hlstd{= y,} \hlkwc{index} \hlstd{= index.gender)}
+\hlkwd{summary}\hlstd{(effects.female)}
+\end{alltt}
+\begin{verbatim}
+## [1] "Estimates and significance testing of the effect of target variables"
+##                     Estimate. Std. Error t value Pr(>|t|)
+## female              -0.154923   0.050162  -3.088 0.002012
+## female:widowed       0.136095   0.090663   1.501 0.133325
+## female:divorced      0.136939   0.022182   6.174 6.68e-10
+## female:separated     0.023303   0.053212   0.438 0.661441
+## female:nevermarried  0.186853   0.019942   9.370  < 2e-16
+## female:hsd08         0.027810   0.120914   0.230 0.818092
+## female:hsd911       -0.119335   0.051880  -2.300 0.021435
+## female:hsg          -0.012890   0.019223  -0.671 0.502518
+## female:cg            0.010139   0.018327   0.553 0.580114
+## female:ad           -0.030464   0.021806  -1.397 0.162405
+## female:mw           -0.001063   0.019192  -0.055 0.955811
+## female:so           -0.008183   0.019357  -0.423 0.672468
+## female:we           -0.004226   0.021168  -0.200 0.841760
+## female:exp1          0.004935   0.007804   0.632 0.527139
+## female:exp2         -0.159519   0.045300  -3.521 0.000429
+## female:exp3          0.038451   0.007861   4.891 1.00e-06
+##                        
+## female              ** 
+## female:widowed         
+## female:divorced     ***
+## female:separated       
+## female:nevermarried ***
+## female:hsd08           
+## female:hsd911       *  
+## female:hsg             
+## female:cg              
+## female:ad              
+## female:mw              
+## female:so              
+## female:we              
+## female:exp1            
+## female:exp2         ***
+## female:exp3         ***
+## ---
+## Signif. codes:  
+## 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+Finally, we estimate and plot confident intervals, first "pointwise" and then the joint confidence intervals.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{joint.CI} \hlkwb{<-} \hlkwd{confint}\hlstd{(effects.female,} \hlkwc{level} \hlstd{=} \hlnum{0.95}\hlstd{,} \hlkwc{joint} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+\hlstd{joint.CI}
+\end{alltt}
+\begin{verbatim}
+##                            2.5 %      97.5 %
+## female              -0.247543718 -0.06230284
+## female:widowed      -0.043270502  0.31546147
+## female:divorced      0.095621308  0.17825746
+## female:separated    -0.069795172  0.11640070
+## female:nevermarried  0.148558524  0.22514844
+## female:hsd08        -0.239684558  0.29530518
+## female:hsd911       -0.218862780 -0.01980730
+## female:hsg          -0.047630251  0.02185069
+## female:cg           -0.024316410  0.04459352
+## female:ad           -0.073929927  0.01300244
+## female:mw           -0.036731298  0.03460442
+## female:so           -0.044444883  0.02807820
+## female:we           -0.045052301  0.03660004
+## female:exp1         -0.009313837  0.01918435
+## female:exp2         -0.242381838 -0.07665682
+## female:exp3          0.024087022  0.05281414
+\end{verbatim}
+\begin{alltt}
+\hlcom{# plot(effects.female, joint=TRUE, level=0.95) # plot of the effects}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+This analysis allows a closer look how discrimination according to gender is related to other socio-economic variables.
+
+As a side remark, the version 0.2 allows also now a formula interface for many functions including \texttt{rlassoEffects}. Hence, the analysis could also be done more compact as
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{effects.female} \hlkwb{<-} \hlkwd{rlassoEffects}\hlstd{(lnw} \hlopt{~} \hlstd{female} \hlopt{+} \hlstd{female}\hlopt{:}\hlstd{(widowed} \hlopt{+} \hlstd{divorced} \hlopt{+} \hlstd{separated} \hlopt{+}
+    \hlstd{nevermarried} \hlopt{+} \hlstd{hsd08} \hlopt{+} \hlstd{hsd911} \hlopt{+} \hlstd{hsg} \hlopt{+} \hlstd{cg} \hlopt{+} \hlstd{ad} \hlopt{+} \hlstd{mw} \hlopt{+} \hlstd{so} \hlopt{+} \hlstd{we} \hlopt{+} \hlstd{exp1} \hlopt{+} \hlstd{exp2} \hlopt{+}
+    \hlstd{exp3)} \hlopt{+} \hlstd{(widowed} \hlopt{+} \hlstd{divorced} \hlopt{+} \hlstd{separated} \hlopt{+} \hlstd{nevermarried} \hlopt{+} \hlstd{hsd08} \hlopt{+} \hlstd{hsd911} \hlopt{+} \hlstd{hsg} \hlopt{+}
+    \hlstd{cg} \hlopt{+} \hlstd{ad} \hlopt{+} \hlstd{mw} \hlopt{+} \hlstd{so} \hlopt{+} \hlstd{we} \hlopt{+} \hlstd{exp1} \hlopt{+} \hlstd{exp2} \hlopt{+} \hlstd{exp3)}\hlopt{^}\hlnum{2}\hlstd{,} \hlkwc{data} \hlstd{= cps2012,} \hlkwc{I} \hlstd{=} \hlopt{~}\hlstd{female} \hlopt{+}
+    \hlstd{female}\hlopt{:}\hlstd{(widowed} \hlopt{+} \hlstd{divorced} \hlopt{+} \hlstd{separated} \hlopt{+} \hlstd{nevermarried} \hlopt{+} \hlstd{hsd08} \hlopt{+} \hlstd{hsd911} \hlopt{+} \hlstd{hsg} \hlopt{+}
+        \hlstd{cg} \hlopt{+} \hlstd{ad} \hlopt{+} \hlstd{mw} \hlopt{+} \hlstd{so} \hlopt{+} \hlstd{we} \hlopt{+} \hlstd{exp1} \hlopt{+} \hlstd{exp2} \hlopt{+} \hlstd{exp3))}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+The one-sided option \texttt{I} gives the target variables for which inference is conducted.
 
 \subsection{Application: Estimation of the treatment effect in a linear model with many confounding factors}
 
@@ -799,8 +939,7 @@ We then collect results in a nice latex table:
     \hlnum{1}\hlopt{:}\hlnum{2}\hlstd{],} \hlkwd{summary}\hlstd{(doublesel.effect)}\hlopt{$}\hlstd{coef[,} \hlnum{1}\hlopt{:}\hlnum{2}\hlstd{])}
 \hlkwd{colnames}\hlstd{(table)} \hlkwb{=} \hlkwd{c}\hlstd{(}\hlstr{"Estimate"}\hlstd{,} \hlstr{"Std. Error"}\hlstd{)}  \hlcom{#names(summary(full.fit)$coef)[1:2]}
 \hlkwd{rownames}\hlstd{(table)} \hlkwb{=} \hlkwd{c}\hlstd{(}\hlstr{"full reg via ols"}\hlstd{,} \hlstr{"partial reg
-via post-lasso "}\hlstd{,}
-    \hlstr{"partial reg via double selection"}\hlstd{)}
+via post-lasso "}\hlstd{,} \hlstr{"partial reg via double selection"}\hlstd{)}
 \hlstd{tab} \hlkwb{=} \hlkwd{xtable}\hlstd{(table,} \hlkwc{digits} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{,} \hlnum{2}\hlstd{,} \hlnum{5}\hlstd{))}
 \end{alltt}
 \end{kframe}
@@ -811,7 +950,7 @@ via post-lasso "}\hlstd{,}
 \hlstd{tab}
 \end{alltt}
 \end{kframe}% latex table generated in R 3.2.5 by xtable 1.8-2 package
-% Wed Jun 15 16:29:22 2016
+% Mon Aug 01 07:45:14 2016
 \begin{table}[ht]
 \centering
 \begin{tabular}{rrr}
@@ -867,6 +1006,8 @@ and high-dimensional $x_i$ the algorithm described in \citet{CHS:ManyIVNote} is 
  uses post-Lasso for partialling out.  By setting \code{post=FALSE}
  we can employ Lasso instead of Post-Lasso. Finally, the package provides the standard function \code{tsls}, which implements the \textquotedblleft classical\textquotedblright\ two-stage least squares estimation.
 
+\textbf{Fucntion usage} Both the family of \code{rlassoIV}-functions and the family of the functions for treatment effects , which are introduced in the next section, allow use with both formula-interface and by handing over the prepard model matrices. Hence the general pattern  for use with formula is \code{function(formula, data, ...)} where formula consists of two-parts and is a member of the class \code{Formula}. These formulas are of the pattern \code{y ~ d + x | x + z} where \code{y} is the outcome variable, \code{x} are exogenous variables, \code{d} endogenous varialbes (if several ones are allowed depends on the concrete function), and \code{z} denote the instrumental variables. A more primitive use of the functions is by simply hand over the required group of variables as matrices: \code{function(x=x, d=d, y=y, z=z)}. In some of the following examples both alternatives are displayed.   
+
 \subsection{Application: Economic Development and Institutions}
 Estimating the causal effect of institutions on output is complicated by the simultaneity between institutions and output: specifically, better institutions may
 lead to higher incomes, but higher incomes may also lead to the development of
@@ -892,8 +1033,8 @@ First, we process the data
 \hlstd{y} \hlkwb{=} \hlstd{AJR}\hlopt{$}\hlstd{GDP}
 \hlstd{d} \hlkwb{=} \hlstd{AJR}\hlopt{$}\hlstd{Exprop}
 \hlstd{z} \hlkwb{=} \hlstd{AJR}\hlopt{$}\hlstd{logMort}
-\hlstd{x} \hlkwb{=} \hlkwd{model.matrix}\hlstd{(}\hlopt{~-}\hlnum{1} \hlopt{+} \hlstd{(Latitude} \hlopt{+} \hlstd{Latitude2} \hlopt{+} \hlstd{Africa} \hlopt{+} \hlstd{Asia} \hlopt{+}
-    \hlstd{Namer} \hlopt{+} \hlstd{Samer)}\hlopt{^}\hlnum{2}\hlstd{,} \hlkwc{data} \hlstd{= AJR)}
+\hlstd{x} \hlkwb{=} \hlkwd{model.matrix}\hlstd{(}\hlopt{~-}\hlnum{1} \hlopt{+} \hlstd{(Latitude} \hlopt{+} \hlstd{Latitude2} \hlopt{+} \hlstd{Africa} \hlopt{+} \hlstd{Asia} \hlopt{+} \hlstd{Namer} \hlopt{+} \hlstd{Samer)}\hlopt{^}\hlnum{2}\hlstd{,}
+    \hlkwc{data} \hlstd{= AJR)}
 \hlkwd{dim}\hlstd{(x)}
 \end{alltt}
 \begin{verbatim}
@@ -906,12 +1047,10 @@ Then we estimate an IV model with selection on the $X$
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlcom{# AJR.Xselect = rlassoIV(x=x, d=d, y=y, z=z, select.X=TRUE,}
-\hlcom{# select.Z=FALSE)}
-\hlstd{AJR.Xselect} \hlkwb{=} \hlkwd{rlassoIV}\hlstd{(GDP} \hlopt{~} \hlstd{Exprop} \hlopt{+} \hlstd{(Latitude} \hlopt{+} \hlstd{Latitude2} \hlopt{+}
-    \hlstd{Africa} \hlopt{+} \hlstd{Asia} \hlopt{+} \hlstd{Namer} \hlopt{+} \hlstd{Samer)}\hlopt{^}\hlnum{2} \hlopt{|} \hlstd{logMort} \hlopt{+} \hlstd{(Latitude} \hlopt{+}
-    \hlstd{Latitude2} \hlopt{+} \hlstd{Africa} \hlopt{+} \hlstd{Asia} \hlopt{+} \hlstd{Namer} \hlopt{+} \hlstd{Samer)}\hlopt{^}\hlnum{2}\hlstd{,} \hlkwc{data} \hlstd{= AJR,}
-    \hlkwc{select.X} \hlstd{=} \hlnum{TRUE}\hlstd{,} \hlkwc{select.Z} \hlstd{=} \hlnum{FALSE}\hlstd{)}
+\hlcom{# AJR.Xselect = rlassoIV(x=x, d=d, y=y, z=z, select.X=TRUE, select.Z=FALSE)}
+\hlstd{AJR.Xselect} \hlkwb{=} \hlkwd{rlassoIV}\hlstd{(GDP} \hlopt{~} \hlstd{Exprop} \hlopt{+} \hlstd{(Latitude} \hlopt{+} \hlstd{Latitude2} \hlopt{+} \hlstd{Africa} \hlopt{+} \hlstd{Asia} \hlopt{+} \hlstd{Namer} \hlopt{+}
+    \hlstd{Samer)}\hlopt{^}\hlnum{2} \hlopt{|} \hlstd{logMort} \hlopt{+} \hlstd{(Latitude} \hlopt{+} \hlstd{Latitude2} \hlopt{+} \hlstd{Africa} \hlopt{+} \hlstd{Asia} \hlopt{+} \hlstd{Namer} \hlopt{+} \hlstd{Samer)}\hlopt{^}\hlnum{2}\hlstd{,}
+    \hlkwc{data} \hlstd{= AJR,} \hlkwc{select.X} \hlstd{=} \hlnum{TRUE}\hlstd{,} \hlkwc{select.Z} \hlstd{=} \hlnum{FALSE}\hlstd{)}
 \hlkwd{summary}\hlstd{(AJR.Xselect)}
 \end{alltt}
 \begin{verbatim}
@@ -940,12 +1079,9 @@ Let us investigate partialling out in more detail in this example.  We can first
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlcom{# parialling out by linear model}
-\hlstd{fmla.y} \hlkwb{=} \hlstd{GDP} \hlopt{~} \hlstd{(Latitude} \hlopt{+} \hlstd{Latitude2} \hlopt{+} \hlstd{Africa} \hlopt{+} \hlstd{Asia} \hlopt{+} \hlstd{Namer} \hlopt{+}
-    \hlstd{Samer)}\hlopt{^}\hlnum{2}
-\hlstd{fmla.d} \hlkwb{=} \hlstd{Exprop} \hlopt{~} \hlstd{(Latitude} \hlopt{+} \hlstd{Latitude2} \hlopt{+} \hlstd{Africa} \hlopt{+} \hlstd{Asia} \hlopt{+} \hlstd{Namer} \hlopt{+}
-    \hlstd{Samer)}\hlopt{^}\hlnum{2}
-\hlstd{fmla.z} \hlkwb{=} \hlstd{logMort} \hlopt{~} \hlstd{(Latitude} \hlopt{+} \hlstd{Latitude2} \hlopt{+} \hlstd{Africa} \hlopt{+} \hlstd{Asia} \hlopt{+} \hlstd{Namer} \hlopt{+}
-    \hlstd{Samer)}\hlopt{^}\hlnum{2}
+\hlstd{fmla.y} \hlkwb{=} \hlstd{GDP} \hlopt{~} \hlstd{(Latitude} \hlopt{+} \hlstd{Latitude2} \hlopt{+} \hlstd{Africa} \hlopt{+} \hlstd{Asia} \hlopt{+} \hlstd{Namer} \hlopt{+} \hlstd{Samer)}\hlopt{^}\hlnum{2}
+\hlstd{fmla.d} \hlkwb{=} \hlstd{Exprop} \hlopt{~} \hlstd{(Latitude} \hlopt{+} \hlstd{Latitude2} \hlopt{+} \hlstd{Africa} \hlopt{+} \hlstd{Asia} \hlopt{+} \hlstd{Namer} \hlopt{+} \hlstd{Samer)}\hlopt{^}\hlnum{2}
+\hlstd{fmla.z} \hlkwb{=} \hlstd{logMort} \hlopt{~} \hlstd{(Latitude} \hlopt{+} \hlstd{Latitude2} \hlopt{+} \hlstd{Africa} \hlopt{+} \hlstd{Asia} \hlopt{+} \hlstd{Namer} \hlopt{+} \hlstd{Samer)}\hlopt{^}\hlnum{2}
 \hlstd{rY} \hlkwb{=} \hlkwd{lm}\hlstd{(fmla.y,} \hlkwc{data} \hlstd{= AJR)}\hlopt{$}\hlstd{res}
 \hlstd{rD} \hlkwb{=} \hlkwd{lm}\hlstd{(fmla.d,} \hlkwc{data} \hlstd{= AJR)}\hlopt{$}\hlstd{res}
 \hlstd{rZ} \hlkwb{=} \hlkwd{lm}\hlstd{(fmla.z,} \hlkwc{data} \hlstd{= AJR)}\hlopt{$}\hlstd{res}
@@ -954,8 +1090,8 @@ Let us investigate partialling out in more detail in this example.  We can first
 \hlkwd{print}\hlstd{(}\hlkwd{cbind}\hlstd{(ivfit.lm}\hlopt{$}\hlstd{coef, ivfit.lm}\hlopt{$}\hlstd{se),} \hlkwc{digits} \hlstd{=} \hlnum{3}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-##      [,1] [,2]
-## [1,] 1.27 1.73
+##    [,1] [,2]
+## rD 1.27 1.73
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -969,14 +1105,13 @@ Next, we replace the OLS operator by post-Lasso for partialling out
 \hlstd{rY} \hlkwb{=} \hlkwd{rlasso}\hlstd{(fmla.y,} \hlkwc{data} \hlstd{= AJR)}\hlopt{$}\hlstd{res}
 \hlstd{rD} \hlkwb{=} \hlkwd{rlasso}\hlstd{(fmla.d,} \hlkwc{data} \hlstd{= AJR)}\hlopt{$}\hlstd{res}
 \hlstd{rZ} \hlkwb{=} \hlkwd{rlasso}\hlstd{(fmla.z,} \hlkwc{data} \hlstd{= AJR)}\hlopt{$}\hlstd{res}
-\hlcom{# ivfit.lasso = tsls(y=rY,d=rD, x=NULL, z=rZ,}
-\hlcom{# intercept=FALSE)}
+\hlcom{# ivfit.lasso = tsls(y=rY,d=rD, x=NULL, z=rZ, intercept=FALSE)}
 \hlstd{ivfit.lasso} \hlkwb{=} \hlkwd{tsls}\hlstd{(rY} \hlopt{~} \hlstd{rD} \hlopt{|} \hlstd{rZ,} \hlkwc{intercept} \hlstd{=} \hlnum{FALSE}\hlstd{)}
 \hlkwd{print}\hlstd{(}\hlkwd{cbind}\hlstd{(ivfit.lasso}\hlopt{$}\hlstd{coef, ivfit.lasso}\hlopt{$}\hlstd{se),} \hlkwc{digits} \hlstd{=} \hlnum{3}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-##       [,1]  [,2]
-## [1,] 0.879 0.297
+##     [,1]  [,2]
+## rD 0.879 0.297
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -997,10 +1132,12 @@ First, we load the data an construct the matrices with the controls (x), instrum
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlkwd{data}\hlstd{(EminentDomain)}
-\hlstd{z} \hlkwb{<-} \hlstd{EminentDomain}\hlopt{$}\hlstd{logGDP}\hlopt{$}\hlstd{z}
-\hlstd{x} \hlkwb{<-} \hlstd{EminentDomain}\hlopt{$}\hlstd{logGDP}\hlopt{$}\hlstd{x}
+\hlstd{z} \hlkwb{<-} \hlkwd{as.matrix}\hlstd{(EminentDomain}\hlopt{$}\hlstd{logGDP}\hlopt{$}\hlstd{z)}
+\hlstd{x} \hlkwb{<-} \hlkwd{as.matrix}\hlstd{(EminentDomain}\hlopt{$}\hlstd{logGDP}\hlopt{$}\hlstd{x)}
 \hlstd{y} \hlkwb{<-} \hlstd{EminentDomain}\hlopt{$}\hlstd{logGDP}\hlopt{$}\hlstd{y}
 \hlstd{d} \hlkwb{<-} \hlstd{EminentDomain}\hlopt{$}\hlstd{logGDP}\hlopt{$}\hlstd{d}
+\hlstd{x} \hlkwb{<-} \hlstd{x[,} \hlkwd{apply}\hlstd{(x,} \hlnum{2}\hlstd{, mean,} \hlkwc{na.rm} \hlstd{=} \hlnum{TRUE}\hlstd{)} \hlopt{>} \hlnum{0.05}\hlstd{]}  \hlcom{#}
+\hlstd{z} \hlkwb{<-} \hlstd{z[,} \hlkwd{apply}\hlstd{(z,} \hlnum{2}\hlstd{, mean,} \hlkwc{na.rm} \hlstd{=} \hlnum{TRUE}\hlstd{)} \hlopt{>} \hlnum{0.05}\hlstd{]}  \hlcom{# }
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -1020,22 +1157,21 @@ Next, we estimate the model with selection on the instruments.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{lasso.IV.Z} \hlkwb{=} \hlkwd{rlassoIV}\hlstd{(}\hlkwc{x} \hlstd{= x,} \hlkwc{d} \hlstd{= d,} \hlkwc{y} \hlstd{= y,} \hlkwc{z} \hlstd{= z,} \hlkwc{select.X} \hlstd{=} \hlnum{FALSE}\hlstd{,}
-    \hlkwc{select.Z} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+\hlstd{lasso.IV.Z} \hlkwb{=} \hlkwd{rlassoIV}\hlstd{(}\hlkwc{x} \hlstd{= x,} \hlkwc{d} \hlstd{= d,} \hlkwc{y} \hlstd{= y,} \hlkwc{z} \hlstd{= z,} \hlkwc{select.X} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{select.Z} \hlstd{=} \hlnum{TRUE}\hlstd{)}
 \hlcom{# or lasso.IV.Z = rlassoIVselectZt(x=X, d=d, y=y, z=z)}
 \hlkwd{summary}\hlstd{(lasso.IV.Z)}
 \end{alltt}
 \begin{verbatim}
 ## [1] "Estimates and significance testing of the effect of target variables in the IV regression model"
-##     coeff.     se. t-value p-value
-## d1 0.01543 0.01926   0.801   0.423
+##    coeff.    se. t-value p-value
+## d1 0.4146 0.2902   1.428   0.153
 \end{verbatim}
 \begin{alltt}
 \hlkwd{confint}\hlstd{(lasso.IV.Z)}
 \end{alltt}
 \begin{verbatim}
 ##         2.5 %    97.5 %
-## d1 -0.0223192 0.0531804
+## d1 -0.1542764 0.9834796
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -1045,21 +1181,20 @@ Finally, we do selection on both the $x$ and $z$ variables.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{lasso.IV.XZ} \hlkwb{=} \hlkwd{rlassoIV}\hlstd{(}\hlkwc{x} \hlstd{= x,} \hlkwc{d} \hlstd{= d,} \hlkwc{y} \hlstd{= y,} \hlkwc{z} \hlstd{= z,} \hlkwc{select.X} \hlstd{=} \hlnum{TRUE}\hlstd{,}
-    \hlkwc{select.Z} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+\hlstd{lasso.IV.XZ} \hlkwb{=} \hlkwd{rlassoIV}\hlstd{(}\hlkwc{x} \hlstd{= x,} \hlkwc{d} \hlstd{= d,} \hlkwc{y} \hlstd{= y,} \hlkwc{z} \hlstd{= z,} \hlkwc{select.X} \hlstd{=} \hlnum{TRUE}\hlstd{,} \hlkwc{select.Z} \hlstd{=} \hlnum{TRUE}\hlstd{)}
 \hlkwd{summary}\hlstd{(lasso.IV.XZ)}
 \end{alltt}
 \begin{verbatim}
 ## Estimates and Significance Testing of the effect of target variables in the IV regression model 
 ##      coeff.      se. t-value p-value
-## d1 -0.03488  0.15881   -0.22   0.826
+## d1 -0.03078  0.16077  -0.191   0.848
 \end{verbatim}
 \begin{alltt}
 \hlkwd{confint}\hlstd{(lasso.IV.XZ)}
 \end{alltt}
 \begin{verbatim}
 ##         2.5 %    97.5 %
-## d1 -0.3461475 0.2763868
+## d1 -0.3458816 0.2843283
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -1079,8 +1214,8 @@ Finally, we compare all results
 \end{alltt}
 \begin{verbatim}
 ## [1] "Estimates and significance testing of the effect of target variables in the IV regression model"
-##     coeff.     se. t-value p-value
-## d1 0.01543 0.01926   0.801   0.423
+##    coeff.    se. t-value p-value
+## d1 0.4146 0.2902   1.428   0.153
 \end{verbatim}
 \begin{alltt}
 \hlstd{table[}\hlnum{4}\hlstd{, ]} \hlkwb{=} \hlkwd{summary}\hlstd{(lasso.IV.XZ)[,} \hlnum{1}\hlopt{:}\hlnum{2}\hlstd{]}
@@ -1088,12 +1223,11 @@ Finally, we compare all results
 \begin{verbatim}
 ## Estimates and Significance Testing of the effect of target variables in the IV regression model 
 ##      coeff.      se. t-value p-value
-## d1 -0.03488  0.15881   -0.22   0.826
+## d1 -0.03078  0.16077  -0.191   0.848
 \end{verbatim}
 \begin{alltt}
 \hlkwd{colnames}\hlstd{(table)} \hlkwb{=} \hlkwd{c}\hlstd{(}\hlstr{"Estimate"}\hlstd{,} \hlstr{"Std. Error"}\hlstd{)}
-\hlkwd{rownames}\hlstd{(table)} \hlkwb{=} \hlkwd{c}\hlstd{(}\hlstr{"ols regression"}\hlstd{,} \hlstr{"IV estimation "}\hlstd{,} \hlstr{"selection on Z"}\hlstd{,}
-    \hlstr{"selection on X and Z"}\hlstd{)}
+\hlkwd{rownames}\hlstd{(table)} \hlkwb{=} \hlkwd{c}\hlstd{(}\hlstr{"ols regression"}\hlstd{,} \hlstr{"IV estimation "}\hlstd{,} \hlstr{"selection on Z"}\hlstd{,} \hlstr{"selection on X and Z"}\hlstd{)}
 \hlstd{tab} \hlkwb{=} \hlkwd{xtable}\hlstd{(table,} \hlkwc{digits} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{,} \hlnum{2}\hlstd{,} \hlnum{7}\hlstd{))}
 \end{alltt}
 \end{kframe}
@@ -1104,17 +1238,17 @@ Finally, we compare all results
 \hlstd{tab}
 \end{alltt}
 \end{kframe}% latex table generated in R 3.2.5 by xtable 1.8-2 package
-% Wed Jun 15 16:29:49 2016
+% Mon Aug 01 07:45:34 2016
 \begin{table}[ht]
 \centering
 \begin{tabular}{rrr}
   \hline
  & Estimate & Std. Error \\ 
   \hline
-ols regression & 0.01 & 0.0052848 \\ 
-  IV estimation  & 0.15 & 0.1255526 \\ 
-  selection on Z & 0.02 & 0.0192605 \\ 
-  selection on X and Z & -0.03 & 0.1588127 \\ 
+ols regression & 0.01 & 0.0098659 \\ 
+  IV estimation  & -0.01 & 0.0337664 \\ 
+  selection on Z & 0.41 & 0.2902492 \\ 
+  selection on X and Z & -0.03 & 0.1607708 \\ 
    \hline
 \end{tabular}
 \end{table}
@@ -1188,17 +1322,15 @@ Again, we start first with the data preparation:
 \hlstd{y} \hlkwb{=} \hlstd{pension}\hlopt{$}\hlstd{tw}
 \hlstd{d} \hlkwb{=} \hlstd{pension}\hlopt{$}\hlstd{p401}
 \hlstd{z} \hlkwb{=} \hlstd{pension}\hlopt{$}\hlstd{e401}
-\hlstd{X} \hlkwb{=} \hlstd{pension[,} \hlkwd{c}\hlstd{(}\hlstr{"i2"}\hlstd{,} \hlstr{"i3"}\hlstd{,} \hlstr{"i4"}\hlstd{,} \hlstr{"i5"}\hlstd{,} \hlstr{"i6"}\hlstd{,} \hlstr{"i7"}\hlstd{,} \hlstr{"a2"}\hlstd{,} \hlstr{"a3"}\hlstd{,}
-    \hlstr{"a4"}\hlstd{,} \hlstr{"a5"}\hlstd{,} \hlstr{"fsize"}\hlstd{,} \hlstr{"hs"}\hlstd{,} \hlstr{"smcol"}\hlstd{,} \hlstr{"col"}\hlstd{,} \hlstr{"marr"}\hlstd{,} \hlstr{"twoearn"}\hlstd{,}
-    \hlstr{"db"}\hlstd{,} \hlstr{"pira"}\hlstd{,} \hlstr{"hown"}\hlstd{)]}  \hlcom{# simple model}
-\hlstd{xvar} \hlkwb{=} \hlkwd{c}\hlstd{(}\hlstr{"i2"}\hlstd{,} \hlstr{"i3"}\hlstd{,} \hlstr{"i4"}\hlstd{,} \hlstr{"i5"}\hlstd{,} \hlstr{"i6"}\hlstd{,} \hlstr{"i7"}\hlstd{,} \hlstr{"a2"}\hlstd{,} \hlstr{"a3"}\hlstd{,} \hlstr{"a4"}\hlstd{,}
-    \hlstr{"a5"}\hlstd{,} \hlstr{"fsize"}\hlstd{,} \hlstr{"hs"}\hlstd{,} \hlstr{"smcol"}\hlstd{,} \hlstr{"col"}\hlstd{,} \hlstr{"marr"}\hlstd{,} \hlstr{"twoearn"}\hlstd{,} \hlstr{"db"}\hlstd{,}
-    \hlstr{"pira"}\hlstd{,} \hlstr{"hown"}\hlstd{)}
+\hlstd{X} \hlkwb{=} \hlstd{pension[,} \hlkwd{c}\hlstd{(}\hlstr{"i2"}\hlstd{,} \hlstr{"i3"}\hlstd{,} \hlstr{"i4"}\hlstd{,} \hlstr{"i5"}\hlstd{,} \hlstr{"i6"}\hlstd{,} \hlstr{"i7"}\hlstd{,} \hlstr{"a2"}\hlstd{,} \hlstr{"a3"}\hlstd{,} \hlstr{"a4"}\hlstd{,} \hlstr{"a5"}\hlstd{,} \hlstr{"fsize"}\hlstd{,}
+    \hlstr{"hs"}\hlstd{,} \hlstr{"smcol"}\hlstd{,} \hlstr{"col"}\hlstd{,} \hlstr{"marr"}\hlstd{,} \hlstr{"twoearn"}\hlstd{,} \hlstr{"db"}\hlstd{,} \hlstr{"pira"}\hlstd{,} \hlstr{"hown"}\hlstd{)]}  \hlcom{# simple model}
+\hlstd{xvar} \hlkwb{=} \hlkwd{c}\hlstd{(}\hlstr{"i2"}\hlstd{,} \hlstr{"i3"}\hlstd{,} \hlstr{"i4"}\hlstd{,} \hlstr{"i5"}\hlstd{,} \hlstr{"i6"}\hlstd{,} \hlstr{"i7"}\hlstd{,} \hlstr{"a2"}\hlstd{,} \hlstr{"a3"}\hlstd{,} \hlstr{"a4"}\hlstd{,} \hlstr{"a5"}\hlstd{,} \hlstr{"fsize"}\hlstd{,} \hlstr{"hs"}\hlstd{,}
+    \hlstr{"smcol"}\hlstd{,} \hlstr{"col"}\hlstd{,} \hlstr{"marr"}\hlstd{,} \hlstr{"twoearn"}\hlstd{,} \hlstr{"db"}\hlstd{,} \hlstr{"pira"}\hlstd{,} \hlstr{"hown"}\hlstd{)}
 \hlstd{xpart} \hlkwb{=} \hlkwd{paste}\hlstd{(xvar,} \hlkwc{collapse} \hlstd{=} \hlstr{"+"}\hlstd{)}
-\hlstd{form} \hlkwb{=} \hlkwd{as.formula}\hlstd{(}\hlkwd{paste}\hlstd{(}\hlstr{"tw ~ "}\hlstd{,} \hlkwd{paste}\hlstd{(}\hlkwd{c}\hlstd{(}\hlstr{"p401"}\hlstd{, xvar),} \hlkwc{collapse} \hlstd{=} \hlstr{"+"}\hlstd{),}
-    \hlstr{"|"}\hlstd{,} \hlkwd{paste}\hlstd{(xvar,} \hlkwc{collapse} \hlstd{=} \hlstr{"+"}\hlstd{)))}
-\hlstd{formZ} \hlkwb{=} \hlkwd{as.formula}\hlstd{(}\hlkwd{paste}\hlstd{(}\hlstr{"tw ~ "}\hlstd{,} \hlkwd{paste}\hlstd{(}\hlkwd{c}\hlstd{(}\hlstr{"p401"}\hlstd{, xvar),} \hlkwc{collapse} \hlstd{=} \hlstr{"+"}\hlstd{),}
-    \hlstr{"|"}\hlstd{,} \hlkwd{paste}\hlstd{(}\hlkwd{c}\hlstd{(}\hlstr{"e401"}\hlstd{, xvar),} \hlkwc{collapse} \hlstd{=} \hlstr{"+"}\hlstd{)))}
+\hlstd{form} \hlkwb{=} \hlkwd{as.formula}\hlstd{(}\hlkwd{paste}\hlstd{(}\hlstr{"tw ~ "}\hlstd{,} \hlkwd{paste}\hlstd{(}\hlkwd{c}\hlstd{(}\hlstr{"p401"}\hlstd{, xvar),} \hlkwc{collapse} \hlstd{=} \hlstr{"+"}\hlstd{),} \hlstr{"|"}\hlstd{,} \hlkwd{paste}\hlstd{(xvar,}
+    \hlkwc{collapse} \hlstd{=} \hlstr{"+"}\hlstd{)))}
+\hlstd{formZ} \hlkwb{=} \hlkwd{as.formula}\hlstd{(}\hlkwd{paste}\hlstd{(}\hlstr{"tw ~ "}\hlstd{,} \hlkwd{paste}\hlstd{(}\hlkwd{c}\hlstd{(}\hlstr{"p401"}\hlstd{, xvar),} \hlkwc{collapse} \hlstd{=} \hlstr{"+"}\hlstd{),} \hlstr{"|"}\hlstd{,} \hlkwd{paste}\hlstd{(}\hlkwd{c}\hlstd{(}\hlstr{"e401"}\hlstd{,}
+    \hlstd{xvar),} \hlkwc{collapse} \hlstd{=} \hlstr{"+"}\hlstd{)))}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -1344,7 +1476,7 @@ processed using \code{xtable} to produce the latex output:
 \end{knitrout}
 
 % latex table generated in R 3.2.5 by xtable 1.8-2 package
-% Wed Jun 15 16:29:52 2016
+% Mon Aug 01 07:45:37 2016
 \begin{table}[ht]
 \centering
 \begin{tabular}{rrr}
@@ -1365,15 +1497,14 @@ Finally, we estimate a model including all interaction effects:
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlcom{# X = model.matrix(~ -1 + (i2 + i3 + i4 + i5 + i6 + i7 + a2 +}
-\hlcom{# a3 + a4 + a5 + fsize + hs + smcol + col + marr + twoearn +}
-\hlcom{# db + pira + hown)^2, data = pension) # model with}
-\hlcom{# interactions}
+\hlcom{# X = model.matrix(~ -1 + (i2 + i3 + i4 + i5 + i6 + i7 + a2 + a3 + a4 + a5 +}
+\hlcom{# fsize + hs + smcol + col + marr + twoearn + db + pira + hown)^2, data =}
+\hlcom{# pension) # model with interactions}
 \hlstd{xvar2} \hlkwb{<-} \hlkwd{paste}\hlstd{(}\hlstr{"("}\hlstd{, xvar,} \hlstr{")^2"}\hlstd{,} \hlkwc{sep} \hlstd{=} \hlstr{""}\hlstd{)}
-\hlstd{formExt} \hlkwb{=} \hlkwd{as.formula}\hlstd{(}\hlkwd{paste}\hlstd{(}\hlstr{"tw ~ "}\hlstd{,} \hlkwd{paste}\hlstd{(}\hlkwd{c}\hlstd{(}\hlstr{"p401"}\hlstd{, xvar2),} \hlkwc{collapse} \hlstd{=} \hlstr{"+"}\hlstd{),}
-    \hlstr{"|"}\hlstd{,} \hlkwd{paste}\hlstd{(xvar2,} \hlkwc{collapse} \hlstd{=} \hlstr{"+"}\hlstd{)))}
-\hlstd{formZExt} \hlkwb{=} \hlkwd{as.formula}\hlstd{(}\hlkwd{paste}\hlstd{(}\hlstr{"tw ~ "}\hlstd{,} \hlkwd{paste}\hlstd{(}\hlkwd{c}\hlstd{(}\hlstr{"p401"}\hlstd{, xvar2),}
-    \hlkwc{collapse} \hlstd{=} \hlstr{"+"}\hlstd{),} \hlstr{"|"}\hlstd{,} \hlkwd{paste}\hlstd{(}\hlkwd{c}\hlstd{(}\hlstr{"e401"}\hlstd{, xvar2),} \hlkwc{collapse} \hlstd{=} \hlstr{"+"}\hlstd{)))}
+\hlstd{formExt} \hlkwb{=} \hlkwd{as.formula}\hlstd{(}\hlkwd{paste}\hlstd{(}\hlstr{"tw ~ "}\hlstd{,} \hlkwd{paste}\hlstd{(}\hlkwd{c}\hlstd{(}\hlstr{"p401"}\hlstd{, xvar2),} \hlkwc{collapse} \hlstd{=} \hlstr{"+"}\hlstd{),} \hlstr{"|"}\hlstd{,}
+    \hlkwd{paste}\hlstd{(xvar2,} \hlkwc{collapse} \hlstd{=} \hlstr{"+"}\hlstd{)))}
+\hlstd{formZExt} \hlkwb{=} \hlkwd{as.formula}\hlstd{(}\hlkwd{paste}\hlstd{(}\hlstr{"tw ~ "}\hlstd{,} \hlkwd{paste}\hlstd{(}\hlkwd{c}\hlstd{(}\hlstr{"p401"}\hlstd{, xvar2),} \hlkwc{collapse} \hlstd{=} \hlstr{"+"}\hlstd{),} \hlstr{"|"}\hlstd{,}
+    \hlkwd{paste}\hlstd{(}\hlkwd{c}\hlstd{(}\hlstr{"e401"}\hlstd{, xvar2),} \hlkwc{collapse} \hlstd{=} \hlstr{"+"}\hlstd{)))}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -1385,10 +1516,9 @@ Finally, we estimate a model including all interaction effects:
 \hlstd{pension.atet} \hlkwb{=} \hlkwd{rlassoATET}\hlstd{(X, z, y)}
 \hlstd{pension.late} \hlkwb{=} \hlkwd{rlassoLATE}\hlstd{(X, d, y, z)}
 \hlstd{pension.latet} \hlkwb{=} \hlkwd{rlassoLATET}\hlstd{(X, d, y, z)}
-\hlcom{# pension.ate = rlassoATE(formExt, data = pension)}
-\hlcom{# pension.atet = rlassoATET(formExt, data = pension)}
-\hlcom{# pension.late = rlassoLATE(formZExt, data = pension)}
-\hlcom{# pension.latet = rlassoLATET(formZExt, data = pension)}
+\hlcom{# pension.ate = rlassoATE(formExt, data = pension) pension.atet =}
+\hlcom{# rlassoATET(formExt, data = pension) pension.late = rlassoLATE(formZExt, data =}
+\hlcom{# pension) pension.latet = rlassoLATET(formZExt, data = pension)}
 \hlstd{table} \hlkwb{=} \hlkwd{matrix}\hlstd{(}\hlnum{0}\hlstd{,} \hlnum{4}\hlstd{,} \hlnum{2}\hlstd{)}
 \hlstd{table[}\hlnum{1}\hlstd{, ]} \hlkwb{=} \hlkwd{summary}\hlstd{(pension.ate)[,} \hlnum{1}\hlopt{:}\hlnum{2}\hlstd{]}
 \hlstd{table[}\hlnum{2}\hlstd{, ]} \hlkwb{=} \hlkwd{summary}\hlstd{(pension.atet)[,} \hlnum{1}\hlopt{:}\hlnum{2}\hlstd{]}
@@ -1404,7 +1534,7 @@ Finally, we estimate a model including all interaction effects:
 This gives the following results:
 
 % latex table generated in R 3.2.5 by xtable 1.8-2 package
-% Wed Jun 15 16:29:54 2016
+% Mon Aug 01 07:45:38 2016
 \begin{table}[ht]
 \centering
 \begin{tabular}{rrr}
@@ -1422,7 +1552,7 @@ ATE & 8449.80 & 1895.43 \\
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The Lasso Methods for Discovery of Significant
-Causes Amongst Many Potential Causes, with Many Controls}
+Causes amongst Many Potential Causes, with Many Controls}
 Here we consider the model
 $$
 \underbrace{Y_{i}}_{\mathrm{Outcome}} \ \ =  \ \ \underbrace{\sum_{l=1}^{p_1} D_{il} \alpha_\ell}_{
