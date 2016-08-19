@@ -84,8 +84,8 @@ intercept <- 1
 P <- exp(intercept + X \%*\% beta)/(1+exp(intercept + X \%*\% beta))
 y <- rbinom(length(y), size=1, prob=P)
 ## fit rlassologit object
- rlassologit.reg <- rlassologit(y~X)
- ## methods
+rlassologit.reg <- rlassologit(y~X)
+## methods
 summary(rlassologit.reg, all=F)
 print(rlassologit.reg)
 predict(rlassologit.reg, type='response')

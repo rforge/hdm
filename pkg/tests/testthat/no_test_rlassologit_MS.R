@@ -127,7 +127,6 @@ y <- numeric(length = n)
 for(i in 1:n){
   y[i] <- sample(x = c(1,0), size = 1, prob = c(P[i],1 - P[i]))
 }
-
 xd <- X[,2:50]
 d <- X[,1]
 
@@ -135,3 +134,25 @@ test <- rlassologitEffect(x=xd, d=d, y=y)
 test <- glm(y ~ X,family=binomial(link='logit'))
 test <- rlassologitEffects(X,y, index=c(1,2,40))
 test <- rlassologitEffects(y ~ X, I = ~ V1 + V2)
+
+########################################
+
+library(hdm)
+## DGP
+set.seed(2)
+n <- 1000
+p <- 50
+px <- 3
+X <- matrix(rnorm(n*p), ncol=p)
+colnames(X) = paste("V", 1:p, sep="")
+beta <- c(rep(2,px), rep(0,p-px))
+intercept <- 1
+P <- exp(intercept + X %*% beta)/(1+exp(intercept + X %*% beta))
+y <- rbinom(length(y), size=1, prob=P)
+xd <- X[,2:50]
+d <- X[,1]
+logit.effect <- rlassologitEffect(x=xd, d=d, y=y)
+logit.effects <- rlassologitEffects(X,y, index=c(1,2,40))
+logit.effects.f <- rlassologitEffects(y ~ X, I = ~ V1 + V2)
+
+

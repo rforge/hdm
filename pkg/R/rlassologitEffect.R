@@ -27,6 +27,26 @@ rlassologitEffects <- function(x, ...)
 
 #' @export
 #' @rdname rlassologitEffects
+#' @examples
+#'\dontrun{
+#' library(hdm)
+#' ## DGP
+#' set.seed(2)
+#' n <- 250
+#' p <- 100
+#' px <- 10
+#' X <- matrix(rnorm(n*p), ncol=p)
+#' colnames(X) = paste("V", 1:p, sep="")
+#' beta <- c(rep(2,px), rep(0,p-px))
+#' intercept <- 1
+#' P <- exp(intercept + X %*% beta)/(1+exp(intercept + X %*% beta))
+#' y <- rbinom(length(y), size=1, prob=P)
+#' xd <- X[,2:50]
+#' d <- X[,1]
+#' logit.effect <- rlassologitEffect(x=xd, d=d, y=y)
+#' logit.effects <- rlassologitEffects(X,y, index=c(1,2,40))
+#' logit.effects.f <- rlassologitEffects(y ~ X, I = ~ V1 + V2)
+#' }
 rlassologitEffects.default <- function(x, y, index = c(1:ncol(x)), I3 = NULL, post = TRUE, ...) {
   if (is.logical(index)) {
     k <- p1 <- sum(index)

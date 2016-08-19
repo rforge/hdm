@@ -51,6 +51,7 @@
 #' print(lasso.effect)
 #' summary(lasso.effect)
 #' confint(lasso.effect)
+#' plot(lasso.effect)
 # library(hdm)
 # ## DGP
 # n <- 250
