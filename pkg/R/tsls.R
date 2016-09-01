@@ -106,8 +106,8 @@ tsls.formula <- function(formula, data, intercept=TRUE, homoscedastic=TRUE, ...)
   res$call <- match.call()
   return(res)
 }
-################# Methods for tsls
 
+################# Methods for tsls
 #' Methods for S3 object \code{tsls}
 #'
 #' Objects of class \code{tsls} are constructed by \code{tsls}. 
