@@ -516,7 +516,7 @@ print.rlasso <- function(x, all=TRUE ,digits = max(3L, getOption("digits") - 3L)
       print.default(format(coef(x)[c(TRUE,x$index)], digits = digits), print.gap = 2L,
                     quote = FALSE)
       } else {
-        print.default(format(beta$x[x$index], digits = digits), print.gap = 2L,
+        print.default(format(x$beta[x$index], digits = digits), print.gap = 2L,
                       quote = FALSE)
       }
     }
