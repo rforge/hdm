@@ -53,7 +53,8 @@ rlassoIVselectZ.default <- function(x, d, y, z, post = TRUE, intercept = TRUE, .
   flag.const <- 0
   for (i in 1:ke) {
     di <- d[, i]
-    lasso.fit <- rlasso(di ~ Z, post = post, intercept = intercept, ...)
+    #lasso.fit <- rlasso(di ~ Z, post = post, intercept = intercept, ...)
+    lasso.fit <- rlasso(y=di, x=Z, post = post, intercept = intercept, ...)
     if (sum(lasso.fit$ind) == 0) {
       dihat <- rep(mean(di), n)  #dihat <- mean(di)
       flag.const <- flag.const + 1

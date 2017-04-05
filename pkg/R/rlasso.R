@@ -166,7 +166,8 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, model = TRUE,
     control$tol = 10^-5
   }
   
-  if (post==FALSE & (!exists("c", where = penalty) | is.na(match("penalty", names(as.list(match.call)))))) {
+  #if (post==FALSE & (!exists("c", where = penalty) | is.na(match("penalty", names(as.list(match.call)))))) {
+  if (post==FALSE & (!exists("c", where = penalty))) {  
     penalty$c = 0.5
   }
   

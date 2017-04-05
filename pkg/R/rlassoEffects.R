@@ -173,8 +173,9 @@ rlassoEffects.formula <- function(formula, data, I, method = "partialling out",
   cn <- attr(mt, "term.labels")
   try(if (is.matrix(eval(parse(text=cn)))) cn <- colnames(eval(parse(text=cn))), silent=TRUE)
   I.c <- check_variables(I, cn)
+  I.c <- grep(cn[I.c],colnames(X))
   I3 <- check_variables(included, cn)
-  
+  I3 <- grep(cn[I.c],colnames(X))
   #if (length(intersect(I.c, I3) != 0)) 
   #  stop("I and included should not contain the same variables!")
   
@@ -385,7 +386,7 @@ confint.rlassoEffects <- function(object, parm, level = 0.95, joint = FALSE,
         }
     }
     var <- diag(Omegahat)
-    Beta <- matrix(NA, ncol=B, nrow=k)
+    #Beta <- matrix(NA, ncol=B, nrow=k)
     sim <- vector("numeric", length = B)
     for (i in 1:B) {
       beta_i <- MASS::mvrnorm(mu = rep(0,k), Sigma=Omegahat/n)
