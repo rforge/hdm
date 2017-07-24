@@ -1,6 +1,7 @@
+library(glmnet)
 set.seed(1)
 n = 100 #sample size
-p = 200 # number of variables
+p = 10 # number of variables
 s = 3 # nubmer of non-zero variables
 X = matrix(rnorm(n*p), ncol=p)
 colnames(X) = paste("V", 1:p, sep="")
@@ -13,11 +14,13 @@ for(i in 1:n){
 }
 
 
-lasso.reg = rlassologit(y~X, post=TRUE, intercept=FALSE)
-lasso.reg = rlassologit(X, y, post=TRUE, intercept=FALSE)
-lasso.reg = rlassologit("y~X", post=TRUE, intercept=FALSE)
-lasso.reg = rlassologit(y~X, post=FALSE, intercept=TRUE)
-lasso.reg = rlassologit(y~X, post=TRUE, intercept=TRUE, penalty=list(lambda=0.1))
+lasso.reg1 = rlassologit(y~X, post=TRUE, intercept=FALSE)
+lasso.reg2 = rlassologit(X, y, post=TRUE, intercept=FALSE)
+lasso.reg3 = rlassologit("y~X", post=TRUE, intercept=FALSE)
+lasso.reg4 = rlassologit(y~X, post=FALSE, intercept=TRUE)
+lasso.reg5 = rlassologit(y~X, post=TRUE, intercept=TRUE, penalty=list(lambda=0.1))
+lasso.reg6 = glm(y~X, family=binomial())
+lasso.reg7 = glmnet(X,y, family="binomial")
 
 pred1 <- predict(lasso.reg)
 pred2 <- predict(lasso.reg, newdata=X)
@@ -130,10 +133,10 @@ for(i in 1:n){
 xd <- X[,2:50]
 d <- X[,1]
 
-test <- rlassologitEffect(x=xd, d=d, y=y)
-test <- glm(y ~ X,family=binomial(link='logit'))
-test <- rlassologitEffects(X,y, index=c(1,2,40))
-test <- rlassologitEffects(y ~ X, I = ~ V1 + V2)
+test1 <- rlassologitEffect(x=xd, d=d, y=y)
+test2 <- glm(y ~ X,family=binomial(link='logit'))
+test3 <- rlassologitEffects(X,y, index=c(1,2,40))
+test4 <- rlassologitEffects(y ~ X, I = ~ V1 + V2)
 
 ########################################
 
