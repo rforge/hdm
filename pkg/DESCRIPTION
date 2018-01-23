@@ -2,8 +2,8 @@ Package: hdm
 Type: Package
 Title: High-Dimensional Metrics
 Version: 0.2.3
-Date: 2016-09-01
-Authors@R: c(person("Martin", "Spindler", email="spindler@mea.mpisoc.mpg.de", role=c("cre", "aut")), person("Victor", "Chernozhukov", role="aut"), person("Christian", "Hansen", role="aut"))
+Date: 2018-01-22
+Authors@R: c(person("Martin", "Spindler", email="martin.spindler@gmx.de", role=c("cre", "aut")), person("Victor", "Chernozhukov", role="aut"), person("Christian", "Hansen", role="aut"))
 Depends:
     R (>= 3.0.0)
 Description: Implementation of selected high-dimensional statistical and
@@ -15,6 +15,7 @@ Description: Implementation of selected high-dimensional statistical and
     (IV) and treatment effect estimation in a high-dimensional setting. Moreover,
     the methods enable valid post-selection inference and rely on a theoretically
     grounded, data-driven choice of the penalty.
+    Chernozhukov, Hansen, Spindler (2016) <arXiv:1603.01700>
 License: MIT + file LICENSE
 LazyData: TRUE
 Imports:
