@@ -183,6 +183,7 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, model = TRUE,
   }
   
   normx <- sqrt(apply(x, 2, var))
+  Psi <- apply(x, 2, function(x) mean(x^2)) 
   ind <- rep(FALSE, p) #
   
   # variables with low variation are taken out, because normalization is not reliable
@@ -275,13 +276,15 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, model = TRUE,
     
     # homoscedatic and X-independent
     if (penalty$homoscedastic == TRUE && penalty$X.dependent.lambda == FALSE) {
-      Ups1 <- s1*normx
-      lambda <- rep(pen$lambda0 * s1, p)
+      Ups1 <- s1*Psi
+      #lambda <- rep(pen$lambda0 * s1, p)
+      lambda <- pen$lambda0*Ups1
     }
     # homoscedatic and X-dependent
     if (penalty$homoscedastic == TRUE && penalty$X.dependent.lambda == TRUE) {
-      Ups1 <- s1*normx
-      lambda <- rep(pen$lambda0 * s1, p)
+      Ups1 <- s1*Psi
+      #lambda <- rep(pen$lambda0 * s1, p)
+      lambda <- pen$lambda0 * Ups1
     }
     # heteroscedastic and X-independent
     if (penalty$homoscedastic == FALSE && penalty$X.dependent.lambda == FALSE) {
@@ -421,7 +424,9 @@ lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.dependent.
     sim <- vector("numeric", length = R)
     for (l in 1:R) {
       g <- matrix(rep(rnorm(n), each = p), ncol = p, byrow = TRUE)
-      sim[l] <- n * max(2 * colMeans(x * g))
+      #sim[l] <- n * max(2 * colMeans(x * g))
+      psi <- apply(x, 2, function(x) mean(x^2))
+      sim[l] <- n * max(2 * colMeans(t(t(x)/sqrt(psi)) * g))
     }
     lambda0 <- penalty$c * quantile(sim, probs = 1 - penalty$gamma)
     Ups0 <- sqrt(var(y))

@@ -106,7 +106,7 @@ rlassoLATE.default <- function(x, d, y, z, bootstrap = "none", nRep = 500, post 
   n <- dim(x)[1]
   p <- dim(x)[2]
   checkmate::checkChoice(bootstrap, c("none", "Bayes", "normal", "wild"))
-  lambda <- 2.2 * sqrt(n) * qnorm(1 - (1/log(n))/(2 * (2 * p)))
+  lambda <- 2.2 * sqrt(n) * qnorm(1 - (.1/log(n))/(2 * (2 * p)))
   control <- list(numIter = 15, tol = 10^-5)
   # penalty <- list(method = 'none', lambda.start = rep(lambda, p), c =
   # 1.1, gamma = 0.1)
@@ -123,7 +123,7 @@ rlassoLATE.default <- function(x, d, y, z, bootstrap = "none", nRep = 500, post 
                      intercept = intercept, control = control, penalty = penalty)
   my_z0x <- predict(b_y_z0xL, newdata = x)
   # E[D|Z = 1,X] = md_z1x
-  lambda <- 2.2 * sqrt(n) * qnorm(1 - (1/log(n))/(2 * (2 * p)))
+  lambda <- 2.2 * sqrt(n) * qnorm(1 - (.1/log(n))/(2 * (2 * p)))
   penalty <- list(lambda.start = lambda, c = 1.1, gamma = 0.1)
   if (sum(d - z) != 0) {
     b_d_z1xL <- rlassologit(d[indz1] ~ x[indz1, , drop = FALSE], post = post, 
@@ -212,7 +212,7 @@ rlassoLATET.default <- function(x, d, y, z, bootstrap = "none", nRep = 500, post
   n <- dim(x)[1]
   p <- dim(x)[2]
   checkmate::checkChoice(bootstrap, c("none", "Bayes", "normal", "wild"))
-  lambda <- 2.2 * sqrt(n) * qnorm(1 - (1/log(n))/(2 * (2 * p)))
+  lambda <- 2.2 * sqrt(n) * qnorm(1 - (.1/log(n))/(2 * (2 * p)))
   control <- list(numIter = 15, tol = 10^-5)
   # penalty <- list(method = 'none', lambda.start = rep(lambda, p), c =
   # 1.1, gamma = 0.1)
@@ -227,7 +227,7 @@ rlassoLATET.default <- function(x, d, y, z, bootstrap = "none", nRep = 500, post
   # E[D|Z = 0,X] = md_z0x
   md_z0x <- rep(0, n)
   # E[Z|X] = mz_x
-  lambdaP <- 2.2 * sqrt(n) * qnorm(1 - (1/log(n))/(2 * p))
+  lambdaP <- 2.2 * sqrt(n) * qnorm(1 - (.1/log(n))/(2 * p))
   # penalty <- list(lambda.start = lambdaP, c = 1.1, gamma = 0.1)
   penalty <- list(homoscedastic = "none", lambda.start = p, c = 1.1, 
                   gamma = 0.1)

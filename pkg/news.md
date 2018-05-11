@@ -16,3 +16,9 @@
 * 13/06/2016: new data sets (BLP, CPS)
 * 13/06/2016: generic functions to implement formulas
 * 18/06/2016: rlasso / rlassologit with character -> formula
+
+
+## Changes from Version 0.2.3 to 0.2.4
+* removing bug in calculation of penalty
+* removing bug rlassotreatment.R (1 -> 0.1 weight)
+* removing tpyos in vignette

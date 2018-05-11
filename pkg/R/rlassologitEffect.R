@@ -169,7 +169,7 @@ rlassologitEffect <- function(x, y, d, I3 = NULL, post = TRUE) {
   t <- predict(l1, type = "link", newdata = dx)
   sigma2 <- exp(t)/(1 + exp(t))^2
   w <- sigma2  #exp(t)/(1+exp(t))^2
-  f <- sqrt(sigma2) #1 #w/sigma2
+  f <- sqrt(sigma2) #w/sigma2=1
   I1 <- l1$index[-1]
   # Step 2
   la2 <- rep(2.2 * sqrt(n) * qnorm(1 - 0.05/(max(n, p * log(n)))), p)
