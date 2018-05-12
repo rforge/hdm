@@ -453,12 +453,13 @@ lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.dependent.
     n <- dim(x)[1]
     R <- penalty$numSim
     sim <- vector("numeric", length = R)
-    lasso.x.y <- rlasso(y ~ x)
-    eh <- lasso.x.y$residuals
+    #lasso.x.y <- rlasso(y ~ x)
+    #eh <- lasso.x.y$residuals
+    eh <- y
     ehat <- matrix(rep(eh, each = p), ncol = p, byrow = TRUE) # might be improved by initial estimator or passed through
     for (l in 1:R) {
       g <- matrix(rep(rnorm(n), each = p), ncol = p, byrow = TRUE)
-      sim[l] <- n * max(2 * colMeans(x * ehat* g)) # sqrt(n) or n??
+      sim[l] <- sqrt(n) * max(2 * colMeans(x * ehat* g)) # sqrt(n) or n??
     }
     lambda0 <- penalty$c * quantile(sim, probs = 1 - penalty$gamma)
     Ups0 <- 1/sqrt(n) * sqrt(t(t(y^2) %*% (x^2)))

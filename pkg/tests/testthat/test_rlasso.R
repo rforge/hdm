@@ -1,6 +1,7 @@
+library(testthat)
 context("Test rlasso")
 library(hdm)
-library(testthat)
+
 
 DGP_rlasso <- function(n, p, px){
   
