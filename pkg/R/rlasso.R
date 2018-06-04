@@ -127,12 +127,24 @@ rlasso.formula <- function(formula, data = NULL, post = TRUE, intercept = TRUE, 
 #' @rdname rlasso
 #' @export
 rlasso.character <- function(x, data = NULL, post = TRUE, intercept = TRUE, model = TRUE, 
-                           penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = .1/log(n)),
-                           control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...) {
+                             penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = .1/log(n)),
+                             control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...) {
   formula <- as.formula(x)
-  res <- rlasso.formula(formula, data = data, post = post, intercept = intercept, model = model, 
-                        penalty = penalty, control = control, ...)
+  if (missing(penalty))
+    rlasso.formula(formula, data = data, post = post, intercept = intercept, model = model, 
+                   control = control, ...)
+  else
+    rlasso.formula(x, x, data = NULL, post = TRUE, intercept = TRUE, model = TRUE, 
+                   penalty = penalty,
+                   control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...)
 }
+# rlasso.character <- function(x, data = NULL, post = TRUE, intercept = TRUE, model = TRUE, 
+#                            penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = .1/log(n)),
+#                            control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...) {
+#   formula <- as.formula(x)
+#   res <- rlasso.formula(formula, data = data, post = post, intercept = intercept, model = model, 
+#                         penalty = penalty, control = control, ...)
+# }
 
 
 #' @rdname rlasso
