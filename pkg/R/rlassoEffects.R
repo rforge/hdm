@@ -390,7 +390,7 @@ confint.rlassoEffects <- function(object, parm, level = 0.95, joint = FALSE,
       beta_i <- MASS::mvrnorm(mu = rep(0,k), Sigma=Omegahat/n)
       sim[i] <- max(abs(beta_i/sqrt(var)))
     }
-    a <- (1 - level)/2
+    a <- (1 - level) #not dividing by 2!
     ab <- c(a, 1 - a)
     pct <- format.perc(ab, 3)
     ci <- array(NA, dim = c(length(parm), 2L), dimnames = list(parm,

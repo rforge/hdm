@@ -183,6 +183,11 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, model = TRUE,
     penalty$c = 0.5
   }
   
+  default_pen <-  list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = .1/log(n))
+  if (post==FALSE &  isTRUE(all.equal(penalty, default_pen))) {  
+    penalty$c = 0.5
+  }
+  
   # Intercept handling and scaling
   if (intercept) {
     meanx <- colMeans(x)

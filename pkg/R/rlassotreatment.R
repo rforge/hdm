@@ -132,6 +132,7 @@ rlassoLATE.default <- function(x, d, y, z, bootstrap = "none", nRep = 500, post 
   } else {
     md_z1x <- rep(1, n)
   }
+  
   # E[D|Z = 0,X] = md_z0x
   md_z0x <- rep(0, n)
   
@@ -228,9 +229,11 @@ rlassoLATET.default <- function(x, d, y, z, bootstrap = "none", nRep = 500, post
   md_z0x <- rep(0, n)
   # E[Z|X] = mz_x
   lambdaP <- 2.2 * sqrt(n) * qnorm(1 - (.1/log(n))/(2 * p))
-  # penalty <- list(lambda.start = lambdaP, c = 1.1, gamma = 0.1)
-  penalty <- list(homoscedastic = "none", lambda.start = p, c = 1.1, 
-                  gamma = 0.1)
+   # penalty <- list(lambda.start = lambdaP, c = 1.1, gamma = 0.1)
+  #penalty <- list(homoscedastic = "none", lambda.start = p, c = 1.1, 
+  #                gamma = 0.1)
+  penalty <- list(homoscedastic = "none", lambda.start = rep(lambda, 
+                                                             p), c = 1.1, gamma = 0.1)
   b_z_xL <- rlassologit(z ~ x, post = post, intercept = intercept, penalty = penalty)
   mz_x <- predict(b_z_xL, newdata = x)
   mz_x <- mz_x * (mz_x > 1e-12 & mz_x < 1 - 1e-12) + (1 - 1e-12) * (mz_x > 
