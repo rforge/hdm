@@ -385,19 +385,20 @@ confint.rlassoEffects <- function(object, parm, level = 0.95, joint = FALSE,
       }
     }
     var <- diag(Omegahat)
+    names(var) <- names(cf)
     sim <- vector("numeric", length = B)
     for (i in 1:B) {
       beta_i <- MASS::mvrnorm(mu = rep(0,k), Sigma=Omegahat/n)
       sim[i] <- max(abs(beta_i/sqrt(var)))
     }
     a <- (1 - level) #not dividing by 2!
-    ab <- c(a, 1 - a)
+    ab <- c(a/2, 1 - a/2)
     pct <- format.perc(ab, 3)
     ci <- array(NA, dim = c(length(parm), 2L), dimnames = list(parm,
                                                                pct))
     hatc <- quantile(sim, probs = 1 - a)
-    ci[, 1] <- cf[parm] - hatc * sqrt(var)
-    ci[, 2] <- cf[parm] + hatc * sqrt(var)
+    ci[, 1] <- cf[parm] - hatc * sqrt(var[parm])
+    ci[, 2] <- cf[parm] + hatc * sqrt(var[parm])
   }
   return(ci)
 }
@@ -442,7 +443,7 @@ plot.rlassoEffects <- function(x, joint=FALSE, level= 0.95, main = "", xlab = "c
   
   # generate errorbars (KIs)
   plotobject <- plotobject + ggplot2::geom_errorbar(ymin = coefmatrix$lower, 
-                                                    ymax = coefmatrix$uppe, colour = col)
+                                                    ymax = coefmatrix$upper, colour = col)
   
   # further graphic parameter
   plotobject <- plotobject + ggplot2::ggtitle(main) + ggplot2::ylim(low, 
