@@ -84,8 +84,9 @@ rlassoIV.default <- function(x, d, y, z, select.Z = TRUE, select.X = TRUE, post 
       return(list(alpha = NA, se = NA))
     }
     ind.dzx <- lasso.d.zx$index
-    PZ <- Z[, ind.dzx] %*% MASS::ginv(t(Z[, ind.dzx]) %*% Z[, ind.dzx]) %*% 
-      t(Z[, ind.dzx]) %*% d
+    #PZ <- Z[, ind.dzx] %*% MASS::ginv(t(Z[, ind.dzx]) %*% Z[, ind.dzx]) %*% 
+    #  t(Z[, ind.dzx]) %*% d
+    PZ <- as.matrix(predict(lasso.d.zx))
     lasso.PZ.x <- rlasso(x, PZ, post = post, ...)
     ind.PZx <- lasso.PZ.x$index
     

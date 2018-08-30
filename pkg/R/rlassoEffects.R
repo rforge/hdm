@@ -118,7 +118,7 @@ rlassoEffects.default <- function(x, y, index = c(1:ncol(x)), method = "partiall
   lasso.regs <- vector("list", k)
   reside <- matrix(NA, nrow = n, ncol = p1)
   residv <- matrix(NA, nrow = n, ncol = p1)
-  coef.mat <- NULL
+  coef.mat <- list()
   names(coefficients) <- names(se) <- names(t) <- names(pval) <- names(lasso.regs) <- colnames(reside) <- colnames(residv) <- colnames(x)[index]
   
   for (i in 1:k) {
@@ -136,7 +136,7 @@ rlassoEffects.default <- function(x, y, index = c(1:ncol(x)), method = "partiall
       pval[i] <- col$pval
       reside[, i] <- col$residuals$epsilon
       residv[, i] <- col$residuals$v
-      coef.mat <- cbind(coef.mat, col$coefficients.reg)
+      coef.mat[[i]] <- col$coefficients.reg
     }
   }
   #colnames(coef.mat) <- colnames(x)[index]
@@ -173,9 +173,11 @@ rlassoEffects.formula <- function(formula, data, I, method = "partialling out",
   cn <- attr(mt, "term.labels")
   try(if (is.matrix(eval(parse(text=cn)))) cn <- colnames(eval(parse(text=cn))), silent=TRUE)
   I.c <- check_variables(I, cn)
-  I.c <- grep(cn[I.c],colnames(X))
+  #I.c <- grep(cn[I.c],colnames(X))
+  I.c <- which(colnames(X) %in% cn[I.c])
   I3 <- check_variables(included, cn)
-  I3 <- grep(cn[I.c],colnames(X))
+  #I3 <- grep(cn[I.c],colnames(X))
+  I3 <- which(colnames(X) %in% cn[I.c])
   #if (length(intersect(I.c, I3) != 0)) 
   #  stop("I and included should not contain the same variables!")
   

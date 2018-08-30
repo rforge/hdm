@@ -21,7 +21,7 @@
 #' @return An object of class \code{rlassoIVselectZ} containing at least the following
 #' components: \item{coefficients}{estimated parameter vector}
 #' \item{vcov}{variance-covariance matrix} \item{residuals}{
-#' residuals} \item{samplesize}{sample size} \item{selected}{matrix of selected variables in the first stage for each endogenour variable}
+#' residuals} \item{samplesize}{sample size} \item{selected}{matrix of selected variables in the first stage for each endogenous variable}
 #' @references D. Belloni, D. Chen, V. Chernozhukov and C. Hansen (2012).
 #' Sparse models and methods for optimal instruments with an application to
 #' eminent domain. \emph{Econometrica} 80 (6), 2369--2429.

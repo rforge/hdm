@@ -134,7 +134,12 @@ rlassoLATE.default <- function(x, d, y, z, bootstrap = "none", nRep = 500, post 
   }
   
   # E[D|Z = 0,X] = md_z0x
+  #penalty <- list(homoscedastic = "none", lambda.start = rep(lambda, 
+  #                                                           p), c = 1.1, gamma = 0.1)
+  #b_d_z0x <- rlassologit(d[indz0] ~ x[indz0, ], post = post, intercept = intercept, penalty = penalty)
+  #md_z0x <- predict(b_d_z0x, newdata = x)
   md_z0x <- rep(0, n)
+  
   
   # E[Z|X] = mz_x
   b_z_xL <- rlassologit(z ~ x, post = post, intercept = intercept)
@@ -226,7 +231,12 @@ rlassoLATET.default <- function(x, d, y, z, bootstrap = "none", nRep = 500, post
                      control = control, penalty = penalty)
   my_z0x <- predict(b_y_z0xL, newdata = x)
   # E[D|Z = 0,X] = md_z0x
+  #penalty <- list(homoscedastic = "none", lambda.start = rep(lambda, 
+  #                                                           p), c = 1.1, gamma = 0.1)
+  #b_d_z0x <- rlassologit(d[indz0] ~ x[indz0, ], post = post, intercept = intercept, penalty = penalty)
+  #md_z0x <- predict(b_d_z0x, newdata = x)
   md_z0x <- rep(0, n)
+  
   # E[Z|X] = mz_x
   lambdaP <- 2.2 * sqrt(n) * qnorm(1 - (.1/log(n))/(2 * p))
    # penalty <- list(lambda.start = lambdaP, c = 1.1, gamma = 0.1)

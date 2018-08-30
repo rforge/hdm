@@ -70,7 +70,7 @@ colnames(X) = paste("V", 1:p, sep="")
 beta <- c(rep(2,px), rep(0,p-px))
 intercept <- 1
 P <- exp(intercept + X \%*\% beta)/(1+exp(intercept + X \%*\% beta))
-y <- rbinom(length(y), size=1, prob=P)
+y <- rbinom(n, size=1, prob=P)
 xd <- X[,2:50]
 d <- X[,1]
 logit.effect <- rlassologitEffect(x=xd, d=d, y=y)

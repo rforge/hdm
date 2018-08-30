@@ -22,3 +22,10 @@
 * removing bug in calculation of penalty
 * removing bug rlassotreatment.R (1 -> 0.1 weight)
 * removing tpyos in vignette
+
+## Changes from Version 0.2.4 to 0.3
+* rlassoIV: add of constants in calculating PZ
+* change of error level (alpha/2 -> alpha)
+* removed error in confint
+* removed error in rlassotreatment effect (misspecified penalty term)
+* adding two new methods for lm and rlasso objects for multiple testing
