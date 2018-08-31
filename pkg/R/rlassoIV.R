@@ -58,7 +58,7 @@ rlassoIV.default <- function(x, d, y, z, select.Z = TRUE, select.X = TRUE, post 
   n <- length(y)
   
   if (select.Z == FALSE && select.X == FALSE) {
-    res <- tsls(x, d, y, z, ...)
+    res <- tsls(x, d, y, z, homoscedastic = FALSE, ...)
     return(res)
   }
   
@@ -108,7 +108,7 @@ rlassoIV.default <- function(x, d, y, z, select.Z = TRUE, select.X = TRUE, post 
       Zr <- lasso.PZ.x$residuals
     }
     
-    result <- tsls(y = Yr, d = Dr, x = NULL, z = Zr, intercept = FALSE)
+    result <- tsls(y = Yr, d = Dr, x = NULL, z = Zr, intercept = FALSE, homoscedastic = FALSE)
     coef <- as.vector(result$coefficient)
     se <- diag(sqrt(result$vcov))
     names(coef) <- names(se) <- colnames(d)
@@ -240,7 +240,7 @@ rlassoIVmult <- function(x, d, y, z, select.Z = TRUE, select.X = TRUE,
     colnames(z) <- paste("z", 1:ncol(z), sep = "")
   
   if (select.Z == FALSE & select.X == FALSE) {
-    res <- tsls(x=x, d=d, y=y, z=z, ...)
+    res <- tsls(x=x, d=d, y=y, z=z, homoscedastic = FALSE, ...)
     return(res)
   }
   
@@ -288,7 +288,7 @@ rlassoIVmult <- function(x, d, y, z, select.Z = TRUE, select.X = TRUE,
       Drhat <- cbind(Drhat, Dr)
       Zrhat <- cbind(Zrhat, Zr)
     }
-    result <- tsls(y = Yr, d = Drhat, x = NULL, z = Zrhat)
+    result <- tsls(y = Yr, d = Drhat, x = NULL, z = Zrhat, homoscedastic = FALSE)
     coef <- as.vector(result$coefficient)
     se <- sqrt(diag(result$vcov))
     names(coef) <- names(se) <- colnames(d)
