@@ -293,13 +293,13 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, model = TRUE,
     
     # homoscedatic and X-independent
     if (penalty$homoscedastic == TRUE && penalty$X.dependent.lambda == FALSE) {
-      Ups1 <- s1*Psi
+      Ups1 <- c(s1)*Psi
       #lambda <- rep(pen$lambda0 * s1, p)
       lambda <- pen$lambda0*Ups1
     }
     # homoscedatic and X-dependent
     if (penalty$homoscedastic == TRUE && penalty$X.dependent.lambda == TRUE) {
-      Ups1 <- s1*Psi
+      Ups1 <- c(s1)*Psi
       #lambda <- rep(pen$lambda0 * s1, p)
       lambda <- pen$lambda0 * Ups1
     }
