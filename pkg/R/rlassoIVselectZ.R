@@ -92,9 +92,22 @@ rlassoIVselectZ.default <- function(x, d, y, z, post = TRUE, intercept = TRUE, .
   vcov <- Q.hat.inv %*% Omega.hat %*% t(Q.hat.inv)
   rownames(alpha.hat) <- c(colnames(d))
   colnames(vcov) <- rownames(vcov) <- rownames(alpha.hat)
+  
+  if (is.null(x)){
   res <- list(coefficients = alpha.hat[1:ke, ], se = sqrt(diag(vcov))[1:ke], 
               vcov = vcov[1:ke, 1:ke, drop = FALSE], residuals = residuals, samplesize = n, selected = select.mat, 
-              call = match.call())
+              call = match.call()) 
+  }
+  else{
+    if (is.null(x) == FALSE){
+      res <- list(coefficients = alpha.hat[1:ke, ], se = sqrt(diag(vcov))[1:ke], 
+                  vcov = vcov[1:ke, 1:ke, drop = FALSE], 
+                  coefficients.controls = alpha.hat[(ke + 1):(ke + kex), ], se.controls = sqrt(diag(vcov))[(ke + 1):(ke + kex)], 
+                  vcov.controls = vcov[(ke + 1):(ke + kex), (ke + 1):(ke + kex), drop = FALSE],
+                  residuals = residuals, samplesize = n, selected = select.mat, 
+                  call = match.call())
+    }
+  }
   class(res) <- "rlassoIVselectZ"
   return(res)
 }
@@ -154,11 +167,11 @@ print.rlassoIVselectZ <- function(x, digits = max(3L, getOption("digits") -
 summary.rlassoIVselectZ <- function(object, digits = max(3L, getOption("digits") - 
                                                            3L), ...) {
   if (length(coef(object))) {
-    k <- length(object$coefficient)
+    k <- length(object$coefficients)
     table <- matrix(NA, ncol = 4, nrow = k)
-    rownames(table) <- names(object$coefficient)
+    rownames(table) <- names(object$coefficients)
     colnames(table) <- c("coeff.", "se.", "t-value", "p-value")
-    table[, 1] <- object$coefficient
+    table[, 1] <- object$coefficients
     table[, 2] <- sqrt(diag(as.matrix(object$vcov)))
     table[, 3] <- table[, 1]/table[, 2]
     table[, 4] <- 2 * pnorm(-abs(table[, 3]))

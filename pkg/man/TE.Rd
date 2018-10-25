@@ -25,33 +25,39 @@
 \usage{
 rlassoATE(x, ...)
 
-\method{rlassoATE}{default}(x, d, y, bootstrap = "none", nRep = 500, ...)
-
-\method{rlassoATE}{formula}(formula, data, bootstrap = "none", nRep = 500,
+\method{rlassoATE}{default}(x, d, y, bootstrap = "none", nRep = 500,
   ...)
+
+\method{rlassoATE}{formula}(formula, data, bootstrap = "none",
+  nRep = 500, ...)
 
 rlassoATET(x, ...)
 
-\method{rlassoATET}{default}(x, d, y, bootstrap = "none", nRep = 500, ...)
-
-\method{rlassoATET}{formula}(formula, data, bootstrap = "none", nRep = 500,
+\method{rlassoATET}{default}(x, d, y, bootstrap = "none", nRep = 500,
   ...)
+
+\method{rlassoATET}{formula}(formula, data, bootstrap = "none",
+  nRep = 500, ...)
 
 rlassoLATE(x, ...)
 
-\method{rlassoLATE}{default}(x, d, y, z, bootstrap = "none", nRep = 500,
-  post = TRUE, intercept = TRUE, ...)
+\method{rlassoLATE}{default}(x, d, y, z, bootstrap = "none",
+  nRep = 500, post = TRUE, intercept = TRUE, always_takers = TRUE,
+  never_takers = TRUE, ...)
 
-\method{rlassoLATE}{formula}(formula, data, bootstrap = "none", nRep = 500,
-  post = TRUE, intercept = TRUE, ...)
+\method{rlassoLATE}{formula}(formula, data, bootstrap = "none",
+  nRep = 500, post = TRUE, intercept = TRUE, always_takers = TRUE,
+  never_takers = TRUE, ...)
 
 rlassoLATET(x, ...)
 
-\method{rlassoLATET}{default}(x, d, y, z, bootstrap = "none", nRep = 500,
-  post = TRUE, intercept = TRUE, ...)
+\method{rlassoLATET}{default}(x, d, y, z, bootstrap = "none",
+  nRep = 500, post = TRUE, intercept = TRUE, always_takers = TRUE,
+  ...)
 
-\method{rlassoLATET}{formula}(formula, data, bootstrap = "none", nRep = 500,
-  post = TRUE, intercept = TRUE, ...)
+\method{rlassoLATET}{formula}(formula, data, bootstrap = "none",
+  nRep = 500, post = TRUE, intercept = TRUE, always_takers = TRUE,
+  ...)
 }
 \arguments{
 \item{x}{exogenous variables}
@@ -77,8 +83,11 @@ If not found in data, the variables are taken from environment(formula), typical
 
 \item{post}{logical. If \code{TRUE}, post-lasso estimation is conducted.}
 
-\item{intercept}{logical. If \code{TRUE}, intercept is included which is not
-penalized.}
+\item{intercept}{logical. If \code{TRUE}, intercept is included which is not}
+
+\item{always_takers}{option to adapt to cases with (default) and without always-takers. If \code{FALSE}, the estimator is adapted to a setting without always-takers.}
+
+\item{never_takers}{option to adapt to cases with (default) and without never-takers. If \code{FALSE}, the estimator is adapted to a setting without never-takers.}
 }
 \value{
 Functions return an object of class \code{rlassoTE} with estimated effects, standard errors and

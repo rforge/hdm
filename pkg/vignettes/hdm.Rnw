@@ -852,8 +852,10 @@ X = pension[,c("i2", "i3", "i4", "i5", "i6", "i7", "a2", "a3", "a4", "a5",
 xvar = c("i2", "i3", "i4", "i5", "i6", "i7", "a2", "a3", "a4", "a5",
     "fsize", "hs", "smcol", "col", "marr", "twoearn", "db", "pira", "hown")
 xpart = paste(xvar, collapse = "+")
-form = as.formula(paste("tw ~ ", paste(c("e401", xvar), collapse ="+"), "|",   paste(xvar, collapse = "+")))
-formZ = as.formula(paste("tw ~ ", paste(c("e401", xvar), collapse ="+"), "|",   paste(c("e401", xvar), collapse = "+")))
+form <- as.formula(paste("tw ~ ", paste(c("p401", xvar), collapse ="+"), "|",
+paste(xvar, collapse = "+")))
+formZ <- as.formula(paste("tw ~ ", paste(c("p401", xvar), collapse ="+"), "|",
+paste(c("e401", xvar), collapse = "+")))
 @
 
 Now we can  compute the estimates of the target treatment effect parameters.  For ATE and ATET we report the the effect of eligibility for 401(k).
@@ -869,11 +871,11 @@ summary(pension.atet)
 For LATE and LATET we estimate the effect of 401(k) participation (d) with plan eligibility (z) as instrument.
 
 <<401_analysis_LATE>>=
-pension.late = rlassoLATE(X,d,y,z)
-#pension.late = rlassoLATE(formZ, data=pension)
+pension.late = rlassoLATE(X,d,y,z, always_takers = FALSE)
+#pension.late = rlassoLATE(formZ, data=pension, always_takers = FALSE)
 summary(pension.late)
-pension.latet = rlassoLATET(X,d,y,z)
-#pension.latet = rlassoLATET(formZ, data=pension)
+pension.latet = rlassoLATET(X,d,y,z, always_takers = FALSE)
+#pension.latet = rlassoLATET(formZ, data=pension, always_takers = FALSE)
 summary(pension.latet)
 @
 
@@ -899,36 +901,47 @@ tab
 Finally, we estimate a model including all interaction effects:
 
 <<401_processing_interaction>>=
-#X = model.matrix(~ -1 + (i2 + i3 + i4 + i5 + i6 + i7 + a2 + a3 + a4 + a5 +
-#                  fsize + hs + smcol + col + marr + twoearn + db + pira + hown)^2, data = pension) # model with interactions
-xvar2 <- paste("(", xvar, ")^2", sep="")
-formExt = as.formula(paste("tw ~ ", paste(c("e401", xvar2), collapse ="+"), "|",   paste(xvar2, collapse = "+")))
-formZExt = as.formula(paste("tw ~ ", paste(c("e401", xvar2), collapse ="+"), "|",   paste(c("e401", xvar2), collapse = "+")))
+
+# generate all interactions of X's
+xvar2 = paste("(", paste(xvar, collapse = "+"), ")^2", sep="")
+
+# ATE and ATE with interactions
+forminteract = formula(paste("tw ~", xvar2, " + p401", 
+                                     "|", 
+                                     xvar2, sep=""))
+# LATE and LATET  with interactions
+formZinteract = formula(paste("tw ~", xvar2, " + p401", 
+                                     "|", 
+                                     xvar2, " + e401", sep=""))
 @
 
 <<401_analysis_interaction, results="hide", echo="FALSE">>=
-pension.ate =  rlassoATE(X,z,y)
-pension.atet =  rlassoATET(X,z,y)
-pension.late = rlassoLATE(X,d,y,z)
-pension.latet = rlassoLATET(X,d,y,z)
-#pension.ate =  rlassoATE(formExt, data = pension)
-#pension.atet =  rlassoATET(formExt, data = pension)
-#pension.late = rlassoLATE(formZExt, data = pension)
-#pension.latet = rlassoLATET(formZExt, data = pension)
-table= matrix(0, 4, 2)
-table[1,]= summary(pension.ate)[,1:2]
-table[2,]= summary(pension.atet)[,1:2]
-table[3,]= summary(pension.late)[,1:2]
-table[4,]= summary(pension.latet)[,1:2]
-colnames(table)= c("Estimate", "Std. Error")
-rownames(table)= c("ATE",  "ATET ", "LATE", "LATET")
-tab= xtable(table, digits=c(2, 2,2))
+# pension.ate= rlassoATE(forminteract, data = pension)
+# summary(pension.ate)
+# 
+# pension.atet= rlassoATET(forminteract, data = pension)
+# summary(pension.atet)
+# 
+# pension.late= rlassoLATE(formZinteract, data = pension, always_takers = FALSE)
+# summary(pension.late)
+# 
+# pension.latet= rlassoLATET(formZinteract, data = pension, always_takers = FALSE)
+# summary(pension.latet)
+# 
+# table= matrix(0, 4, 2)
+# table[1,]= summary(pension.ate)[,1:2]
+# table[2,]= summary(pension.atet)[,1:2]
+# table[3,]= summary(pension.late)[,1:2]
+# table[4,]= summary(pension.latet)[,1:2]
+# colnames(table)= c("Estimate", "Std. Error")
+# rownames(table)= c("ATE",  "ATET ", "LATE", "LATET")
+# tab= xtable(table, digits=c(2, 2,2))
 @
 
 This gives the following results:
 
 <<results="asis",echo=FALSE>>=
-tab
+# tab
 @
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -967,6 +980,51 @@ confint(rlassoEffects(X,Y, index=c(1:p1)), joint=TRUE)
 @
 As you can see the procedure correctly tells that only
 the first cause $D_{i1}$, among the large number of causes, $D_{i1},..., D_{i20}$,  is a statistically significant cause of $Y$ (see the confidence interval for variable V1).
+
+\section{Methods for Valid Simultaneous Inference in High-Dimensional Models}
+
+The \texttt{hdm} packages provides methods for multiple testing adjustment as described in \cite{siminf2018}. Various methods to conduct valid simultaneous inference on a set of target coefficients are implemented in the S3 method \texttt{p\_adjust()}. For example, consider the problem of simultaneously testing 100 target coefficients in a simulated data example. For instance, it is possible to take dependencies among covariates into account by using the stepdown procedure of \cite{romanowolf2005}.
+<<siminf>>=
+library(mvtnorm) 
+set.seed(1)
+n = 100
+p = 80
+s = 9
+covar=toeplitz(0.9^(0:(p-1)))
+diag(covar) = rep(1,p)
+mu = rep(0,p)
+X = mvtnorm::rmvnorm(n=n, mean=mu, sigma=covar)  # Regressors
+beta = c(s:1, rep(0, p-s))
+Y = X%*% beta + rnorm(n)  #Outcome
+# Estimate rlassoEffects
+rl = rlassoEffects(X,Y, index=c(1:p))
+
+# unadjusted
+p.unadj = p_adjust(rl, method = "none")
+# Number of rejections at a prespecified significance level
+sum(p.unadj[,2]<0.05)
+@
+ 
+<<siminf2>>=
+# Romano-Wolf Stepdown Correction
+p.rw = p_adjust(rl, method = "RW", B = 1000)
+# Number of rejections at a prespecified significance level
+sum(p.rw[,2]<0.05)
+@
+
+More methods to adjust for multiple testing, as provided by the \texttt{p.adjust()} command from the R base package are available, for instance the Bonferroni adjustment or FDR-controling methods like the Benjamini-Hochberg correction. 
+<<siminf3>>=
+# Adjust with Bonferroni correction
+p.bonf = p_adjust(rl, method = "bonferroni")
+# Number of rejections at a prespecified significance level
+sum(p.bonf[,2]<0.05)
+
+# Romano-Wolf Stepdown Correction
+p.bh = p_adjust(rl, method = "BH", B = 1000)
+# Number of rejections at a prespecified significance level
+sum(p.bh[,2]<0.05)
+@
+
 
 
 %\section{Some Tipps and Tricks}

@@ -443,7 +443,7 @@ lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.dependent.
       g <- matrix(rep(rnorm(n), each = p), ncol = p, byrow = TRUE)
       #sim[l] <- n * max(2 * colMeans(x * g))
       psi <- apply(x, 2, function(x) mean(x^2))
-      sim[l] <- n * max(2 * colMeans(t(t(x)/sqrt(psi)) * g))
+      sim[l] <- n * max(2 * abs(colMeans(t(t(x)/sqrt(psi)) * g)))
     }
     lambda0 <- penalty$c * quantile(sim, probs = 1 - penalty$gamma)
     Ups0 <- sqrt(var(y))
@@ -479,7 +479,7 @@ lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.dependent.
       #sim[l] <- n * max(2 * colMeans(x * ehat* g))
       xehat <- x*ehat
       psi <- apply(xehat, 2, function(x) mean(x^2))
-      sim[l] <- n * max(2 * colMeans(t(t(xehat)/sqrt(psi)) * g))
+      sim[l] <- n * max(2 * abs(colMeans(t(t(xehat)/sqrt(psi)) * g)))
     }
     lambda0 <- penalty$c * quantile(sim, probs = 1 - penalty$gamma)
     Ups0 <- 1/sqrt(n) * sqrt(t(t(y^2) %*% (x^2)))
