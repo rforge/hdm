@@ -937,9 +937,7 @@ formZinteract = formula(paste("tw ~", xvar2, " + p401",
 # rownames(table)= c("ATE",  "ATET ", "LATE", "LATET")
 # tab= xtable(table, digits=c(2, 2,2))
 @
-
-This gives the following results:
-
+%This gives the following results:
 <<results="asis",echo=FALSE>>=
 # tab
 @
@@ -983,7 +981,7 @@ the first cause $D_{i1}$, among the large number of causes, $D_{i1},..., D_{i20}
 
 \section{Methods for Valid Simultaneous Inference in High-Dimensional Models}
 
-The \texttt{hdm} packages provides methods for multiple testing adjustment as described in \cite{siminf2018}. Various methods to conduct valid simultaneous inference on a set of target coefficients are implemented in the S3 method \texttt{p\_adjust()}. For example, consider the problem of simultaneously testing 100 target coefficients in a simulated data example. For instance, it is possible to take dependencies among covariates into account by using the stepdown procedure of \cite{romanowolf2005}.
+The \texttt{hdm} packages provides methods for multiple testing adjustment as described in \cite{siminf2018}. Various methods to conduct valid simultaneous inference on a set of target coefficients are implemented in the S3 method \texttt{p\_adjust()}. For example, consider the problem of simultaneously testing 80 target coefficients in a simulated data example. For instance, it is possible to take the correlation structure among covariates into account by using the stepdown procedure of \cite{romanowolf2005}.
 <<siminf>>=
 library(mvtnorm) 
 set.seed(1)
@@ -995,7 +993,7 @@ diag(covar) = rep(1,p)
 mu = rep(0,p)
 X = mvtnorm::rmvnorm(n=n, mean=mu, sigma=covar)  # Regressors
 beta = c(s:1, rep(0, p-s))
-Y = X%*% beta + rnorm(n)  #Outcome
+Y = X%*% beta + rnorm(n, sd = 5)  #Outcome
 # Estimate rlassoEffects
 rl = rlassoEffects(X,Y, index=c(1:p))
 
@@ -1012,7 +1010,7 @@ p.rw = p_adjust(rl, method = "RW", B = 1000)
 sum(p.rw[,2]<0.05)
 @
 
-More methods to adjust for multiple testing, as provided by the \texttt{p.adjust()} command from the R base package are available, for instance the Bonferroni adjustment or FDR-controling methods like the Benjamini-Hochberg correction. 
+More methods to adjust for multiple testing as provided by the \texttt{p.adjust()} command from the R base package are available, for instance the Bonferroni adjustment or FDR-controling methods like the Benjamini-Hochberg correction. 
 <<siminf3>>=
 # Adjust with Bonferroni correction
 p.bonf = p_adjust(rl, method = "bonferroni")
