@@ -11,20 +11,20 @@ disturbances}
 rlasso(x, ...)
 
 \method{rlasso}{formula}(formula, data = NULL, post = TRUE,
-  intercept = TRUE, model = TRUE, parallel = FALSE,
-  penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE,
-  lambda.start = NULL, c = 1.1, gamma = 0.1/log(n)),
-  control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...)
+  intercept = TRUE, model = TRUE, penalty = list(homoscedastic =
+  FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma =
+  0.1/log(n)), control = list(numIter = 15, tol = 10^-5, threshold =
+  NULL), ...)
 
 \method{rlasso}{character}(x, data = NULL, post = TRUE,
-  intercept = TRUE, model = TRUE, parallel = FALSE,
-  penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE,
-  lambda.start = NULL, c = 1.1, gamma = 0.1/log(n)),
-  control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...)
+  intercept = TRUE, model = TRUE, penalty = list(homoscedastic =
+  FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma =
+  0.1/log(n)), control = list(numIter = 15, tol = 10^-5, threshold =
+  NULL), ...)
 
 \method{rlasso}{default}(x, y, post = TRUE, intercept = TRUE,
-  model = TRUE, parallel = FALSE, penalty = list(homoscedastic =
-  FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma =
+  model = TRUE, penalty = list(homoscedastic = FALSE,
+  X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma =
   0.1/log(n)), control = list(numIter = 15, tol = 10^-5, threshold =
   NULL), ...)
 }
@@ -48,8 +48,6 @@ typically the environment from which \code{rlasso} is called.}
 penalized.}
 
 \item{model}{logical. If \code{TRUE} (default), model matrix is returned.}
-
-\item{parallel}{If TRUE, calculation of lambda is executed in parallel. It is necessary to register a parallel backend before hand like doParallel (Windows) or doMC (Unix) or others.}
 
 \item{penalty}{list with options for the calculation of the penalty. 
 \itemize{

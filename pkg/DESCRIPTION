@@ -5,8 +5,7 @@ Version: 0.3.1
 Date: 2018-08-29
 Authors@R: c(person("Martin", "Spindler", email="martin.spindler@gmx.de", role=c("cre", "aut")), person("Victor", "Chernozhukov", role="aut"), person("Christian", "Hansen", role="aut"),  person("Philipp", "Bach", email = "philipp.bach@uni-hamburg.de", role="ctb"))
 Depends:
-    R (>= 3.0.0),
-    foreach
+    R (>= 3.0.0)
 Description: Implementation of selected high-dimensional statistical and
     econometric methods for estimation and inference. Efficient estimators and
     uniformly valid confidence intervals for various low-dimensional causal/

@@ -6,7 +6,7 @@
 \usage{
 lambdaCalculation(penalty = list(homoscedastic = FALSE,
   X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = 0.1),
-  y = NULL, x = NULL, parallel = FALSE)
+  y = NULL, x = NULL)
 }
 \arguments{
 \item{penalty}{list with options for the calculation of the penalty. 
@@ -21,8 +21,6 @@ lambdaCalculation(penalty = list(homoscedastic = FALSE,
 \item{y}{residual which is used for calculation of the variance or the data-dependent loadings}
 
 \item{x}{matrix of regressor variables}
-
-\item{parallel}{If TRUE, calculation of lambda is executed in parallel. It is necessary to register a parallel backend before hand like doParallel (Windows) or doMC (Unix) or others.}
 }
 \value{
 The functions returns a list with the penalty \code{lambda} which is the product of \code{lambda0} and \code{Ups0}. \code{Ups0}
