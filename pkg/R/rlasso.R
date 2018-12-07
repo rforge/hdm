@@ -45,6 +45,7 @@ globalVariables(c("post", "intercept", "penalty", "control", "error", "n", "sele
 #' \code{tol} tolerance for improvement of the estimated variances.
 #'\code{threshold} is applied to the final estimated lasso
 #' coefficients. Absolute values below the threshold are set to zero.
+#' @param parallel If TRUE, calculation of lambda is executed in parallel. It is necessary to register a parallel backend before hand like doParallel (Windows) or doMC (Unix) or others.
 #' @param ... further arguments (only for consistent defintion of methods)
 #' @return \code{rlasso} returns an object of class \code{rlasso}. An object of
 #' class "rlasso" is a list containing at least the following components:
@@ -94,7 +95,7 @@ rlasso <- function(x, ...) {
 #' typically the environment from which \code{rlasso} is called.
 #' @rdname rlasso
 #' @export
-rlasso.formula <- function(formula, data = NULL, post = TRUE, intercept = TRUE, model = TRUE, 
+rlasso.formula <- function(formula, data = NULL, post = TRUE, intercept = TRUE, model = TRUE, parallel = FALSE,
                            penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = .1/log(n)),
                           control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...) {
   cl <- match.call()
@@ -119,23 +120,23 @@ rlasso.formula <- function(formula, data = NULL, post = TRUE, intercept = TRUE, 
     }
   }
   est <- rlasso(x, y, post = post, intercept = intercept, penalty=penalty, model=model, 
-               control = control)
+                parallel = parallel, control = control)
   est$call <- cl
   return(est)
 }
 
 #' @rdname rlasso
 #' @export
-rlasso.character <- function(x, data = NULL, post = TRUE, intercept = TRUE, model = TRUE, 
+rlasso.character <- function(x, data = NULL, post = TRUE, intercept = TRUE, model = TRUE, parallel = FALSE,
                              penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = .1/log(n)),
                              control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...) {
   formula <- as.formula(x)
   if (missing(penalty))
     rlasso.formula(formula, data = data, post = post, intercept = intercept, model = model, 
-                   control = control, ...)
+                   parallel = parallel, control = control, ...)
   else
     rlasso.formula(x, x, data = NULL, post = TRUE, intercept = TRUE, model = TRUE, 
-                   penalty = penalty,
+                   parallel = parallel, penalty = penalty,
                    control = list(numIter = 15, tol = 10^-5, threshold = NULL), ...)
 }
 # rlasso.character <- function(x, data = NULL, post = TRUE, intercept = TRUE, model = TRUE, 
@@ -151,7 +152,7 @@ rlasso.character <- function(x, data = NULL, post = TRUE, intercept = TRUE, mode
 #' @export
 #' @param y dependent variable (vector, matrix or object can be coerced to matrix)
 #' @param x regressors (vector, matrix or object can be coerced to matrix)
-rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, model = TRUE,
+rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, model = TRUE, parallel = FALSE,
                            penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = .1/log(n)),
                            control = list(numIter = 15, tol = 10^-5, threshold = NULL),...) {
   x <- as.matrix(x)
@@ -222,7 +223,7 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, model = TRUE,
   Xy <- crossprod(x, y)
   
   startingval <- init_values(x,y)$residuals
-  pen <- lambdaCalculation(penalty = penalty, y = startingval, x = x)
+  pen <- lambdaCalculation(penalty = penalty, y = startingval, x = x, parallel = parallel)
   lambda <- pen$lambda
   Ups0 <- Ups1 <- pen$Ups0
   lambda0 <- pen$lambda0
@@ -266,7 +267,7 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, model = TRUE,
                   lambda = lambda, lambda0 = lambda0, loadings = Ups0, residuals = y -
                     mean(y), sigma = var(y), iter = mm, call = match.call(),
                   options = list(post = post, intercept = intercept, ind.scale=ind, 
-                                 control = control, mu = mu, meanx = meanx))
+                                 control = control, mu = mu, meanx = meanx, parallel = parallel))
       if (model) {
         est$model <- x
       } else {
@@ -311,7 +312,7 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, model = TRUE,
     
     # heteroscedastic and X-dependent
     if (penalty$homoscedastic == FALSE && penalty$X.dependent.lambda == TRUE) {
-      lc <- lambdaCalculation(penalty, y=e1, x=x)
+      lc <- lambdaCalculation(penalty, y=e1, x=x, parallel = parallel)
       Ups1 <- lc$Ups0
       lambda <- lc$lambda
     }
@@ -370,7 +371,7 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, model = TRUE,
               lambda0 = lambda0, loadings = Ups1, residuals = as.vector(e1), sigma = s1,
               iter = mm, call = match.call(), options = list(post = post, intercept = intercept,
                                                              control = control, penalty = penalty, ind.scale=ind,
-                                                             mu = mu, meanx = meanx), model=model)
+                                                             mu = mu, meanx = meanx), model=model, parallel = parallel)
   if (model) {
     x <- scale(x, -meanx, FALSE)
     est$model <- x
@@ -401,15 +402,17 @@ rlasso.default <- function(x, y, post = TRUE, intercept = TRUE, model = TRUE,
 #' }
 #' @param x matrix of regressor variables
 #' @param y residual which is used for calculation of the variance or the data-dependent loadings
+#' @param parallel If TRUE, calculation of lambda is executed in parallel. It is necessary to register a parallel backend before hand like doParallel (Windows) or doMC (Unix) or others.
 #' @return The functions returns a list with the penalty \code{lambda} which is the product of \code{lambda0} and \code{Ups0}. \code{Ups0}
 #' denotes either the variance (\code{independent} case) or the data-dependent loadings for the regressors. \code{method} gives the selected method for the calculation.
 #' @export
 
 
 lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.dependent.lambda = FALSE, lambda.start = NULL, c = 1.1, gamma = 0.1),
-                              y = NULL, x = NULL) {
+                              y = NULL, x = NULL, parallel = FALSE) {
   checkmate::checkChoice(penalty$X.dependent.lambda, c(TRUE, FALSE, NULL))
   checkmate::checkChoice(penalty$homoscedastic, c(TRUE, FALSE, "none"))
+  checkmate::checkLogical(parallel)
   if (!exists("homoscedastic", where = penalty))  penalty$homoscedastic = "FALSE"
   if (!exists("X.dependent.lambda", where = penalty))  penalty$X.dependent.lambda = "FALSE"
   if (!exists("c", where = penalty) & penalty$homoscedastic!="none") {
@@ -439,12 +442,32 @@ lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.dependent.
     n <- dim(x)[1]
     R <- penalty$numSim
     sim <- vector("numeric", length = R)
-    for (l in 1:R) {
-      g <- matrix(rep(rnorm(n), each = p), ncol = p, byrow = TRUE)
-      #sim[l] <- n * max(2 * colMeans(x * g))
-      psi <- apply(x, 2, function(x) mean(x^2))
-      sim[l] <- n * max(2 * abs(colMeans(t(t(x)/sqrt(psi)) * g)))
+    # for (l in 1:R) {
+    #   g <- matrix(rep(rnorm(n), each = p), ncol = p, byrow = TRUE)
+    #   #sim[l] <- n * max(2 * colMeans(x * g))
+    #   psi <- apply(x, 2, function(x) mean(x^2))
+    #   sim[l] <- n * max(2 * abs(colMeans(t(t(x)/sqrt(psi)) * g)))
+    # }
+    
+    psi <- apply(x, 2, function(x) mean(x^2))
+    tXtpsi <- t(t(x)/sqrt(psi))
+    
+   if (parallel == FALSE) {
+      for (l in 1:R) {
+        g <- matrix(rep(rnorm(n), each = p), ncol = p, byrow = TRUE)
+        sim[l] <- n * max(2 * abs(colMeans(tXtpsi * g)))
+      }
+   }
+
+    else {
+      sim <- foreach::foreach(l = 1:R, .combine = `c`) %dopar%
+        {
+        g <- matrix(rep(rnorm(n), each = p), ncol = p, byrow = TRUE)
+        n * max(2 * abs(colMeans(tXtpsi * g)))
+      }
     }
+    
+  
     lambda0 <- penalty$c * quantile(sim, probs = 1 - penalty$gamma)
     Ups0 <- sqrt(var(y))
     lambda <- rep(lambda0 * Ups0, p)
@@ -474,13 +497,33 @@ lambdaCalculation <- function(penalty = list(homoscedastic = FALSE, X.dependent.
     #eh <- lasso.x.y$residuals
     eh <- y
     ehat <- matrix(rep(eh, each = p), ncol = p, byrow = TRUE) # might be improved by initial estimator or passed through
-    for (l in 1:R) {
-      g <- matrix(rep(rnorm(n), each = p), ncol = p, byrow = TRUE)
-      #sim[l] <- n * max(2 * colMeans(x * ehat* g))
-      xehat <- x*ehat
-      psi <- apply(xehat, 2, function(x) mean(x^2))
-      sim[l] <- n * max(2 * abs(colMeans(t(t(xehat)/sqrt(psi)) * g)))
+    # for (l in 1:R) {
+    #   g <- matrix(rep(rnorm(n), each = p), ncol = p, byrow = TRUE)
+    #   #sim[l] <- n * max(2 * colMeans(x * ehat* g))
+    #   xehat <- x*ehat
+    #   psi <- apply(xehat, 2, function(x) mean(x^2))
+    #   sim[l] <- n * max(2 * abs(colMeans(t(t(xehat)/sqrt(psi)) * g)))
+    # }
+    xehat <- x*ehat
+    psi <- apply(xehat, 2, function(x) mean(x^2))
+    tXehattpsi <- t(t(xehat)/sqrt(psi))
+    
+    if (parallel == FALSE) {
+      for (l in 1:R) {
+        g <- matrix(rep(rnorm(n), each = p), ncol = p, byrow = TRUE)
+        #sim[l] <- n * max(2 * colMeans(x * ehat* g))
+        sim[l] <- n * max(2 * abs(colMeans(tXehattpsi * g)))
+      }
     }
+    
+    else {
+      sim <- foreach::foreach(l = 1:R, .combine = `c`) %dopar%
+        {
+        g <- matrix(rep(rnorm(n), each = p), ncol = p, byrow = TRUE)
+        n * max(2 * abs(colMeans(tXehattpsi * g)))
+      } 
+    }
+    
     lambda0 <- penalty$c * quantile(sim, probs = 1 - penalty$gamma)
     Ups0 <- 1/sqrt(n) * sqrt(t(t(y^2) %*% (x^2)))
     lambda <- lambda0 * Ups0
