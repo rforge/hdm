@@ -646,9 +646,9 @@ print_coef.rlassoEffects <- function(x, complete = TRUE, selection.matrix = FALS
     cat("\n")
     print(sel.mat$selection.matrix)
     cat("_ _ _ \n")
-    print("'-' indicates a target variable; \n")
-    print("'x' indicates that a variable has been selected by double-selection lasso (coefficient is different from zero); \n") 
-    print("'o' indicates that a variable has been de-selected by double-selection lasso (coefficient is zero). \n")
+    print("'-' indicates a target variable;")
+    print("'x' indicates that a variable has been selected by double-selection lasso (coefficient is different from zero);") 
+    print("'o' indicates that a variable has been de-selected by double-selection lasso (coefficient is zero).")
   }
 }
 
