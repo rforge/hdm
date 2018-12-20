@@ -184,7 +184,7 @@ rlassoEffects.formula <- function(formula, data, I, method = "partialling out",
   #  stop("I and included should not contain the same variables!")
   
   est <- rlassoEffects(x, y, index = I.c, method = method, 
-                                I3 = I3, post = post, ...)
+                       I3 = I3, post = post, ...)
   est$call <- cl
   return(est)
 }
@@ -567,8 +567,8 @@ coef.rlassoEffects <- function(object, complete = TRUE, selection.matrix = FALSE
     }
     
     else{
-    mat <- rbind(mat[targetindx == FALSE, , drop = FALSE], mat[targetindx, , drop = FALSE])
-    rnames <- rownames(mat)
+      mat <- rbind(mat[targetindx == FALSE, , drop = FALSE], mat[targetindx, , drop = FALSE])
+      rnames <- rownames(mat)
     }
     
     mat <- rbind(mat, apply(mat, 2, sum, na.rm = TRUE))
@@ -591,15 +591,15 @@ coef.rlassoEffects <- function(object, complete = TRUE, selection.matrix = FALSE
   
   else {
     
-      if (complete) {
-        return(cf)
-      }
-      
-      else {
-        return(cf[!is.na(cf)])
-      } 
+    if (complete) {
+      return(cf)
     }
     
+    else {
+      return(cf[!is.na(cf)])
+    } 
+  }
+  
 }
 
 
@@ -646,9 +646,8 @@ print_coef.rlassoEffects <- function(x, complete = TRUE, selection.matrix = FALS
     cat("\n")
     print(sel.mat$selection.matrix)
     cat("_ _ _ \n")
-    print("'-' indicates a target variable;")
-    print("'x' indicates that a variable has been selected by double-selection lasso (coefficient is different from zero);") 
-    print("'o' indicates that a variable has been de-selected by double-selection lasso (coefficient is zero).")
+    print("'-' indicates a target variable; \n")
+    print("'x' indicates that a variable has been selected by double-selection lasso (coefficient is different from zero); \n") 
+    print("'o' indicates that a variable has been de-selected by double-selection lasso (coefficient is zero). \n")
   }
 }
-
