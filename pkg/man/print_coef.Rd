@@ -3,6 +3,7 @@
 \name{print_coef}
 \alias{print_coef}
 \alias{print_coef.rlassoEffects}
+\alias{print_coef.rlassoEffects}
 \title{Printing coefficients from S3 objects \code{rlassoEffects}}
 \usage{
 print_coef(x, ...)
