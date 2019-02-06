@@ -176,10 +176,10 @@ rlassoEffects.formula <- function(formula, data, I, method = "partialling out",
   try(if (is.matrix(eval(parse(text=cn)))) cn <- colnames(eval(parse(text=cn))), silent=TRUE)
   I.c <- check_variables(I, cn)
   #I.c <- grep(cn[I.c],colnames(X))
-  I.c <- which(colnames(X) %in% cn[I.c])
+  I.c <- which(colnames(x) %in% cn[I.c])
   I3 <- check_variables(included, cn)
   #I3 <- grep(cn[I.c],colnames(X))
-  I3 <- which(colnames(X) %in% cn[I.c])
+  I3 <- which(colnames(x) %in% cn[I.c])
   #if (length(intersect(I.c, I3) != 0)) 
   #  stop("I and included should not contain the same variables!")
   
